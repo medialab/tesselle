@@ -13,13 +13,10 @@ import * as React from 'react';
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 
-/* eslint-disable react/prefer-stateless-function */
-export default class HomePage extends React.PureComponent {
-  public render() {
-    return (
-      <h1>
-        <FormattedMessage {...messages.header} />
-      </h1>
-    );
-  }
-}
+const HomePage = React.memo(() => (
+  <h1>
+    <FormattedMessage {...messages.header} />
+  </h1>
+));
+
+export default HomePage;
