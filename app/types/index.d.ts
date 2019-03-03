@@ -1,6 +1,7 @@
 import { Reducer, Store } from 'redux';
 import { RouterState } from 'connected-react-router';
 import { ILanguageProviderProps } from 'containers/LanguageProvider';
+import { ContainerState as EditorState } from '../containers/Editor/types';
 
 export interface LifeStore extends Store<{}> {
   injectedReducers?: any;
@@ -23,6 +24,7 @@ export interface InjectSagaParams {
 export interface ApplicationRootState {
   readonly router: RouterState;
   readonly language: ILanguageProviderProps;
+  readonly editor: EditorState;
   // for testing purposes
   readonly test: any;
 }
