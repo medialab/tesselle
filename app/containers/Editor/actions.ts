@@ -8,7 +8,7 @@ import { action, createAsyncAction } from 'typesafe-actions';
 import {} from './types';
 
 import ActionTypes from './constants';
-import Slideshow from 'types/slideshow';
+import Slideshow from 'types/Slideshow';
 
 export const defaultAction = () => action(ActionTypes.DEFAULT_ACTION);
 export const createSlideshowAction = createAsyncAction(
