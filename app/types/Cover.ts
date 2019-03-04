@@ -6,7 +6,6 @@ export default class Cover {
     public file: File,
     public width: number,
     public height: number,
-    public url: string,
   ) {
   }
 }

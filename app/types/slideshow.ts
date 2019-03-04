@@ -24,7 +24,7 @@ new Promise((resolve, reject) => {
     if (img.height === 0) {
       return reject(new Error('Slideshow.image has a height of 0'));
     }
-    const cover: Cover = new Cover(file, img.width, img.height, url);
+    const cover: Cover = new Cover(file, img.width, img.height);
     return resolve(new Slideshow(cover));
   };
   img.src = url;
