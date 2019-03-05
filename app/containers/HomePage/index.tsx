@@ -13,29 +13,31 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Container, Hero, HeroHeader, HeroFooter, Title } from 'quinoa-design-library/components/';
 import FileDrop from 'react-file-drop';
-import { head, propEq, pipe, when, __ } from 'ramda';
+import { propSatisfies, pipe, when, __ } from 'ramda';
+import { RouterProps } from 'react-router';
 import { decorator } from '../Editor';
 import messages from './messages';
-import { RouterProps } from 'react-router';
-// import Slideshow from './../../types/slideshow';
+import includes from 'ramda/es/includes';
 
-// import Slide from 'types/Slide';
+const validMimeTypes = ['image/jpeg', 'image/svg+xml'];
+const isImage = includes(__, validMimeTypes);
 
 interface HomePageProps {
   createSlideshow: () => void;
 }
 
-const stopPropagation = (files: FileList, event: DragEvent) => {
+const stopPropagation = (files: FileList, event: any) => {
   event.preventDefault();
-  return files;
+  return files[0];
 };
 
-const ifFileIsJpg = (func: () => any) => pipe(
+const ifFileIsImage = (func: () => any) => pipe(
   stopPropagation,
-  head,
   when(
-    propEq('type', 'image/jpeg'),
-    func,
+    propSatisfies(isImage, 'type'),
+    pipe((arg) => {
+      return arg;
+    }, func),
   ),
 );
 
@@ -44,7 +46,7 @@ const HomePage = (props: HomePageProps & RouterProps) => {
     <section>
       <FileDrop onDrop={
         useCallback(
-          ifFileIsJpg(props.createSlideshow),
+          ifFileIsImage(props.createSlideshow),
           [],
         )
       }>

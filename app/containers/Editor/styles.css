@@ -1,11 +1,11 @@
-.App {
+#app {
   position: relative;
   user-select: none;
 }
 
 .leaflet-container {
-  height: 100vmin;
-  width: 100vmin;
+  height: 100vh;
+  width: 100vw;
   margin: 0 auto;
 }
 

@@ -23,6 +23,7 @@ import Slideshow from '../../types/Slideshow';
 import { RouterProps } from 'react-router';
 import { Map, ImageOverlay } from 'react-leaflet';
 import Cover from 'types/Cover';
+import './styles.css';
 
 interface EditorProps {
   slideshow: Slideshow;
@@ -31,18 +32,18 @@ interface EditorProps {
 const minZoom = 8;
 const maxZoom = 12;
 
-const useMapLock = (ref, image: Cover) => {
+function useMapLock(ref, image: Cover): [LatLngBoundsExpression, L.Map] {
   const [maxBounds, setMaxBounds] = useState();
   const [map, setMap] = useState();
   useLayoutEffect(() => {
     setMaxBounds(new L.LatLngBounds(
-      ref.current.leafletElement.unproject([0, image.height], ref.current.leafletElement.getMaxZoom()),
-      ref.current.leafletElement.unproject([image.width, 0], ref.current.leafletElement.getMaxZoom()),
+      ref.current.leafletElement.unproject([0, image.height], 10),
+      ref.current.leafletElement.unproject([image.width, 0], 10),
     ));
     setMap(ref.current.leafletElement);
   }, [ref, image]);
   return [maxBounds, map];
-};
+}
 
 const useFlyTo = (map: L.Map, bounds: LatLngBoundsExpression) =>
   useEffect(() => {
@@ -54,7 +55,7 @@ const useFlyTo = (map: L.Map, bounds: LatLngBoundsExpression) =>
 function Editor(props: EditorProps & RouterProps) {
   const slideshow = props.slideshow;
   const ref = useRef();
-  const [maxBounds, map] = useMapLock(ref, slideshow.image);
+  const [maxBounds, map]: [LatLngBoundsExpression, L.Map] = useMapLock(ref, slideshow.image);
   useFlyTo(map, maxBounds);
   return (
     <div>
@@ -83,24 +84,16 @@ function Editor(props: EditorProps & RouterProps) {
 }
 
 Editor.propTypes = {
-  dispatch: PropTypes.func.isRequired,
+  createSlideshow: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
 });
 
-function mapDispatchToProps(dispatch) {
-  return {
-    dispatch: dispatch,
-    createSlideshow: (file: File) =>
-      dispatch(createSlideshowAction.request(file)),
-  };
-}
-
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  {createSlideshow: createSlideshowAction.request},
 );
 
 const withReducer = injectReducer({ key: 'editor', reducer: reducer });

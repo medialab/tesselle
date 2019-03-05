@@ -5,8 +5,6 @@ import { createSlideshowAction } from './actions';
 import { push } from 'react-router-redux';
 import db from '../../utils/db';
 
-// const slideshowFromAction = (action) => slideshowCreator(action.payload);
-
 export function* setSlideshow(slideshow: Slideshow) {
   yield db.setItem('slideshow', slideshow);
   yield put(
@@ -32,21 +30,20 @@ export function* createAndRedirect(action) {
   yield put(push('/editor'));
 }
 
-function* isThereSomethingInMemory() {
-  try {
-    const rawSlideshow = yield db.getItem('slideshow');
-    yield setSlideshow(rawSlideshow as Slideshow);
-    // yield setSlideshow(Slideshow.from(rawSlideshow));
-  } catch (e) {
-    console.error(e);
-    console.log('koiiii');
-  }
-}
+// const saveFile = (file: File): void => {
+//   const svgUrl = URL.createObjectURL(file);
+//   const downloadLink = document.createElement('a');
+//   downloadLink.href = svgUrl;
+//   downloadLink.download = 'newesttree.svg';
+//   document.body.appendChild(downloadLink);
+//   downloadLink.click();
+//   document.body.removeChild(downloadLink);
+// };
 
 // Individual exports for testing
 export default function* editorSaga() {
   // See example in containers/HomePage/saga.js
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
-  yield isThereSomethingInMemory();
-  console.log('Mais il attend ?');
+  const rawSlideshow: Slideshow = yield db.getItem('slideshow');
+  yield setSlideshow(rawSlideshow);
 }

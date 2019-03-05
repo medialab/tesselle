@@ -15,7 +15,7 @@
     "declaration": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
+    // "forceConsistentCasingInFileNames": true,
     // "importHelpers": true, // importing helper functions from tslib
     // "noEmitHelpers": true, // disable emitting inline helper functions
     "types": ["jest", "node"],
