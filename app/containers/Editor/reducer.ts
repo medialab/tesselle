@@ -38,6 +38,19 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
       } else {
         return state;
       }
+    case ActionTypes.REMOVE_SLIDE:
+      if (state.slideshow) {
+        return {
+          ...state,
+          slideshow: Slideshow
+            .builder(state.slideshow)
+            .slides(state.slideshow.slides.filter(
+              slide => slide.id !== action.payload.id,
+            ))
+            .build(),
+        };
+      }
+      return state;
     default:
       return state;
   }

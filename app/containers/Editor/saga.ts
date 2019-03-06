@@ -52,6 +52,7 @@ export function* saveSlideshow(action: any) {
 export default function* editorSaga() {
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
   yield takeLatest(ActionTypes.CREATE_SLIDE, saveSlideshow);
+  yield takeLatest(ActionTypes.REMOVE_SLIDE, saveSlideshow);
   try {
     const rawSlideshow: Slideshow = yield db.getItem('slideshow');
     const slideshow = Slideshow.builder(rawSlideshow).build();

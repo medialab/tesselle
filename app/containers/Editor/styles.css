@@ -10,7 +10,7 @@ body { --rgba-primary-3: #1A1A46; } /* rgba( 26, 26, 70,1); */
 body { --rgba-primary-4: #060614; } /* rgba(  6,  6, 20,1); */
 
 body {
-  --foter-height: 80px;
+  --foter-height: 120px;
 }
 
 .leaflet-container {

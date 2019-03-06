@@ -10,6 +10,7 @@ enum ActionTypes {
   CREATE_SLIDESHOW_SUCCESS = 'app/Editor/CREATE_SLIDESHOW_SUCCESS',
   CREATE_SLIDESHOW_FAILURE = 'app/Editor/CREATE_SLIDESHOW_FAILURE',
   CREATE_SLIDE = 'app/Editor/CREATE_SLIDE',
+  REMOVE_SLIDE = 'app/Editor/REMOVE_SLIDE',
 }
 
 export default ActionTypes;

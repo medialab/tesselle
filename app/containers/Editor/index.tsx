@@ -21,19 +21,21 @@ import injectReducer from 'utils/injectReducer';
 import { makeSelectSlideshow } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-import { createSlideshowAction, createSlideAction } from './actions';
+import { createSlideshowAction, createSlideAction, removeSlideAction } from './actions';
 import Slideshow from '../../types/Slideshow';
 import { RouterProps } from 'react-router';
 import { Map as Mapp, ImageOverlay, Rectangle } from 'react-leaflet';
 import Cover from 'types/Cover';
 import './styles.css';
 import Slide from 'types/Slide';
+import SlideTimeline from 'components/SlideTimeline';
 
 const Map = Mapp as any;
 
 interface EditorProps {
   slideshow: Slideshow;
   createSlide: (bound: LatLngBoundsExpression) => any;
+  removeSlide: (slide: Slide) => any;
 }
 
 const minZoom = 8;
@@ -99,6 +101,7 @@ function Editor(props: EditorProps & RouterProps) {
       props.createSlide(frame);
     }
   }, [drawing]);
+  const onSlideRemove = props.removeSlide;
   return (
     <div>
       <div className="container">
@@ -130,7 +133,7 @@ function Editor(props: EditorProps & RouterProps) {
         </div>
         <footer className="slides-container">
           {props.slideshow.slides.map((slide: Slide) => (
-            <h1 key={slide.id}>slide.id</h1>
+            <SlideTimeline onRemove={onSlideRemove} key={slide.id} slide={slide} />
           ))}
         </footer>
       </div>
@@ -151,6 +154,7 @@ const withConnect = connect(
   {
     createSlideshow: createSlideshowAction.request,
     createSlide: createSlideAction,
+    removeSlide: removeSlideAction,
   },
 );
 
