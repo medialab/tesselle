@@ -7,6 +7,11 @@ const GlobalStyle = createGlobalStyle`
     width: 100%;
   }
 
+
+  html[lang] {
+    overflow-y: auto;
+  }
+
   body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }

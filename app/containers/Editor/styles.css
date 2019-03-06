@@ -3,8 +3,18 @@
   user-select: none;
 }
 
+body { --rgba-primary-0: #343477; } /* rgba( 52, 52,119,1); */
+body { --rgba-primary-1: #8080E5; } /* rgba(128,128,229,1); */
+body { --rgba-primary-2: #5454A8; } /* rgba( 84, 84,168,1); */
+body { --rgba-primary-3: #1A1A46; } /* rgba( 26, 26, 70,1); */
+body { --rgba-primary-4: #060614; } /* rgba(  6,  6, 20,1); */
+
+body {
+  --foter-height: 80px;
+}
+
 .leaflet-container {
-  height: 100vh;
+  height: calc(100vh - var(--foter-height));
   width: 100vw;
   margin: 0 auto;
 }
@@ -17,4 +27,15 @@
 }
 .react-dat-gui {
   z-index: 9999;
+}
+
+.slides-container {
+  height: var(--foter-height);
+  position: absolute;
+  width: 100vw;
+  background: var(--rgba-primary-3);
+}
+
+.container {
+  position: absolute;
 }

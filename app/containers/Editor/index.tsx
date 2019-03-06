@@ -12,6 +12,9 @@ import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import 'leaflet/dist/leaflet.css';
+import Control from 'react-leaflet-control';
+import { Button } from 'quinoa-design-library';
+import 'quinoa-design-library/themes/millet/style.css';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -21,9 +24,11 @@ import saga from './saga';
 import { createSlideshowAction } from './actions';
 import Slideshow from '../../types/Slideshow';
 import { RouterProps } from 'react-router';
-import { Map, ImageOverlay } from 'react-leaflet';
+import { Map as Mapp, ImageOverlay } from 'react-leaflet';
 import Cover from 'types/Cover';
 import './styles.css';
+
+const Map = Mapp as any;
 
 interface EditorProps {
   slideshow: Slideshow;
@@ -63,7 +68,7 @@ function Editor(props: EditorProps & RouterProps) {
         <title>Editor</title>
         <meta name="description" content="Description of Editor" />
       </Helmet>
-      <div>
+      <div className="container">
         <Map
           ref={ref}
           dragging={false}
@@ -77,7 +82,11 @@ function Editor(props: EditorProps & RouterProps) {
           maxZoom={maxZoom}
           center={[0, 0]}>
           <ImageOverlay url={window.URL.createObjectURL(slideshow.image.file)} bounds={maxBounds} />
+          <Control position="topleft">
+            <Button onClick={console.log}>+1</Button>
+          </Control>
         </Map>
+        <footer className="slides-container">Footer</footer>
       </div>
     </div>
   );
