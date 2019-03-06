@@ -2,9 +2,9 @@ import L from 'leaflet';
 import uuid from 'uuid';
 
 class Slide {
-  public id: string;
-  public annotations: GeoJSON.GeoJSON[] = [];
-  constructor(public bounds: L.Bounds) {
+  public readonly id: string;
+  public readonly annotations: GeoJSON.GeoJSON[] = [];
+  constructor(public bounds: L.LatLngBoundsExpression) {
     this.id = uuid();
   }
 }

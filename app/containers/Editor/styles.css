@@ -39,3 +39,11 @@ body {
 .container {
   position: absolute;
 }
+
+.map.creating {
+  cursor: crosshair;
+}
+
+.rectangle {
+  pointer-events: none;
+}

@@ -1,9 +1,10 @@
-import { takeLatest, put } from 'redux-saga/effects';
+import { takeLatest, put, select } from 'redux-saga/effects';
 import ActionTypes from './constants';
 import Slideshow, { slideshowCreator } from '../../types/Slideshow';
 import { createSlideshowAction } from './actions';
 import { push } from 'react-router-redux';
 import db from '../../utils/db';
+import { makeSelectSlideshow } from './selectors';
 
 export function* setSlideshow(slideshow: Slideshow) {
   yield db.setItem('slideshow', slideshow);
@@ -40,10 +41,27 @@ export function* createAndRedirect(action) {
 //   document.body.removeChild(downloadLink);
 // };
 
+const selectSlideshow = makeSelectSlideshow();
+
+export function* saveSlideshow(action: any) {
+  const slideshow: Slideshow = yield select(selectSlideshow);
+  yield db.setItem('slideshow', slideshow);
+}
+
 // Individual exports for testing
 export default function* editorSaga() {
-  // See example in containers/HomePage/saga.js
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
-  const rawSlideshow: Slideshow = yield db.getItem('slideshow');
-  yield setSlideshow(rawSlideshow);
+  yield takeLatest(ActionTypes.CREATE_SLIDE, saveSlideshow);
+  try {
+    const rawSlideshow: Slideshow = yield db.getItem('slideshow');
+    const slideshow = Slideshow.builder(rawSlideshow).build();
+    if (rawSlideshow) {
+      yield setSlideshow(slideshow);
+    } else {
+      yield put(push('/'));
+    }
+  } catch (e) {
+    console.log('là');
+    console.error(e);
+  }
 }

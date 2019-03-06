@@ -4,34 +4,36 @@
  *
  */
 
-import React, { useRef, useLayoutEffect, useState, useEffect } from 'react';
-import L, { LatLngBoundsExpression } from 'leaflet';
+import React, { useRef, useLayoutEffect, useState, useEffect, useCallback } from 'react';
+import L, { LatLngBoundsExpression, LeafletMouseEvent } from 'leaflet';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import 'leaflet/dist/leaflet.css';
 import Control from 'react-leaflet-control';
 import { Button } from 'quinoa-design-library';
 import 'quinoa-design-library/themes/millet/style.css';
+import cx from 'classnames';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 import { makeSelectSlideshow } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-import { createSlideshowAction } from './actions';
+import { createSlideshowAction, createSlideAction } from './actions';
 import Slideshow from '../../types/Slideshow';
 import { RouterProps } from 'react-router';
-import { Map as Mapp, ImageOverlay } from 'react-leaflet';
+import { Map as Mapp, ImageOverlay, Rectangle } from 'react-leaflet';
 import Cover from 'types/Cover';
 import './styles.css';
+import Slide from 'types/Slide';
 
 const Map = Mapp as any;
 
 interface EditorProps {
   slideshow: Slideshow;
+  createSlide: (bound: LatLngBoundsExpression) => any;
 }
 
 const minZoom = 8;
@@ -62,31 +64,75 @@ function Editor(props: EditorProps & RouterProps) {
   const ref = useRef();
   const [maxBounds, map]: [LatLngBoundsExpression, L.Map] = useMapLock(ref, slideshow.image);
   useFlyTo(map, maxBounds);
+  const [addingSlide, setAddingSlide] = useState(false);
+  const [drawing, setDrawing] = useState(false);
+  const [frame, setFrame] = useState(L.latLngBounds([0, 0], [0, 0]));
+  const createSlide = (): void => {
+    setAddingSlide(!addingSlide);
+  };
+  const onMouseDown = useCallback((event: LeafletMouseEvent) => {
+    if (addingSlide) {
+      setDrawing(true);
+      setFrame(
+        L.latLngBounds(
+          event.latlng,
+          event.latlng,
+        ),
+      );
+    }
+  }, [addingSlide]);
+  const onMouseMove = useCallback((event: LeafletMouseEvent) => {
+    if (drawing) {
+      frame.extend(event.latlng);
+      setFrame(
+        L.latLngBounds(
+          frame.getSouthWest(),
+          frame.getNorthEast(),
+        ),
+      );
+    }
+  }, [drawing, frame]);
+  const onMouseUp = useCallback(() => {
+    if (drawing) {
+      setDrawing(false);
+      setAddingSlide(false);
+      props.createSlide(frame);
+    }
+  }, [drawing]);
   return (
     <div>
-      <Helmet>
-        <title>Editor</title>
-        <meta name="description" content="Description of Editor" />
-      </Helmet>
       <div className="container">
-        <Map
-          ref={ref}
-          dragging={false}
-          zoomControl={false}
-          doubleClickZoom={false}
-          keyboard={false}
-          scrollWheelZoom={false}
-          maxBounds={maxBounds}
-          crs={L.CRS.Simple}
-          minZoom={minZoom}
-          maxZoom={maxZoom}
-          center={[0, 0]}>
-          <ImageOverlay url={window.URL.createObjectURL(slideshow.image.file)} bounds={maxBounds} />
-          <Control position="topleft">
-            <Button onClick={console.log}>+1</Button>
-          </Control>
-        </Map>
-        <footer className="slides-container">Footer</footer>
+        <div className={cx({
+              map: true,
+              creating: addingSlide,
+            })}>
+          <Map
+            ref={ref}
+            dragging={false}
+            zoomControl={false}
+            doubleClickZoom={false}
+            keyboard={false}
+            scrollWheelZoom={false}
+            onMouseMove={onMouseMove}
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
+            maxBounds={maxBounds}
+            crs={L.CRS.Simple}
+            minZoom={minZoom}
+            maxZoom={maxZoom}
+            center={[0, 0]}>
+            <ImageOverlay url={window.URL.createObjectURL(slideshow.image.file)} bounds={maxBounds} />
+            {drawing && <Rectangle className="rectangle" color="red" bounds={frame} />}
+            <Control position="topleft">
+              <Button isColor={addingSlide && 'warning'} onClick={createSlide}>+1</Button>
+            </Control>
+          </Map>
+        </div>
+        <footer className="slides-container">
+          {props.slideshow.slides.map((slide: Slide) => (
+            <h1 key={slide.id}>slide.id</h1>
+          ))}
+        </footer>
       </div>
     </div>
   );
@@ -102,7 +148,10 @@ const mapStateToProps = createStructuredSelector({
 
 const withConnect = connect(
   mapStateToProps,
-  {createSlideshow: createSlideshowAction.request},
+  {
+    createSlideshow: createSlideshowAction.request,
+    createSlide: createSlideAction,
+  },
 );
 
 const withReducer = injectReducer({ key: 'editor', reducer: reducer });

@@ -1,14 +1,73 @@
 import uuid from 'uuid';
 import { split, nth, curry, map, pipe } from 'ramda';
+// import { Set } from 'immutable';
 import Slide from './Slide';
 import Cover from './Cover';
 
+interface SlideshowJson {
+  id: string;
+  slides: Slide[];
+  image: Cover;
+}
+
 class Slideshow {
-  public id: string = uuid();
-  public slides: Slide[] = [];
-  public image: Cover;
-  constructor(image: Cover) {
+  public readonly id: string;
+  public readonly slides: Slide[];
+  public readonly image: Cover;
+  private constructor(id: string = uuid(), image: Cover, slides: Slide[] = []) {
+    this.id = id;
     this.image = image;
+    this.slides = slides;
+  }
+  public toJSON(): SlideshowJson {
+    return {
+      id: this.id,
+      image: this.image,
+      slides: this.slides,
+    };
+  }
+  public static fromJS(json: SlideshowJson): Slideshow {
+    return new Slideshow(
+      json.id,
+      json.image,
+      json.slides,
+    );
+  }
+  public static builder(slideshow?: Slideshow): SlideshowBuilder {
+    return new SlideshowBuilder(slideshow);
+  }
+}
+
+// tslint:disable-next-line: max-classes-per-file
+class SlideshowBuilder {
+  private json: SlideshowJson & any;
+  constructor(slideshow?: Slideshow | any) {
+    if (slideshow instanceof Slideshow) {
+      this.json = slideshow.toJSON();
+    } else if (slideshow instanceof Object) {
+      this.json = {
+        id: slideshow.id,
+        image: slideshow.image,
+        slides: slideshow.slides,
+      };
+    } else {
+      this.json = {};
+    }
+  }
+  public id(id: string): SlideshowBuilder {
+    this.json.id = id;
+    return this;
+  }
+  public image(imageCover: Cover): SlideshowBuilder {
+    this.json.image = imageCover;
+    return this;
+  }
+  public slides(slides: Slide[] | Slide): SlideshowBuilder {
+    this.json.slides = slides instanceof Slide ? [...this.json.slides, slides] : slides;
+    return this;
+  }
+  public build(): Slideshow {
+    return Slideshow.fromJS(this.json);
   }
 }
 
@@ -60,7 +119,7 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
         try {
           const box: Box = getSvgSize(svgElement);
           const cover = new Cover(file, box.width, box.height);
-          return resolve(new Slideshow(cover));
+          return resolve(Slideshow.builder().image(cover).build());
         } catch (error) {
           svgElement.setAttribute('width', maxX);
           svgElement.setAttribute('height', maxY);
@@ -72,7 +131,7 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
           ], file.name, {type: svgType});
           const box: Box = getSvgSize(svgElement);
           const cover: Cover = new Cover(newFile, box.width, box.height);
-          return resolve(new Slideshow(cover));
+          return resolve(Slideshow.builder().image(cover).build());
         }
       };
       reader.readAsText(file);
@@ -88,7 +147,7 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
           return reject(new Error('Slideshow.image has a height of 0'));
         }
         const cover: Cover = new Cover(file, img.width, img.height);
-        return resolve(new Slideshow(cover));
+        return resolve(Slideshow.builder().image(cover).build());
       };
       img.onerror = reject;
       img.src = url;
