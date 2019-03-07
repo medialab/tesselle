@@ -9,7 +9,6 @@
 import ActionTypes from './constants';
 import { ContainerState, ContainerActions } from './types';
 import Slideshow from 'types/Slideshow';
-import Slide from 'types/Slide';
 
 export const initialState: ContainerState = {
   slideshow: null,
@@ -27,13 +26,13 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
           .slides(action.payload.slides)
           .build(),
       };
-    case ActionTypes.CREATE_SLIDE:
+    case ActionTypes.CREATE_SLIDE_SUCCESS:
       if (state.slideshow) {
         return {
           ...state,
           slideshow: Slideshow
             .builder(state.slideshow)
-            .slides([...state.slideshow.slides, new Slide(action.payload)])
+            .slides([...state.slideshow.slides, action.payload])
             .build(),
           selectedSlide: state.slideshow.slides.length + 1,
         };

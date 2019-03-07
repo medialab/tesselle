@@ -5,7 +5,7 @@
  */
 
 import React, { useRef, useLayoutEffect, useState, useEffect, useCallback } from 'react';
-import L, { LatLngBoundsExpression, LeafletMouseEvent } from 'leaflet';
+import L, { LatLngBoundsExpression, LeafletMouseEvent, Point } from 'leaflet';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
@@ -34,7 +34,7 @@ const Map = Mapp as any;
 
 interface EditorProps {
   slideshow: Slideshow;
-  createSlide: (bound: LatLngBoundsExpression) => any;
+  createSlide: (action: {frame: LatLngBoundsExpression, projected: Point[]}) => any;
   removeSlide: (slide: Slide) => any;
   selectedSlide: number;
 }
@@ -47,8 +47,8 @@ function useMapLock(ref, image: Cover): [LatLngBoundsExpression, L.Map] {
   const [map, setMap] = useState();
   useLayoutEffect(() => {
     setMaxBounds(new L.LatLngBounds(
-      ref.current.leafletElement.unproject([0, image.height], 10),
-      ref.current.leafletElement.unproject([image.width, 0], 10),
+      ref.current.leafletElement.unproject([0, image.height], ref.current.leafletElement.getMaxZoom()),
+      ref.current.leafletElement.unproject([image.width, 0], ref.current.leafletElement.getMaxZoom()),
     ));
     setMap(ref.current.leafletElement);
   }, [ref, image]);
@@ -58,7 +58,6 @@ function useMapLock(ref, image: Cover): [LatLngBoundsExpression, L.Map] {
 const useFlyTo = (map: L.Map, bounds: LatLngBoundsExpression) =>
   useEffect(() => {
     if (map && bounds) {
-      console.log(bounds);
       map.fitBounds(bounds);
     }
   }, [map, bounds]);
@@ -71,9 +70,15 @@ function Editor(props: EditorProps & RouterProps) {
   const ref = useRef();
   const [maxBounds, map]: [LatLngBoundsExpression, L.Map] = useMapLock(ref, slideshow.image);
   useFlyTo(map, selectedSlide ? selectedSlide.bounds : maxBounds);
+  const [zoomLevel, setZoomLevel] = useState((minZoom + maxZoom) / 2);
   const [addingSlide, setAddingSlide] = useState(false);
   const [drawing, setDrawing] = useState(false);
   const [frame, setFrame] = useState(L.latLngBounds([0, 0], [0, 0]));
+  const onZoom = useCallback((event: LeafletMouseEvent) => {
+    const z = event.target.getZoom();
+    console.log(z);
+    return setZoomLevel(z);
+  }, [zoomLevel]);
   const createSlide = (): void => {
     setAddingSlide(!addingSlide);
   };
@@ -103,7 +108,15 @@ function Editor(props: EditorProps & RouterProps) {
     if (drawing) {
       setDrawing(false);
       setAddingSlide(false);
-      props.createSlide(frame);
+      const projected = [
+        map.project(
+          frame.getSouthWest(), map.getMaxZoom(),
+        ),
+        map.project(
+          frame.getNorthEast(), map.getMaxZoom(),
+        ),
+      ];
+      props.createSlide({frame: frame, projected: projected});
     }
   }, [drawing, frame]);
   return (
@@ -128,6 +141,8 @@ function Editor(props: EditorProps & RouterProps) {
             crs={L.CRS.Simple}
             minZoom={minZoom}
             maxZoom={maxZoom}
+            zoom={zoomLevel}
+            onZoom={onZoom}
             center={[0, 0]}>
             <ImageOverlay url={window.URL.createObjectURL(slideshow.image.file)} bounds={maxBounds} />
             {drawing && <Rectangle className="rectangle" color="red" bounds={frame} />}
@@ -159,7 +174,7 @@ const withConnect = connect(
   mapStateToProps,
   {
     createSlideshow: createSlideshowAction.request,
-    createSlide: createSlideAction,
+    createSlide: createSlideAction.request,
     removeSlide: removeSlideAction,
   },
 );
