@@ -18,7 +18,7 @@ import cx from 'classnames';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import { makeSelectSlideshow } from './selectors';
+import { makeSelectSlideshow, makeSelectSelectedSlide } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import { createSlideshowAction, createSlideAction, removeSlideAction } from './actions';
@@ -36,6 +36,7 @@ interface EditorProps {
   slideshow: Slideshow;
   createSlide: (bound: LatLngBoundsExpression) => any;
   removeSlide: (slide: Slide) => any;
+  selectedSlide: number;
 }
 
 const minZoom = 8;
@@ -57,15 +58,19 @@ function useMapLock(ref, image: Cover): [LatLngBoundsExpression, L.Map] {
 const useFlyTo = (map: L.Map, bounds: LatLngBoundsExpression) =>
   useEffect(() => {
     if (map && bounds) {
+      console.log(bounds);
       map.fitBounds(bounds);
     }
   }, [map, bounds]);
 
 function Editor(props: EditorProps & RouterProps) {
   const slideshow = props.slideshow;
+  const onSlideRemove = props.removeSlide;
+  const selectedSlide: null | Slide = slideshow.slides[props.selectedSlide - 1];
+
   const ref = useRef();
   const [maxBounds, map]: [LatLngBoundsExpression, L.Map] = useMapLock(ref, slideshow.image);
-  useFlyTo(map, maxBounds);
+  useFlyTo(map, selectedSlide ? selectedSlide.bounds : maxBounds);
   const [addingSlide, setAddingSlide] = useState(false);
   const [drawing, setDrawing] = useState(false);
   const [frame, setFrame] = useState(L.latLngBounds([0, 0], [0, 0]));
@@ -100,8 +105,7 @@ function Editor(props: EditorProps & RouterProps) {
       setAddingSlide(false);
       props.createSlide(frame);
     }
-  }, [drawing]);
-  const onSlideRemove = props.removeSlide;
+  }, [drawing, frame]);
   return (
     <div>
       <div className="container">
@@ -120,6 +124,7 @@ function Editor(props: EditorProps & RouterProps) {
             onMouseDown={onMouseDown}
             onMouseUp={onMouseUp}
             maxBounds={maxBounds}
+            // boundsOptions={history && history.slide.bounds}
             crs={L.CRS.Simple}
             minZoom={minZoom}
             maxZoom={maxZoom}
@@ -147,6 +152,7 @@ Editor.propTypes = {
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
+  selectedSlide: makeSelectSelectedSlide(),
 });
 
 const withConnect = connect(

@@ -6,6 +6,7 @@ import Slideshow from 'types/Slideshow';
 /* --- STATE --- */
 interface EditorState {
   readonly slideshow: Slideshow | null;
+  readonly selectedSlide: number;
 }
 
 /* --- ACTIONS --- */

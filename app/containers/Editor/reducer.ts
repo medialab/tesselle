@@ -13,6 +13,7 @@ import Slide from 'types/Slide';
 
 export const initialState: ContainerState = {
   slideshow: null,
+  selectedSlide: 0,
 };
 
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
@@ -34,6 +35,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
             .builder(state.slideshow)
             .slides([...state.slideshow.slides, new Slide(action.payload)])
             .build(),
+          selectedSlide: state.slideshow.slides.length + 1,
         };
       } else {
         return state;

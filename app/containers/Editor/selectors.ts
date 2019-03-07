@@ -29,5 +29,11 @@ export const makeSelectSlideshow = () =>
     substate => substate.slideshow,
   );
 
+export const makeSelectSelectedSlide = () =>
+    createSelector(
+      selectEditorDomain,
+      substate => substate.selectedSlide,
+    );
+
 export default selectEditor;
 export { selectEditorDomain };
