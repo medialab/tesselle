@@ -25,7 +25,6 @@ function loadImage(file: File, options: Options): Promise<File> {
 
     img.width = width;
     img.height = height;
-
     canvas.width = width;
     canvas.height = height;
 
@@ -51,8 +50,8 @@ function loadImage(file: File, options: Options): Promise<File> {
         );
       });
     };
-
     img.src = window.URL.createObjectURL(file);
+    img.onerror = reject;
   });
 }
 

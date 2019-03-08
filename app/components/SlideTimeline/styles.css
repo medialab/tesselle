@@ -1,11 +1,14 @@
 .timeline__slide-container {
   height: 100%;
   width: var(--foter-height);
-  background: red;
+  background: var(--rgba-primary-2);
   display: inline-block;
   padding: 0 10px;
   margin: 0 10px;
   position: relative;
+}
+.timeline__slide-container--selected {
+  background: var(--rgba-primary-1);
 }
 .timeline__slide-remove-buttom {
   position: absolute;

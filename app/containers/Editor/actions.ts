@@ -9,7 +9,7 @@ import {} from './types';
 
 import ActionTypes from './constants';
 import Slideshow from 'types/slideshow';
-import { LatLngBoundsExpression, Point } from 'leaflet';
+import { LatLngBounds, Point } from 'leaflet';
 import Slide from 'types/Slide';
 
 export const defaultAction = () => action(ActionTypes.DEFAULT_ACTION);
@@ -23,8 +23,16 @@ export const createSlideAction = createAsyncAction(
   ActionTypes.CREATE_SLIDE,
   ActionTypes.CREATE_SLIDE_SUCCESS,
   ActionTypes.CREATE_SLIDE_FAILURE,
-)<{frame: LatLngBoundsExpression, projected: Point[]}, Slide, Error>();
+)<{frame: LatLngBounds, projected: Point[]}, {frame: LatLngBounds, file: File}, Error>();
 
 export const removeSlideAction = createAction(ActionTypes.REMOVE_SLIDE, action => {
+  return (slide: Slide) => action(slide);
+});
+
+export const addAnnotationAction = createAction(ActionTypes.CREATE_ANNOTATION, action => {
+  return (feature: LatLngBounds) => action(feature);
+});
+
+export const changeSlideAction = createAction(ActionTypes.CHANGE_SLIDE, action => {
   return (slide: Slide) => action(slide);
 });

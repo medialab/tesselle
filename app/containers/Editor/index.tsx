@@ -5,44 +5,55 @@
  */
 
 import React, { useRef, useLayoutEffect, useState, useEffect, useCallback } from 'react';
-import L, { LatLngBoundsExpression, LeafletMouseEvent, Point } from 'leaflet';
+import L, { LatLngBounds, LeafletMouseEvent, Point } from 'leaflet';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { RouterProps } from 'react-router';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
+import { Map as Mapp, ImageOverlay, Rectangle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import Control from 'react-leaflet-control';
 import { Button } from 'quinoa-design-library';
 import 'quinoa-design-library/themes/millet/style.css';
 import cx from 'classnames';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import { makeSelectSlideshow, makeSelectSelectedSlide } from './selectors';
+import Cover from 'types/Cover';
+import Slide from 'types/Slide';
+import Slideshow from 'types/Slideshow';
+import SlideTimeline from 'components/SlideTimeline';
+import FloatinBar from 'components/FloatingBar';
+import AnnotationLayer from 'components/AnnotationLayer';
+
+import {
+  createSlideshowAction,
+  createSlideAction,
+  removeSlideAction,
+  addAnnotationAction,
+  changeSlideAction,
+} from './actions';
+import { makeSelectSlideshow,
+  makeSelectSelectedSlide } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-import { createSlideshowAction, createSlideAction, removeSlideAction } from './actions';
-import Slideshow from '../../types/Slideshow';
-import { RouterProps } from 'react-router';
-import { Map as Mapp, ImageOverlay, Rectangle } from 'react-leaflet';
-import Cover from 'types/Cover';
 import './styles.css';
-import Slide from 'types/Slide';
-import SlideTimeline from 'components/SlideTimeline';
 
 const Map = Mapp as any;
 
 interface EditorProps {
   slideshow: Slideshow;
-  createSlide: (action: {frame: LatLngBoundsExpression, projected: Point[]}) => any;
+  createSlide: (action: {frame: LatLngBounds, projected: Point[]}) => any;
   removeSlide: (slide: Slide) => any;
+  createAnnotation: (frame: LatLngBounds) => void;
+  changeSlide: (slide: Slide) => any;
   selectedSlide: number;
 }
 
 const minZoom = 8;
 const maxZoom = 12;
 
-function useMapLock(ref, image: Cover): [LatLngBoundsExpression, L.Map] {
+function useMapLock(ref, image: Cover): [LatLngBounds, L.Map] {
   const [maxBounds, setMaxBounds] = useState();
   const [map, setMap] = useState();
   useLayoutEffect(() => {
@@ -55,7 +66,7 @@ function useMapLock(ref, image: Cover): [LatLngBoundsExpression, L.Map] {
   return [maxBounds, map];
 }
 
-const useFlyTo = (map: L.Map, bounds: LatLngBoundsExpression) =>
+const useFlyTo = (map: L.Map, bounds: LatLngBounds) =>
   useEffect(() => {
     if (map && bounds) {
       map.fitBounds(bounds);
@@ -68,19 +79,26 @@ function Editor(props: EditorProps & RouterProps) {
   const selectedSlide: null | Slide = slideshow.slides[props.selectedSlide - 1];
 
   const ref = useRef();
-  const [maxBounds, map]: [LatLngBoundsExpression, L.Map] = useMapLock(ref, slideshow.image);
-  useFlyTo(map, selectedSlide ? selectedSlide.bounds : maxBounds);
+  const [maxBounds, map]: [LatLngBounds, L.Map] = useMapLock(ref, slideshow.image);
+  useFlyTo(map, maxBounds);
   const [zoomLevel, setZoomLevel] = useState((minZoom + maxZoom) / 2);
   const [addingSlide, setAddingSlide] = useState(false);
   const [drawing, setDrawing] = useState(false);
-  const [frame, setFrame] = useState(L.latLngBounds([0, 0], [0, 0]));
-  const onZoom = useCallback((event: LeafletMouseEvent) => {
-    const z = event.target.getZoom();
-    console.log(z);
-    return setZoomLevel(z);
-  }, [zoomLevel]);
+  const [frame, setFrame] = useState(maxBounds);
+  const onZoom = useCallback((event: LeafletMouseEvent) =>
+    setZoomLevel(event.target.getZoom())
+  , [zoomLevel]);
   const createSlide = (): void => {
-    setAddingSlide(!addingSlide);
+    const bounds = maxBounds;
+    const projected = [
+      map.project(
+        bounds.getSouthWest(), map.getMaxZoom(),
+      ),
+      map.project(
+        bounds.getNorthEast(), map.getMaxZoom(),
+      ),
+    ];
+    props.createSlide({frame: bounds, projected: projected});
   };
   const onMouseDown = useCallback((event: LeafletMouseEvent) => {
     if (addingSlide) {
@@ -107,25 +125,19 @@ function Editor(props: EditorProps & RouterProps) {
   const onMouseUp = useCallback(() => {
     if (drawing) {
       setDrawing(false);
-      setAddingSlide(false);
-      const projected = [
-        map.project(
-          frame.getSouthWest(), map.getMaxZoom(),
-        ),
-        map.project(
-          frame.getNorthEast(), map.getMaxZoom(),
-        ),
-      ];
-      props.createSlide({frame: frame, projected: projected});
+      props.createAnnotation(frame);
     }
   }, [drawing, frame]);
+  const onRectangleClick = useCallback(() => {
+    setAddingSlide(state => !state);
+  }, []);
   return (
     <div>
       <div className="container">
         <div className={cx({
-              map: true,
-              creating: addingSlide,
-            })}>
+          map: true,
+          creating: addingSlide,
+        })}>
           <Map
             ref={ref}
             dragging={false}
@@ -137,7 +149,6 @@ function Editor(props: EditorProps & RouterProps) {
             onMouseDown={onMouseDown}
             onMouseUp={onMouseUp}
             maxBounds={maxBounds}
-            // boundsOptions={history && history.slide.bounds}
             crs={L.CRS.Simple}
             minZoom={minZoom}
             maxZoom={maxZoom}
@@ -145,16 +156,25 @@ function Editor(props: EditorProps & RouterProps) {
             onZoom={onZoom}
             center={[0, 0]}>
             <ImageOverlay url={window.URL.createObjectURL(slideshow.image.file)} bounds={maxBounds} />
-            {drawing && <Rectangle className="rectangle" color="red" bounds={frame} />}
-            <Control position="topleft">
-              <Button isColor={addingSlide && 'warning'} onClick={createSlide}>+1</Button>
-            </Control>
+            {(drawing && frame) && <Rectangle className="rectangle" color="red" bounds={frame} />}
+            {(selectedSlide && selectedSlide.annotations.length > 0) && (
+              <AnnotationLayer key={selectedSlide.id} data={selectedSlide.annotations as any} />
+            )}
+            <FloatinBar onRectangleClick={onRectangleClick} />
           </Map>
         </div>
         <footer className="slides-container">
           {props.slideshow.slides.map((slide: Slide) => (
-            <SlideTimeline onRemove={onSlideRemove} key={slide.id} slide={slide} />
+            <SlideTimeline
+              onRemove={onSlideRemove}
+              onClick={props.changeSlide}
+              key={slide.id}
+              selected={selectedSlide && selectedSlide.id === slide.id}
+              slide={slide} />
           ))}
+          <div className="timeline__slide-container">
+            <Button className="timeline__slide-add-buttom" isRounded isColor="error" onClick={createSlide}>+1</Button>
+          </div>
         </footer>
       </div>
     </div>
@@ -175,7 +195,9 @@ const withConnect = connect(
   {
     createSlideshow: createSlideshowAction.request,
     createSlide: createSlideAction.request,
+    createAnnotation: addAnnotationAction,
     removeSlide: removeSlideAction,
+    changeSlide: changeSlideAction,
   },
 );
 

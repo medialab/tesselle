@@ -7,8 +7,7 @@ import Slideshow, { slideshowCreator } from '../../types/Slideshow';
 import { createSlideshowAction, createSlideAction } from './actions';
 import db from '../../utils/db';
 import { makeSelectSlideshow } from './selectors';
-import { LatLngBoundsExpression, Point } from 'leaflet';
-import Slide from 'types/Slide';
+import { LatLngBounds, Point } from 'leaflet';
 
 const selectSlideshow = makeSelectSlideshow();
 
@@ -38,7 +37,7 @@ export function* createAndRedirect(action) {
 }
 
 export function* createSlide(action) {
-  const {frame, projected}: {frame: LatLngBoundsExpression, projected: Point[]} = action.payload;
+  const {frame, projected}: {frame: LatLngBounds, projected: Point[]} = action.payload;
   const slideshow: Slideshow = yield select(selectSlideshow);
   const imgFile = yield loadImage(
     slideshow.image.file,
@@ -51,7 +50,12 @@ export function* createSlide(action) {
       left: projected[0].x,
     },
   );
-  yield put(createSlideAction.success(new Slide(frame, imgFile)));
+  yield put(
+    createSlideAction.success({
+      frame: frame,
+      file: imgFile,
+    }),
+  );
 }
 
 // const saveFile = (file: File): void => {
@@ -67,15 +71,13 @@ export function* createSlide(action) {
 //   const downloadLink = document.createElement('a');
 //   downloadLink.href = window.URL.createObjectURL(imageFile);
 //   downloadLink.target = '_blank';
-//   console.log(downloadLink);
 //   downloadLink.download = 'newesttree.jpg';
 //   document.body.appendChild(downloadLink);
 //   downloadLink.click();
-//   console.log('ben ui');
 //   document.body.removeChild(downloadLink);
 // };
 
-export function* saveSlideshow(action: any) {
+export function* saveSlideshow() {
   const slideshow: Slideshow = yield select(selectSlideshow);
   yield db.setItem('slideshow', slideshow);
 }
@@ -85,17 +87,17 @@ export default function* editorSaga() {
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
   yield takeLatest(ActionTypes.CREATE_SLIDE, createSlide);
   yield takeLatest(ActionTypes.CREATE_SLIDE_SUCCESS, saveSlideshow);
+  yield takeLatest(ActionTypes.CREATE_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.REMOVE_SLIDE, saveSlideshow);
   try {
     const rawSlideshow: Slideshow = yield db.getItem('slideshow');
-    const slideshow = Slideshow.builder(rawSlideshow).build();
+    // const slideshow = Slideshow.builder(rawSlideshow).build();
     if (rawSlideshow) {
-      yield setSlideshow(slideshow);
+      yield setSlideshow(rawSlideshow);
     } else {
       yield put(push('/'));
     }
   } catch (e) {
-    console.log('là');
     console.error(e);
   }
 }

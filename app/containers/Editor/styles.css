@@ -47,3 +47,11 @@ body {
 .rectangle {
   pointer-events: none;
 }
+
+.timeline__slide-add-buttom {
+  position: relative;
+  left: 20px;
+  top: 40px;
+  background-color: var(--rgba-primary-1);
+  /* transform: translate(50%, 50%); */
+}

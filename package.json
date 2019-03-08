@@ -83,6 +83,8 @@
     "dom-image-file": "^1.1.1",
     "express": "4.16.4",
     "fontfaceobserver": "2.0.13",
+    "geojson": "^0.5.0",
+    "geojson-bbox": "0.0.0",
     "history": "4.7.2",
     "hoist-non-react-statics": "3.0.1",
     "intl": "1.2.5",
