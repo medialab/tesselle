@@ -16,7 +16,8 @@ interface OwnProps extends PathProps {
 
 class AnnotationLayer extends Path<OwnProps, any> {
   public createLeafletElement(props) {
-     return new (LeafletGeoJSON as any)(props.data, this.getOptions(props));
+    this.leafletElement = new (LeafletGeoJSON as any)(props.data, this.getOptions(props));
+    return this.leafletElement;
   }
 
   public updateLeafletElement(fromProps, toProps) {

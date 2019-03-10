@@ -71,7 +71,9 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
             type: 'Polygon',
             coordinates: boundsToLatLngs(action.payload),
           },
-          properties: {name: 'area1'},
+          properties: {
+            name: 'area1',
+          },
         };
         return {
           ...state,

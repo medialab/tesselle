@@ -140,9 +140,6 @@ function EditorMap(props: EditorProps) {
   const [drawing, setDrawing] = useState(false);
   const [frame, setFrame] = useState();
   const onZoom = useCallback((event: LeafletMouseEvent) => setZoomLevel(event.target.getZoom()), [zoomLevel]);
-  // if (selectedSlide) {
-  //   console.log(selectedSlide.annotations);
-  // }
   const onMouseDown = useCallback((event: LeafletMouseEvent) => {
     if (addingSlide) {
       setDrawing(true);
