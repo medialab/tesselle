@@ -7,6 +7,7 @@ import Slideshow from 'types/Slideshow';
 interface EditorState {
   readonly slideshow: Slideshow | null;
   readonly selectedSlide: number;
+  readonly map: L.Map | null;
 }
 
 /* --- ACTIONS --- */

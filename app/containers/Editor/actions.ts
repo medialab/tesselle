@@ -36,3 +36,5 @@ export const addAnnotationAction = createAction(ActionTypes.CREATE_ANNOTATION, a
 export const changeSlideAction = createAction(ActionTypes.CHANGE_SLIDE, action => {
   return (slide: Slide) => action(slide);
 });
+
+export const setMap = createAction(ActionTypes.SET_MAP, action => (map: L.Map) => action(map));

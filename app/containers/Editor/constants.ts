@@ -15,6 +15,7 @@ enum ActionTypes {
   REMOVE_SLIDE = 'app/Editor/REMOVE_SLIDE',
   CREATE_ANNOTATION = 'app/Editor/CREATE_ANNOTATION',
   CHANGE_SLIDE = 'app/Editor/CHANGE_SLIDE',
+  SET_MAP = 'app/Editor/SET_MAP',
 }
 
 export default ActionTypes;

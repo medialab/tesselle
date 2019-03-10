@@ -6,8 +6,8 @@ import ActionTypes from './constants';
 import Slideshow, { slideshowCreator } from '../../types/Slideshow';
 import { createSlideshowAction, createSlideAction } from './actions';
 import db from '../../utils/db';
-import { makeSelectSlideshow } from './selectors';
-import { LatLngBounds, Point } from 'leaflet';
+import { makeSelectSlideshow, makeMapSelector } from './selectors';
+import { LatLngBounds } from 'leaflet';
 
 const selectSlideshow = makeSelectSlideshow();
 
@@ -37,25 +37,42 @@ export function* createAndRedirect(action) {
 }
 
 export function* createSlide(action) {
-  const {frame, projected}: {frame: LatLngBounds, projected: Point[]} = action.payload;
   const slideshow: Slideshow = yield select(selectSlideshow);
-  const imgFile = yield loadImage(
-    slideshow.image.file,
-    {
-      maxWidth: 120,
-      maxHeight: 120,
-      top: projected[1].y,
-      right: projected[1].x,
-      bottom: projected[0].y,
-      left: projected[0].x,
-    },
+  const map = yield select(makeMapSelector());
+  const bounds: LatLngBounds = new LatLngBounds(
+    map.unproject([0, slideshow.image.height], map.getMaxZoom()),
+    map.unproject([slideshow.image.width, 0], map.getMaxZoom()),
   );
-  yield put(
-    createSlideAction.success({
-      frame: frame,
-      file: imgFile,
-    }),
-  );
+  const projected = [
+    map.project(
+      bounds.getSouthWest(), map.getMaxZoom(),
+    ),
+    map.project(
+      bounds.getNorthEast(), map.getMaxZoom(),
+    ),
+  ];
+  try {
+    const imgFile = yield loadImage(
+      slideshow.image.file,
+      {
+        maxWidth: 120,
+        maxHeight: 120,
+        top: projected[1].y,
+        right: projected[1].x,
+        bottom: projected[0].y,
+        left: projected[0].x,
+      },
+    );
+    yield put(
+      createSlideAction.success({
+        frame: bounds,
+        file: imgFile,
+      }),
+    );
+  } catch (e) {
+    console.log('error');
+    console.error(e);
+  }
 }
 
 // const saveFile = (file: File): void => {

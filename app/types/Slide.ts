@@ -1,13 +1,13 @@
 import L from 'leaflet';
 import uuid from 'uuid';
-import { FeatureCollection } from 'geojson';
+import { GeoJSON, Feature } from 'geojson';
 
 class Slide {
   public readonly id: string;
   public readonly bounds: L.LatLngBounds;
-  public readonly annotations: FeatureCollection[] = [];
+  public readonly annotations: GeoJSON;
   public readonly file: File;
-  private constructor(id: string = uuid(), bounds: L.LatLngBounds, file: File, annotations: FeatureCollection[] = []) {
+  private constructor(id: string = uuid(), bounds: L.LatLngBounds, file: File, annotations: GeoJSON) {
     this.id = id;
     this.bounds = bounds;
     this.file = file;
@@ -39,7 +39,7 @@ export default Slide;
 interface SlideJson {
   id: string;
   bounds: L.LatLngBounds;
-  annotations: FeatureCollection[];
+  annotations: GeoJSON;
   file: File;
 }
 
@@ -68,8 +68,18 @@ export class SlideBuilder {
     this.json.bounds = bounds;
     return this;
   }
-  public annotations(annotations: GeoJSON.GeoJSON[]): SlideBuilder {
-    this.json.annotations = annotations;
+  public annotations(annotations?: GeoJSON, toAdd?: Feature): SlideBuilder {
+    if (annotations) {
+      this.json.annotations = {
+        ...annotations,
+        features: [...(annotations as any).features, toAdd],
+      };
+      return this;
+    }
+    this.json.annotations = {
+      type: 'FeatureCollection',
+      features: toAdd ? [toAdd] : [],
+    };
     return this;
   }
   public file(file: File): SlideBuilder {
@@ -77,6 +87,9 @@ export class SlideBuilder {
     return this;
   }
   public build(): Slide {
+    if (!this.json.annotations) {
+      this.annotations();
+    }
     return Slide.fromJS(this.json);
   }
 }

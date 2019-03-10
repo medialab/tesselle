@@ -32,6 +32,7 @@ const boundsToLatLngs = (latLngBounds: LatLngBounds): any => [
 export const initialState: ContainerState = {
   slideshow: null,
   selectedSlide: 1,
+  map: null,
 };
 
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
@@ -61,7 +62,6 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
       } else {
         return state;
       }
-
     case ActionTypes.CREATE_ANNOTATION:
       if (state.slideshow) {
         const slide = state.slideshow.slides[state.selectedSlide - 1];
@@ -79,7 +79,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
           .slides(
             update(
               state.selectedSlide - 1,
-              Slide.builder(slide).annotations([...slide.annotations, feature]).build(),
+              Slide.builder(slide).annotations(slide.annotations, feature).build(),
               state.slideshow.slides,
             ),
           )
@@ -106,6 +106,14 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
             ))
             .build(),
           selectedSlide: 1,
+        };
+      }
+      return state;
+    case ActionTypes.SET_MAP:
+      if (state.map !== action.payload) {
+        return {
+          ...state,
+          map: action.payload,
         };
       }
       return state;

@@ -5,16 +5,18 @@
  */
 
 import { withLeaflet, Path, PathProps } from 'react-leaflet';
-import { Feature } from 'geojson';
+import { GeoJSON, Feature } from 'geojson';
 import LeafletGeoJSON from './LeafletElement';
 
 interface OwnProps extends PathProps {
-  data: Feature[];
+  data: GeoJSON;
+  style: (feature: Feature) => any;
+  onEachFeature: (feature: Feature, layer: L.Layer) => any;
 }
 
 class AnnotationLayer extends Path<OwnProps, any> {
   public createLeafletElement(props) {
-    return new (LeafletGeoJSON as any)(props.data, this.getOptions(props));
+     return new (LeafletGeoJSON as any)(props.data, this.getOptions(props));
   }
 
   public updateLeafletElement(fromProps, toProps) {
