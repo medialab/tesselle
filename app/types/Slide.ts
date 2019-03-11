@@ -1,17 +1,17 @@
 import L from 'leaflet';
 import uuid from 'uuid';
-import { GeoJSON, Feature } from 'geojson';
+import { GeoJSON, Feature, FeatureCollection } from 'geojson';
 
 class Slide {
   public readonly id: string;
   public readonly bounds: L.LatLngBounds;
-  public readonly annotations: GeoJSON;
+  public readonly annotations: FeatureCollection;
   public readonly file: File;
   private constructor(id: string = uuid(), bounds: L.LatLngBounds, file: File, annotations: GeoJSON) {
     this.id = id;
     this.bounds = bounds;
     this.file = file;
-    this.annotations = annotations;
+    this.annotations = annotations as FeatureCollection;
   }
   public toJSON(): SlideJson {
     return {

@@ -214,6 +214,14 @@ function EditorMap(props: EditorProps) {
   );
 }
 
+const ConnectedEditorMap = withConnect(EditorMap);
+
+function MenuItem(props) {
+  return (
+    <h1>Menu Item</h1>
+  );
+}
+
 function Editor(props: EditorProps & RouterProps) {
   const slideshow = props.slideshow;
   const onSlideRemove = props.removeSlide;
@@ -239,6 +247,11 @@ function Editor(props: EditorProps & RouterProps) {
           </div>
         </footer>
       </div>
+      {selectedSlide && (
+        <div className="sidebar">
+          {selectedSlide.annotations.features.map(feature => <MenuItem data={feature} />)}
+        </div>
+      )}
     </div>
   );
 }
@@ -246,7 +259,5 @@ function Editor(props: EditorProps & RouterProps) {
 Editor.propTypes = {
   createSlideshow: PropTypes.func.isRequired,
 };
-
-const ConnectedEditorMap = withConnect(EditorMap);
 
 export default decorator(props => props.slideshow && <Editor {...props} />);

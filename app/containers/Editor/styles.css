@@ -11,11 +11,19 @@ body { --rgba-primary-4: #060614; } /* rgba(  6,  6, 20,1); */
 
 body {
   --foter-height: 120px;
+  --sidebar-width: 250px;
+}
+
+body {
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 .leaflet-container {
-  height: calc(100vh - var(--foter-height));
-  width: 100vw;
+  /* height: calc(100vh - var(--foter-height)); */
+  height: 100%;
+  width: 100%;
+  min-width: 100px;
   margin: 0 auto;
 }
 
@@ -38,8 +46,15 @@ body {
 
 .container {
   position: absolute;
+  width: 100vw;
+  width: calc(100vw - var(--sidebar-width));
+  height: 100vh;
 }
 
+.map {
+  height: calc(100% - var(--foter-height));
+  width: 100%;
+}
 .map.creating {
   cursor: crosshair;
 }
@@ -53,5 +68,13 @@ body {
   left: 20px;
   top: 40px;
   background-color: var(--rgba-primary-1);
-  /* transform: translate(50%, 50%); */
+}
+
+.sidebar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--rgba-primary-0);
 }
