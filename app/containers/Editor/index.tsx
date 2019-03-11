@@ -25,6 +25,7 @@ import Slideshow from 'types/Slideshow';
 import SlideTimeline from 'components/SlideTimeline';
 import FloatinBar from 'components/FloatingBar';
 import AnnotationLayer from 'components/AnnotationLayer';
+import Sidebar from 'components/Sidebar';
 
 import {
   createSlideshowAction,
@@ -216,12 +217,6 @@ function EditorMap(props: EditorProps) {
 
 const ConnectedEditorMap = withConnect(EditorMap);
 
-function MenuItem(props) {
-  return (
-    <h1>Menu Item</h1>
-  );
-}
-
 function Editor(props: EditorProps & RouterProps) {
   const slideshow = props.slideshow;
   const onSlideRemove = props.removeSlide;
@@ -247,11 +242,7 @@ function Editor(props: EditorProps & RouterProps) {
           </div>
         </footer>
       </div>
-      {selectedSlide && (
-        <div className="sidebar">
-          {selectedSlide.annotations.features.map(feature => <MenuItem data={feature} />)}
-        </div>
-      )}
+      <Sidebar annotations={selectedSlide && selectedSlide.annotations} />
     </div>
   );
 }
