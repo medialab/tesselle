@@ -1,0 +1,8 @@
+.sidebar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--rgba-primary-0);
+}
