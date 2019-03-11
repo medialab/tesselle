@@ -5,8 +5,9 @@
  */
 
 import * as React from 'react';
-import { FeatureCollection } from 'geojson';
+import { Set } from 'immutable';
 import './styles.css';
+import Annotation from 'types/Annotation';
 
 function MenuItem(props) {
   return (
@@ -15,7 +16,7 @@ function MenuItem(props) {
 }
 
 interface OwnProps {
-  annotations: FeatureCollection | null;
+  annotations: Set<Annotation>;
 }
 
 const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
@@ -26,7 +27,7 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
       </div>
     );
   }
-  if (props.annotations.features.length === 0) {
+  if (props.annotations.size === 0) {
     return (
       <div className="sidebar">
         <h1>Edit your annotations here.</h1>
@@ -35,7 +36,7 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
   }
   return (
     <div className="sidebar">
-      {props.annotations.features.map((feature, index) => <MenuItem key={index} data={feature} />)}
+      {props.annotations.map((feature, index) => <MenuItem key={index} data={feature} />)}
     </div>
   );
 };

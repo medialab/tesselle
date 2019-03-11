@@ -10,7 +10,6 @@ body { --rgba-primary-3: #1A1A46; } /* rgba( 26, 26, 70,1); */
 body { --rgba-primary-4: #060614; } /* rgba(  6,  6, 20,1); */
 
 body {
-  --foter-height: 120px;
   --sidebar-width: 250px;
 }
 
@@ -20,7 +19,6 @@ body {
 }
 
 .leaflet-container {
-  /* height: calc(100vh - var(--foter-height)); */
   height: 100%;
   width: 100%;
   min-width: 100px;
@@ -37,13 +35,6 @@ body {
   z-index: 9999;
 }
 
-.slides-container {
-  height: var(--foter-height);
-  position: absolute;
-  width: 100vw;
-  background: var(--rgba-primary-3);
-}
-
 .container {
   position: absolute;
   width: 100vw;
@@ -52,7 +43,7 @@ body {
 }
 
 .map {
-  height: calc(100% - var(--foter-height));
+  height: 100%;
   width: 100%;
 }
 .map.creating {
@@ -61,11 +52,4 @@ body {
 
 .rectangle {
   pointer-events: none;
-}
-
-.timeline__slide-add-buttom {
-  position: relative;
-  left: 20px;
-  top: 40px;
-  background-color: var(--rgba-primary-1);
 }

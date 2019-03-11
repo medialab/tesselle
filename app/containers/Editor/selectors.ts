@@ -29,12 +29,6 @@ export const makeSelectSlideshow = () =>
     substate => substate.slideshow,
   );
 
-export const makeSelectSelectedSlide = () =>
-    createSelector(
-      selectEditorDomain,
-      substate => substate.selectedSlide,
-    );
-
 export const makeMapSelector = () =>
     createSelector(
       selectEditorDomain,

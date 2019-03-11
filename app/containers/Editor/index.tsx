@@ -5,7 +5,7 @@
  */
 
 import React, { useLayoutEffect, useState, useEffect, useCallback } from 'react';
-import L, { LatLngBounds, LeafletMouseEvent, Point } from 'leaflet';
+import L, { LatLngBounds, LeafletMouseEvent } from 'leaflet';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { RouterProps } from 'react-router';
@@ -13,31 +13,24 @@ import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import cx from 'classnames';
 import { Map, ImageOverlay, Rectangle } from 'react-leaflet';
-import { Button } from 'quinoa-design-library';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 import Cover from 'types/Cover';
-import Slide from 'types/Slide';
 import Slideshow from 'types/Slideshow';
-import SlideTimeline from 'components/SlideTimeline';
 import FloatinBar from 'components/FloatingBar';
 import AnnotationLayer from 'components/AnnotationLayer';
 import Sidebar from 'components/Sidebar';
 
 import {
   createSlideshowAction,
-  createSlideAction,
-  removeSlideAction,
   addAnnotationAction,
-  changeSlideAction,
   setMap,
 } from './actions';
 import {
   makeSelectSlideshow,
-  makeSelectSelectedSlide,
   makeMapSelector,
 } from './selectors';
 import reducer from './reducer';
@@ -46,7 +39,6 @@ import './styles.css';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
-  selectedSlide: makeSelectSelectedSlide(),
   map: makeMapSelector(),
 });
 
@@ -54,10 +46,7 @@ const withConnect = connect(
   mapStateToProps,
   {
     createSlideshow: createSlideshowAction.request,
-    createSlide: createSlideAction.request,
     createAnnotation: addAnnotationAction,
-    removeSlide: removeSlideAction,
-    changeSlide: changeSlideAction,
     setMap: setMap,
   },
 );
@@ -73,12 +62,9 @@ export const decorator = compose(
 
 interface EditorProps {
   readonly slideshow: Slideshow;
-  readonly selectedSlide: number;
+  readonly selectedAnnotation: number;
   readonly map: L.Map;
-  readonly createSlide: (action: {frame: LatLngBounds, projected: Point[]}) => any;
-  readonly removeSlide: (slide: Slide) => any;
   readonly createAnnotation: (frame: LatLngBounds) => void;
-  readonly changeSlide: (slide: Slide) => any;
   readonly setMap: (event) => void;
 }
 
@@ -133,7 +119,6 @@ function EditorMap(props: EditorProps) {
     slideshow,
     map,
   } = props;
-  const selectedSlide = slideshow.slides[props.selectedSlide - 1];
   const maxBounds: LatLngBounds = useMapLock(map, props.slideshow.image);
   useFlyTo(map, maxBounds);
   const [zoomLevel, setZoomLevel] = useState((minZoom + maxZoom) / 2);
@@ -200,14 +185,12 @@ function EditorMap(props: EditorProps) {
         onZoom={onZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={window.URL.createObjectURL(slideshow.image.file)} bounds={maxBounds} />}
-        {selectedSlide && (
-          <AnnotationLayer
-            onEachFeature={onEachFeature}
-            style={geoStyle}
-            key={selectedSlide.id}
-            data={selectedSlide.annotations}
-          />
-        )}
+        <AnnotationLayer
+          onEachFeature={onEachFeature}
+          style={geoStyle}
+          key={`${slideshow.id}-${slideshow.annotations.size}`}
+          data={slideshow.annotations}
+        />
         {(drawing && frame) && <Rectangle className="rectangle" color="red" bounds={frame} />}
         <FloatinBar onRectangleClick={onRectangleClick} />
       </Map>
@@ -215,34 +198,14 @@ function EditorMap(props: EditorProps) {
   );
 }
 
-const ConnectedEditorMap = withConnect(EditorMap);
-
 function Editor(props: EditorProps & RouterProps) {
   const slideshow = props.slideshow;
-  const onSlideRemove = props.removeSlide;
-  const selectedSlide: null | Slide = slideshow.slides[props.selectedSlide - 1];
   return (
     <div>
       <div className="container">
-        <ConnectedEditorMap />
-        <footer className="slides-container">
-          {props.slideshow.slides.map((slide: Slide) => (
-            <SlideTimeline
-              onRemove={onSlideRemove}
-              onClick={props.changeSlide}
-              key={slide.id}
-              selected={!!(selectedSlide && selectedSlide.id === slide.id)}
-              slide={slide} />
-          ))}
-          <div className="timeline__slide-container">
-            <Button
-              className="timeline__slide-add-buttom"
-              isRounded isColor="error"
-              onClick={props.createSlide}>+1</Button>
-          </div>
-        </footer>
+        <EditorMap {...props} />
       </div>
-      <Sidebar annotations={selectedSlide && selectedSlide.annotations} />
+      <Sidebar annotations={slideshow.annotations} />
     </div>
   );
 }

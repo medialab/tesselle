@@ -1,35 +1,37 @@
 import uuid from 'uuid';
+import { Record, Set } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
-// import { Set } from 'immutable';
-import Slide from './Slide';
+import Annotation from 'types/Annotation';
 import Cover from './Cover';
-import { Record } from 'immutable';
 
-interface SlideshowJson {
+interface SlideshowArgs {
   id?: string;
-  slides?: Slide[];
+  annotations?: Set<Annotation>;
   image?: Cover;
 }
 
 class Slideshow extends Record({
   id: uuid(),
-  slides: [],
+  annotations: Set(),
   image: {},
 }) {
   public readonly id!: string;
-  public readonly slides!: Slide[];
+  public readonly annotations!: Set<Annotation>;
   public readonly image!: Cover;
-  constructor(params?: SlideshowJson) {
+  constructor(params?: SlideshowArgs) {
     if (params) {
       if (!params.id) {
         params.id = uuid();
+      }
+      if (params.annotations instanceof Array) {
+        params.annotations = Set<Annotation>(params.annotations);
       }
       super(params);
     } else {
       super();
     }
   }
-  public with(values: SlideshowJson) {
+  public with(values: SlideshowArgs) {
     return this.merge(values) as this;
   }
 }

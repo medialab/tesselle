@@ -10,7 +10,7 @@ interface CoverArgs {
 
 export default class Cover extends Record({
   id: '',
-  file: null,
+  file: {},
   width: 0,
   height: 0,
 }) {
