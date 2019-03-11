@@ -9,14 +9,13 @@ import { FeatureCollection } from 'geojson';
 import './styles.css';
 
 function MenuItem(props) {
-  console.log(props.data);
   return (
     <h1>Menu Item</h1>
   );
 }
 
 interface OwnProps {
-  annotations: FeatureCollection;
+  annotations: FeatureCollection | null;
 }
 
 const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {

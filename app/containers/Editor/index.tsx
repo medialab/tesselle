@@ -231,7 +231,7 @@ function Editor(props: EditorProps & RouterProps) {
               onRemove={onSlideRemove}
               onClick={props.changeSlide}
               key={slide.id}
-              selected={selectedSlide && selectedSlide.id === slide.id}
+              selected={!!(selectedSlide && selectedSlide.id === slide.id)}
               slide={slide} />
           ))}
           <div className="timeline__slide-container">

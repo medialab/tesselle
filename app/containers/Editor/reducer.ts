@@ -38,25 +38,30 @@ export const initialState: ContainerState = {
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
   switch (action.type) {
     case ActionTypes.CREATE_SLIDESHOW_SUCCESS:
+      const newSlideshow = new Slideshow({
+        id: action.payload.id,
+        image: action.payload.image,
+        slides: action.payload.slides,
+      });
+      console.log('cocu', newSlideshow.get('id'));
       return {
         ...state,
-        slideshow: Slideshow.builder()
-          .id(action.payload.id)
-          .image(action.payload.image)
-          .slides(action.payload.slides)
-          .build(),
+        slideshow: newSlideshow,
       };
     case ActionTypes.CREATE_SLIDE_SUCCESS:
       if (state.slideshow) {
+        const newSlideshow = state.slideshow.with({
+          slides: [
+            ...state.slideshow.slides,
+            new Slide({
+              bounds: action.payload.frame,
+              file: action.payload.file,
+            }),
+          ],
+        });
         return {
           ...state,
-          slideshow: Slideshow
-            .builder(state.slideshow)
-            .slides([
-              ...state.slideshow.slides,
-              Slide.builder().bounds(action.payload.frame).file(action.payload.file).build(),
-            ])
-            .build(),
+          slideshow: newSlideshow,
           selectedSlide: state.slideshow.slides.length + 1,
         };
       } else {
@@ -77,15 +82,19 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
         };
         return {
           ...state,
-          slideshow: Slideshow.builder(state.slideshow)
-          .slides(
-            update(
+          slideshow: state.slideshow.with({
+            slides: update(
               state.selectedSlide - 1,
-              Slide.builder(slide).annotations(slide.annotations, feature).build(),
+              new Slide({
+                ...slide,
+                annotations: {
+                  type: 'FeatureCollection',
+                  features: [...slide.annotations.features, feature],
+                },
+              }),
               state.slideshow.slides,
             ),
-          )
-          .build(),
+          }),
         };
       }
       return state;
@@ -99,14 +108,15 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
       return state;
     case ActionTypes.REMOVE_SLIDE:
       if (state.slideshow) {
+        const newSlideshow = state.slideshow.with({
+          slides: state.slideshow.slides.filter(
+            slide => slide.id !== action.payload.id,
+          ),
+        });
+        console.log(newSlideshow, newSlideshow.id);
         return {
           ...state,
-          slideshow: Slideshow
-            .builder(state.slideshow)
-            .slides(state.slideshow.slides.filter(
-              slide => slide.id !== action.payload.id,
-            ))
-            .build(),
+          slideshow: newSlideshow,
           selectedSlide: 1,
         };
       }

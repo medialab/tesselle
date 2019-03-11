@@ -3,74 +3,36 @@ import { split, nth, curry, map, pipe } from 'ramda';
 // import { Set } from 'immutable';
 import Slide from './Slide';
 import Cover from './Cover';
+import { Record } from 'immutable';
 
 interface SlideshowJson {
-  id: string;
-  slides: Slide[];
-  image: Cover;
+  id?: string;
+  slides?: Slide[];
+  image?: Cover;
 }
 
-class Slideshow {
-  public readonly id: string;
-  public readonly slides: Slide[];
-  public readonly image: Cover;
-  private constructor(id: string = uuid(), image: Cover, slides: Slide[] = []) {
-    this.id = id;
-    this.image = image;
-    this.slides = slides;
-  }
-  public toJSON(): SlideshowJson {
-    return {
-      id: this.id,
-      image: this.image,
-      slides: this.slides,
-    };
-  }
-  public static fromJS(json: SlideshowJson): Slideshow {
-    return new Slideshow(
-      json.id,
-      json.image,
-      json.slides,
-    );
-  }
-  public static builder(slideshow?: Slideshow): SlideshowBuilder {
-    return new SlideshowBuilder(slideshow);
-  }
-}
-
-// tslint:disable-next-line: max-classes-per-file
-class SlideshowBuilder {
-  private json: SlideshowJson & any;
-  constructor(slideshow?: Slideshow | any) {
-    if (slideshow instanceof Slideshow) {
-      this.json = slideshow.toJSON();
-    } else if (slideshow instanceof Object) {
-      this.json = {
-        id: slideshow.id,
-        image: slideshow.image,
-        slides: slideshow.slides,
-      };
+class Slideshow extends Record({
+  id: uuid(),
+  slides: [],
+  image: {},
+}) {
+  public readonly id!: string;
+  public readonly slides!: Slide[];
+  public readonly image!: Cover;
+  constructor(params?: SlideshowJson) {
+    if (params) {
+      if (!params.id) {
+        params.id = uuid();
+      }
+      super(params);
     } else {
-      this.json = {};
+      super();
     }
   }
-  public id(id: string): SlideshowBuilder {
-    this.json.id = id;
-    return this;
-  }
-  public image(imageCover: Cover): SlideshowBuilder {
-    this.json.image = imageCover;
-    return this;
-  }
-  public slides(slides: Slide[] | Slide): SlideshowBuilder {
-    this.json.slides = slides instanceof Slide ? [...this.json.slides, slides] : slides;
-    return this;
-  }
-  public build(): Slideshow {
-    return Slideshow.fromJS(this.json);
+  public with(values: SlideshowJson) {
+    return this.merge(values) as this;
   }
 }
-
 export default Slideshow;
 
 interface Box {
@@ -118,8 +80,14 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
         const svgElement = container.getElementsByTagName('svg')[0] as Element;
         try {
           const box: Box = getSvgSize(svgElement);
-          const cover = new Cover(file, box.width, box.height);
-          return resolve(Slideshow.builder().image(cover).build());
+          return resolve(
+            new Slideshow({
+              image: new Cover({
+                file: file,
+                width: box.width,
+                height: box.height,
+              }),
+            }));
         } catch (error) {
           svgElement.setAttribute('width', maxX);
           svgElement.setAttribute('height', maxY);
@@ -130,8 +98,13 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
             ),
           ], file.name, {type: svgType});
           const box: Box = getSvgSize(svgElement);
-          const cover: Cover = new Cover(newFile, box.width, box.height);
-          return resolve(Slideshow.builder().image(cover).build());
+          return resolve(new Slideshow({
+            image: new Cover({
+              file: newFile,
+              width: box.width,
+              height: box.height,
+            }),
+          }));
         }
       };
       reader.readAsText(file);
@@ -146,8 +119,13 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
         if (img.height === 0) {
           return reject(new Error('Slideshow.image has a height of 0'));
         }
-        const cover: Cover = new Cover(file, img.width, img.height);
-        return resolve(Slideshow.builder().image(cover).build());
+        return resolve(new Slideshow({
+          image: new Cover({
+            file: file,
+            width: img.width,
+            height: img.height,
+          }),
+        }));
       };
       img.onerror = reject;
       img.src = url;
