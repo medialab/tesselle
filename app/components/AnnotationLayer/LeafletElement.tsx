@@ -1,36 +1,7 @@
-import { GeoJSON as LeafletGeoJSON, Marker, FeatureGroup, Polyline, Polygon, Circle } from 'leaflet';
-import { coordsToLatLng, coordsToLatLngs, asFeature } from 'utils/geo';
-
-export default LeafletGeoJSON.extend({
-  addData: function(geojson) {
-    const features = Array.isArray(geojson) ? geojson : geojson.features;
-    if (features) {
-      for (const feature of features) {
-        if (feature.geometries || feature.geometry || feature.features || feature.coordinates) {
-          this.addData(feature);
-        }
-      }
-      return this;
-    }
-    const options = this.options;
-
-    if (options.filter && !options.filter(geojson)) {
-      return this;
-    }
-    const layer = geometryToLayer(geojson, options);
-    if (!layer) {
-      return this;
-    }
-    layer.feature = asFeature(geojson);
-    layer.defaultOptions = layer.options;
-    this.resetStyle(layer);
-    if (options.onEachFeature) {
-      options.onEachFeature(geojson, layer);
-    }
-
-    return this.addLayer(layer);
-  },
-});
+import React from 'react';
+import { Polygon, Tooltip } from 'react-leaflet';
+import { Marker, FeatureGroup, Polyline, Circle } from 'leaflet';
+import { coordsToLatLng, coordsToLatLngs } from 'utils/geo';
 
 // @function geometryToLayer(featureData: Object, options?: GeoJSON options): Layer
 // Creates a `Layer` from a given GeoJSON feature. Can use a custom
@@ -71,7 +42,13 @@ export function geometryToLayer(geojson, options) {
     case 'Polygon':
     case 'MultiPolygon':
       latlngs = coordsToLatLngs(coords, geometry.type === 'Polygon' ? 1 : 2, callbackCoordsToLatLng);
-      return new Polygon(latlngs, options);
+      return (
+        <Polygon positions={latlngs.toJS()}>
+          <Tooltip opacity={1} permanent>
+            {geojson.properties.content}
+          </Tooltip>
+        </Polygon>
+      );
 
     case 'GeometryCollection':
       for (const geom of geometry.geometries) {

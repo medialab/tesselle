@@ -16,12 +16,12 @@ export class AnnotationProperties extends Record({
   public content!: string;
   constructor(params?: AnnotationPropertiesArgs) {
     if (params) {
-      if (!params.id) {
+      if (!params.id || params.id === 'emptyId') {
         params.id = uuid();
       }
       super(params);
     } else {
-      super();
+      super({id: uuid()});
     }
   }
   public with(values: AnnotationPropertiesArgs) {
@@ -29,7 +29,7 @@ export class AnnotationProperties extends Record({
   }
 }
 
-export default interface Annotation extends Feature, Record<any> {
+export default interface Annotation extends Feature, Record<Annotation> {
   id: string;
   properties: AnnotationProperties;
 }

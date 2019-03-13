@@ -11,6 +11,7 @@ import ActionTypes from './constants';
 import Slideshow from 'types/slideshow';
 import { LatLngBounds } from 'leaflet';
 import Annotation from 'types/Annotation';
+import { List } from 'immutable';
 
 export const defaultAction = () => action(ActionTypes.DEFAULT_ACTION);
 export const createSlideshowAction = createAsyncAction(
@@ -37,3 +38,9 @@ export const editAnnotationAction = createAction(
     content: content,
   }),
 );
+
+export const editOrderAction = createAction(
+  ActionTypes.CHANGE_ORDER,
+  action => (annotations: List<Annotation>) => action(annotations),
+);
+

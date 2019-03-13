@@ -4,34 +4,26 @@
  *
  */
 
-import { withLeaflet, Path, PathProps } from 'react-leaflet';
-import { Feature } from 'geojson';
+import { LayerGroup } from 'react-leaflet';
+import React from 'react';
+
 import Annotation from 'types/Annotation';
 import { List } from 'immutable';
-import LeafletGeoJSON from './LeafletElement';
+import { geometryToLayer } from './LeafletElement';
 
-interface OwnProps extends PathProps {
+interface AnnotationLayerProps {
   data: List<Annotation>;
-  style: (feature: Feature) => any;
-  onEachFeature: (feature: Feature, layer: L.Layer) => any;
 }
 
-class AnnotationLayer extends Path<OwnProps, any> {
-  public createLeafletElement(props) {
-    this.leafletElement = new (LeafletGeoJSON as any)({
-      type: 'FeatureCollection',
-      features: props.data.toJS(),
-    }, this.getOptions(props));
-    return this.leafletElement;
-  }
+const AnnotationLayer = (props: AnnotationLayerProps) => {
+  return (
+    <LayerGroup>
+      {props.data.map((annotation) => {
+        console.log(annotation.toJS());
+        return <React.Fragment key={annotation.properties.id}>{geometryToLayer(annotation, {})}</React.Fragment>;
+      })}
+    </LayerGroup>
+  );
+};
 
-  public updateLeafletElement(fromProps, toProps) {
-    if (typeof toProps.style === 'function') {
-      this.setStyle(toProps.style);
-    } else {
-      this.setStyleIfChanged(fromProps, toProps);
-    }
-  }
-}
-
-export default withLeaflet(AnnotationLayer);
+export default AnnotationLayer;

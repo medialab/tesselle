@@ -13,6 +13,7 @@ enum ActionTypes {
   SET_MAP = 'app/Editor/SET_MAP',
   REMOVE_ANNOTATION = 'app/Editor/REMOVE_ANNOTATION',
   EDIT_ANNOTATION = 'app/Editor/EDIT_ANNOTATION',
+  CHANGE_ORDER = 'app/Editor/CHANGE_ORDER',
 }
 
 export default ActionTypes;

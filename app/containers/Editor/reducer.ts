@@ -36,7 +36,7 @@ export const initialState: ContainerState = {
 };
 
 function propertiesReviver(key, value) {
-  return new AnnotationProperties(value);
+  return new AnnotationProperties(value.toJSON());
 }
 
 const fromJS = (value) => {
@@ -46,6 +46,11 @@ const fromJS = (value) => {
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
   if (state.slideshow) {
     switch (action.type) {
+      case ActionTypes.CHANGE_ORDER:
+        return {
+          ...state,
+          slideshow: state.slideshow.set('annotations', action.payload),
+        };
       case ActionTypes.CREATE_ANNOTATION:
         return {
           ...state,
@@ -57,9 +62,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
                   type: 'Polygon',
                   coordinates: boundsToLatLngs(action.payload),
                 },
-                properties: {
-                  name: 'area1',
-                },
+                properties: {},
               }),
             ),
           }),
@@ -84,7 +87,9 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
         return {
           ...state,
           slideshow: state.slideshow.with({
-            annotations: state.slideshow.annotations.remove(state.slideshow.annotations.indexOf(action.payload)),
+            annotations: state.slideshow.annotations.remove(
+              state.slideshow.annotations.indexOf(action.payload),
+            ),
           }),
         };
     }

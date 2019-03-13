@@ -106,12 +106,12 @@ export default function* editorSaga() {
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
   yield takeLatest(ActionTypes.CREATE_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.REMOVE_ANNOTATION, saveSlideshow);
-  yield takeLatest(ActionTypes.EDIT_ANNOTATION, saveSlideshow);
+  yield takeLatest(ActionTypes.EDIT_ANNOTATION,   saveSlideshow);
+  yield takeLatest(ActionTypes.CHANGE_ORDER,      saveSlideshow);
   try {
     const rawSlideshow: Slideshow = yield db.getItem('slideshow');
     // const slideshow = Slideshow.builder(rawSlideshow).build();
     if (rawSlideshow) {
-      console.log(rawSlideshow);
       yield setSlideshow(rawSlideshow);
     } else {
       yield put(push('/'));

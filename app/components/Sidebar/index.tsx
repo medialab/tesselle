@@ -6,78 +6,149 @@
 
 import * as React from 'react';
 import { List } from 'immutable';
-import { Store, Dispatch } from 'redux';
-import { Button } from 'quinoa-design-library';
+import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
 import { ReactReduxContext } from 'react-redux';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-import { removeAnnotationAction, editAnnotationAction } from 'containers/Editor/actions';
+import { removeAnnotationAction, editAnnotationAction, editOrderAction } from 'containers/Editor/actions';
 import Annotation from 'types/Annotation';
+import icons from 'quinoa-design-library/src/themes/millet/icons';
 
 import './styles.css';
 
-const useDispatchAction = (callback: (dispatch: Dispatch, ...args: any) => any, deps: ReadonlyArray<any>) => {
-  const {
-    store: {
-      dispatch,
-    },
-  }: {store: Store} = React.useContext(ReactReduxContext);
-  return React.useCallback(
-    (...args) => callback(dispatch, ...args),
-    deps,
-  );
+const useDispatch = () => {
+  return React.useContext(ReactReduxContext).store.dispatch;
 };
 
 interface MenuItemProps {
   data: Annotation;
 }
 
-function MenuItem(props: MenuItemProps) {
-  const [edit, setEdit] = React.useState(false);
+const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProps, ref) => {
   const [content, setContent] = React.useState(props.data.properties.content);
-  const onRemove: (event: React.SyntheticEvent) => void = useDispatchAction(
-    (dispatch) => dispatch(removeAnnotationAction(props.data)),
+  const dispatch = useDispatch();
+  const onRemove = React.useCallback(
+    () => dispatch(removeAnnotationAction(props.data)),
     [props.data],
   );
-  const saveOnEnter = useDispatchAction(
-    (dispatch, event: React.KeyboardEvent<HTMLInputElement>): void => {
-      console.log(event.keyCode);
-      if (event.key === 'Enter') {
-        dispatch(editAnnotationAction(props.data, content));
-        setEdit(false);
-      }
-    },
+  const save = React.useCallback(
+    () => dispatch(editAnnotationAction(props.data, content)),
     [props.data, content],
   );
-  const onTextClick = React.useCallback(() => {
-    setEdit(state => !state);
-  }, []);
   const onInputChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      setContent((event.target as HTMLInputElement).value),
+    (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+      setContent((event.target as HTMLTextAreaElement).value),
     [],
   );
+  const isActive = false;
   return (
-    <div>
-      {edit ? (
-        <input
-          type="text"
-          defaultValue={props.data.properties.content}
-          onBlur={onTextClick}
-          autoFocus
-          onKeyPress={saveOnEnter}
-          onChange={onInputChange} />
-        ) : (
-          <h1 onClick={onTextClick}>{props.data.properties.content}</h1>
-        )
-      }
-      <Button onClick={onRemove}>X</Button>
-    </div>
+    <Box
+    ref={ref}
+    style={{
+      background: isActive ? '#3849a2' : 'transparent',
+    }}>
+      <StretchedLayoutContainer isDirection="horizontal">
+        <StretchedLayoutItem
+          style={{
+            paddingRight: '1rem',
+          }}
+          isFlex={1}>
+          <textarea
+            onChange={onInputChange}
+            defaultValue={props.data.properties.content}
+            onBlur={save}
+            autoFocus
+            style={{
+            width: '100%',
+            background: isActive ? '#3849a2' : 'transparent',
+            color: isActive ? 'white' : 'black',
+          }} className="textarea" />
+        </StretchedLayoutItem>
+        <StretchedLayoutItem>
+          <StretchedLayoutContainer isDirection="vertical">
+            <Button
+              onClick={onRemove}
+              style={{marginBottom: '.5rem'}}
+              data-for="card-action" data-tip={'delete this annotation'}>
+              <Icon isSize="small" isAlign="left">
+                <img src={icons.remove.black.svg} />
+              </Icon>
+            </Button>
+            <Button style={{marginBottom: '.5rem'}} data-for="card-action" data-tip={'drag to change annotation order'}>
+              <Icon isSize="small" isAlign="left">
+                <img src={icons.move.black.svg} />
+              </Icon>
+            </Button>
+            <Button data-for="card-action" data-tip={'set a frame'}>
+              <Icon isSize="small" isAlign="left">
+                <img src={icons.cover.black.svg} />
+              </Icon>
+            </Button>
+          </StretchedLayoutContainer>
+        </StretchedLayoutItem>
+      </StretchedLayoutContainer>
+    </Box>
   );
-}
+});
 
 interface OwnProps {
   annotations: List<Annotation>;
 }
+
+const reorder = (list: List<Annotation>, startIndex: number, endIndex: number) => {
+  const removed = list.get(startIndex);
+  if (removed) {
+    return list.splice(startIndex, 1).splice(endIndex, 0, removed);
+  }
+  return list;
+};
+
+const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
+
+  const dispatch = useDispatch();
+
+  const onDragEnd = React.useCallback((result) => {
+    // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
+
+    dispatch(
+      editOrderAction(
+        reorder(
+          props.annotations,
+          result.source.index,
+          result.destination.index,
+        ),
+      ),
+    );
+  }, [props.annotations]);
+
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="droppable">
+        {(provided) => (
+          <div
+            {...provided.droppableProps}
+            ref={provided.innerRef}>
+            {props.annotations.map((feature, index) => (
+              <Draggable key={feature.properties.id} draggableId={feature.properties.id} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  ><MenuItem data={feature} /></div>
+                )}
+                </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
 
 const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
   if (!props.annotations) {
@@ -94,11 +165,8 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
       </div>
     );
   }
-  return (
-    <div className="sidebar">
-      {props.annotations.map((feature) => <MenuItem key={feature.id} data={feature} />)}
-    </div>
-  );
+
+  return <div className="sidebar"><Orderable {...props} /></div>;
 };
 
 export default Sidebar;

@@ -71,28 +71,6 @@ interface EditorProps {
 const minZoom = 8;
 const maxZoom = 12;
 
-
-const geoStyle = (feature) => {
-  if (feature.geometry.type === 'Circle') {
-    return {
-      color: 'red',
-    };
-  } else {
-    return {
-      color: 'purple',
-    };
-  }
-};
-
-function onEachFeature(feature, layer) {
-  if (feature.properties && feature.properties.popupContent) {
-    layer.bindTooltip(
-      feature.properties.popupContent,
-      {permanent: true},
-    ).openTooltip();
-  }
-}
-
 function useMapLock(map: L.Map, image: Cover): LatLngBounds {
   const [maxBounds, setMaxBounds] = useState();
   useLayoutEffect(() => {
@@ -198,8 +176,6 @@ function EditorMap(props: EditorProps) {
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
         <AnnotationLayer
-          onEachFeature={onEachFeature}
-          style={geoStyle}
           key={`${slideshow.id}-${slideshow.annotations.size}`}
           data={slideshow.annotations}
         />
