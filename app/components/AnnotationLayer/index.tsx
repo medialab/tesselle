@@ -7,11 +7,11 @@
 import { withLeaflet, Path, PathProps } from 'react-leaflet';
 import { Feature } from 'geojson';
 import Annotation from 'types/Annotation';
-import { Set } from 'immutable';
+import { List } from 'immutable';
 import LeafletGeoJSON from './LeafletElement';
 
 interface OwnProps extends PathProps {
-  data: Set<Annotation>;
+  data: List<Annotation>;
   style: (feature: Feature) => any;
   onEachFeature: (feature: Feature, layer: L.Layer) => any;
 }

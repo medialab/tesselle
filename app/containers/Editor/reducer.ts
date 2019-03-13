@@ -50,7 +50,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
         return {
           ...state,
           slideshow: state.slideshow.with({
-            annotations: state.slideshow.annotations.add(
+            annotations: state.slideshow.annotations.push(
               fromJS({
                 type: 'Feature',
                 geometry: {
@@ -67,8 +67,9 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
       case ActionTypes.EDIT_ANNOTATION:
         return {
           ...state,
-          slideshow: state.slideshow.with({
-            annotations: state.slideshow.annotations.map(
+          slideshow: state.slideshow.set(
+            'annotations',
+            state.slideshow.annotations.map(
               when(
                 equals(action.payload.annotation),
                 (annotation: Annotation) => annotation.set(
@@ -77,13 +78,13 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
                 ),
               ),
             ),
-          }),
+          ),
         };
       case ActionTypes.REMOVE_ANNOTATION:
         return {
           ...state,
           slideshow: state.slideshow.with({
-            annotations: state.slideshow.annotations.remove(action.payload),
+            annotations: state.slideshow.annotations.remove(state.slideshow.annotations.indexOf(action.payload)),
           }),
         };
     }

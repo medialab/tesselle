@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { Set } from 'immutable';
+import { List } from 'immutable';
 import { Store, Dispatch } from 'redux';
 import { Button } from 'quinoa-design-library';
 import { ReactReduxContext } from 'react-redux';
@@ -33,19 +33,14 @@ interface MenuItemProps {
 
 function MenuItem(props: MenuItemProps) {
   const [edit, setEdit] = React.useState(false);
-  const [content, setContent] = React.useState('');
+  const [content, setContent] = React.useState(props.data.properties.content);
   const onRemove: (event: React.SyntheticEvent) => void = useDispatchAction(
     (dispatch) => dispatch(removeAnnotationAction(props.data)),
     [props.data],
   );
-  const onTextClick = React.useCallback(() => {
-    setEdit(state => !state);
-  }, []);
-  const onInputChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) =>
-    setContent((event.target as HTMLInputElement).value),
-    [],
-  );
-  const saveOnEnter = useDispatchAction((dispatch, event: React.KeyboardEvent<HTMLInputElement>): void => {
+  const saveOnEnter = useDispatchAction(
+    (dispatch, event: React.KeyboardEvent<HTMLInputElement>): void => {
+      console.log(event.keyCode);
       if (event.key === 'Enter') {
         dispatch(editAnnotationAction(props.data, content));
         setEdit(false);
@@ -53,12 +48,22 @@ function MenuItem(props: MenuItemProps) {
     },
     [props.data, content],
   );
+  const onTextClick = React.useCallback(() => {
+    setEdit(state => !state);
+  }, []);
+  const onInputChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      setContent((event.target as HTMLInputElement).value),
+    [],
+  );
   return (
     <div>
       {edit ? (
         <input
           type="text"
           defaultValue={props.data.properties.content}
+          onBlur={onTextClick}
+          autoFocus
           onKeyPress={saveOnEnter}
           onChange={onInputChange} />
         ) : (
@@ -71,7 +76,7 @@ function MenuItem(props: MenuItemProps) {
 }
 
 interface OwnProps {
-  annotations: Set<Annotation>;
+  annotations: List<Annotation>;
 }
 
 const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {

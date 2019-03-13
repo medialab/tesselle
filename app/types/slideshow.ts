@@ -1,22 +1,22 @@
 import uuid from 'uuid';
-import { Record, Set } from 'immutable';
+import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
 import Annotation from 'types/Annotation';
 import Cover from './Cover';
 
 interface SlideshowArgs {
   id?: string;
-  annotations?: Set<Annotation>;
+  annotations?: List<Annotation>;
   image?: Cover;
 }
 
 class Slideshow extends Record({
   id: uuid(),
-  annotations: Set(),
+  annotations: List(),
   image: {},
 }) {
   public readonly id!: string;
-  public readonly annotations!: Set<Annotation>;
+  public readonly annotations!: List<Annotation>;
   public readonly image!: Cover;
   constructor(params?: SlideshowArgs) {
     if (params) {
@@ -24,7 +24,7 @@ class Slideshow extends Record({
         params.id = uuid();
       }
       if (params.annotations instanceof Array) {
-        params.annotations = Set<Annotation>(params.annotations);
+        params.annotations = List<Annotation>(params.annotations);
       }
       super(params);
     } else {

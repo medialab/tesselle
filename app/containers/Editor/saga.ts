@@ -96,7 +96,6 @@ export function* createAndRedirect(action) {
 
 export function* saveSlideshow() {
   const slideshow: Slideshow = yield select(selectSlideshow);
-  console.log('save!', slideshow);
   if (slideshow.toJS) {
     yield db.setItem('slideshow', slideshow.toJS());
   }
