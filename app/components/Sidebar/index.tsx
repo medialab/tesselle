@@ -6,12 +6,67 @@
 
 import * as React from 'react';
 import { Set } from 'immutable';
-import './styles.css';
+import { Store, Dispatch } from 'redux';
+import { Button } from 'quinoa-design-library';
+import { ReactReduxContext } from 'react-redux';
+
+import { removeAnnotationAction, editAnnotationAction } from 'containers/Editor/actions';
 import Annotation from 'types/Annotation';
 
-function MenuItem(props) {
+import './styles.css';
+
+const useDispatchAction = (callback: (dispatch: Dispatch, ...args: any) => any, deps: ReadonlyArray<any>) => {
+  const {
+    store: {
+      dispatch,
+    },
+  }: {store: Store} = React.useContext(ReactReduxContext);
+  return React.useCallback(
+    (...args) => callback(dispatch, ...args),
+    deps,
+  );
+};
+
+interface MenuItemProps {
+  data: Annotation;
+}
+
+function MenuItem(props: MenuItemProps) {
+  const [edit, setEdit] = React.useState(false);
+  const [content, setContent] = React.useState('');
+  const onRemove: (event: React.SyntheticEvent) => void = useDispatchAction(
+    (dispatch) => dispatch(removeAnnotationAction(props.data)),
+    [props.data],
+  );
+  const onTextClick = React.useCallback(() => {
+    setEdit(state => !state);
+  }, []);
+  const onInputChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) =>
+    setContent((event.target as HTMLInputElement).value),
+    [],
+  );
+  const saveOnEnter = useDispatchAction((dispatch, event: React.KeyboardEvent<HTMLInputElement>): void => {
+      if (event.key === 'Enter') {
+        dispatch(editAnnotationAction(props.data, content));
+        setEdit(false);
+      }
+    },
+    [props.data, content],
+  );
   return (
-    <h1>Menu Item</h1>
+    <div>
+      {edit ? (
+        <input
+          type="text"
+          defaultValue={props.data.properties.content}
+          onKeyPress={saveOnEnter}
+          onChange={onInputChange} />
+        ) : (
+          <h1 onClick={onTextClick}>{props.data.properties.content}</h1>
+        )
+      }
+      <Button onClick={onRemove}>X</Button>
+    </div>
   );
 }
 
@@ -36,7 +91,7 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
   }
   return (
     <div className="sidebar">
-      {props.annotations.map((feature, index) => <MenuItem key={index} data={feature} />)}
+      {props.annotations.map((feature) => <MenuItem key={feature.id} data={feature} />)}
     </div>
   );
 };

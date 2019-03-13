@@ -1,5 +1,5 @@
 import { takeLatest, put, select } from 'redux-saga/effects';
-import { push } from 'react-router-redux';
+import { push } from 'connected-react-router';
 
 import ActionTypes from './constants';
 import Slideshow, { slideshowCreator } from '../../types/Slideshow';
@@ -96,6 +96,7 @@ export function* createAndRedirect(action) {
 
 export function* saveSlideshow() {
   const slideshow: Slideshow = yield select(selectSlideshow);
+  console.log('save!', slideshow);
   if (slideshow.toJS) {
     yield db.setItem('slideshow', slideshow.toJS());
   }
@@ -105,10 +106,13 @@ export function* saveSlideshow() {
 export default function* editorSaga() {
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
   yield takeLatest(ActionTypes.CREATE_ANNOTATION, saveSlideshow);
+  yield takeLatest(ActionTypes.REMOVE_ANNOTATION, saveSlideshow);
+  yield takeLatest(ActionTypes.EDIT_ANNOTATION, saveSlideshow);
   try {
     const rawSlideshow: Slideshow = yield db.getItem('slideshow');
     // const slideshow = Slideshow.builder(rawSlideshow).build();
     if (rawSlideshow) {
+      console.log(rawSlideshow);
       yield setSlideshow(rawSlideshow);
     } else {
       yield put(push('/'));

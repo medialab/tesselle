@@ -1,6 +1,6 @@
 import uuid from 'uuid';
-import { FeatureCollection } from 'geojson';
-import ImmutableGeoJSON from 'immutable-geojson';
+// import { FeatureCollection } from 'geojson';
+import { Feature } from 'geojson';
 import { Record } from 'immutable';
 
 interface AnnotationPropertiesArgs {
@@ -9,8 +9,10 @@ interface AnnotationPropertiesArgs {
 }
 
 export class AnnotationProperties extends Record({
+    id: 'emptyId',
     content: 'Empty annotation',
 }) {
+  public id!: string;
   public content!: string;
   constructor(params?: AnnotationPropertiesArgs) {
     if (params) {
@@ -27,6 +29,7 @@ export class AnnotationProperties extends Record({
   }
 }
 
-export default interface Annotation extends ImmutableGeoJSON, FeatureCollection {
+export default interface Annotation extends Feature, Record<any> {
   id: string;
+  properties: AnnotationProperties;
 }

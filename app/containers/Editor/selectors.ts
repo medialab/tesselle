@@ -26,13 +26,13 @@ const selectEditor = () =>
 export const makeSelectSlideshow = () =>
   createSelector(
     selectEditorDomain,
-    substate => substate.slideshow,
+    substate => substate && substate.slideshow,
   );
 
 export const makeMapSelector = () =>
     createSelector(
       selectEditorDomain,
-      substate => substate.map,
+      substate => substate && substate.map,
     );
 
 export default selectEditor;

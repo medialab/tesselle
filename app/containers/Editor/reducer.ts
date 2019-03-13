@@ -9,9 +9,10 @@
 import ActionTypes from './constants';
 import { ContainerState, ContainerActions } from './types';
 import Slideshow from 'types/Slideshow';
-import { AnnotationProperties } from 'types/Annotation';
+import Annotation, { AnnotationProperties } from 'types/Annotation';
 import { LatLngBounds, LatLng } from 'leaflet';
 import ImmutableGeoJSON from 'immutable-geojson';
+import { when, equals } from 'ramda';
 
 const pointToArray = (point: LatLng): number[] => [
   point.lng,
@@ -34,30 +35,57 @@ export const initialState: ContainerState = {
   map: null,
 };
 
-function propertiesReviver(arg) {
-  return new AnnotationProperties(arg);
+function propertiesReviver(key, value) {
+  return new AnnotationProperties(value);
 }
+
+const fromJS = (value) => {
+  return ImmutableGeoJSON.fromJS(value, propertiesReviver);
+};
 
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
   if (state.slideshow) {
     switch (action.type) {
       case ActionTypes.CREATE_ANNOTATION:
-      const a = ImmutableGeoJSON.fromJS({
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: boundsToLatLngs(action.payload),
-        },
-        properties: {
-          name: 'area1',
-        },
-      }, propertiesReviver);
-      return {
-        ...state,
-        slideshow: state.slideshow.with({
-          annotations: state.slideshow.annotations.add(a),
-        }),
-      };
+        return {
+          ...state,
+          slideshow: state.slideshow.with({
+            annotations: state.slideshow.annotations.add(
+              fromJS({
+                type: 'Feature',
+                geometry: {
+                  type: 'Polygon',
+                  coordinates: boundsToLatLngs(action.payload),
+                },
+                properties: {
+                  name: 'area1',
+                },
+              }),
+            ),
+          }),
+        };
+      case ActionTypes.EDIT_ANNOTATION:
+        return {
+          ...state,
+          slideshow: state.slideshow.with({
+            annotations: state.slideshow.annotations.map(
+              when(
+                equals(action.payload.annotation),
+                (annotation: Annotation) => annotation.set(
+                  'properties',
+                  annotation.properties.set('content', action.payload.content),
+                ),
+              ),
+            ),
+          }),
+        };
+      case ActionTypes.REMOVE_ANNOTATION:
+        return {
+          ...state,
+          slideshow: state.slideshow.with({
+            annotations: state.slideshow.annotations.remove(action.payload),
+          }),
+        };
     }
   }
   switch (action.type) {
@@ -67,7 +95,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
         slideshow: new Slideshow({
           id: action.payload.id,
           image: action.payload.image,
-          annotations: action.payload.annotations,
+          annotations: action.payload.annotations.map(fromJS),
         }),
       };
     case ActionTypes.SET_MAP:

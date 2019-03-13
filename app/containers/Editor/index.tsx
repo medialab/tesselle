@@ -71,20 +71,6 @@ interface EditorProps {
 const minZoom = 8;
 const maxZoom = 12;
 
-function useMapLock(map: L.Map, image: Cover): LatLngBounds {
-  const [maxBounds, setMaxBounds] = useState();
-  useLayoutEffect(() => {
-    if (map !== null) {
-      setMaxBounds(
-        new L.LatLngBounds(
-          map.unproject([0, image.height], map.getMaxZoom()),
-          map.unproject([image.width, 0], map.getMaxZoom()),
-        ),
-      );
-    }
-  }, [map, image]);
-  return maxBounds;
-}
 
 const geoStyle = (feature) => {
   if (feature.geometry.type === 'Circle') {
@@ -106,6 +92,31 @@ function onEachFeature(feature, layer) {
     ).openTooltip();
   }
 }
+
+function useMapLock(map: L.Map, image: Cover): LatLngBounds {
+  const [maxBounds, setMaxBounds] = useState();
+  useLayoutEffect(() => {
+    if (map !== null) {
+      setMaxBounds(
+        new L.LatLngBounds(
+          map.unproject([0, image.height], map.getMaxZoom()),
+          map.unproject([image.width, 0], map.getMaxZoom()),
+        ),
+      );
+    }
+  }, [map, image]);
+  return maxBounds;
+}
+
+const useUrl = (file: File) => {
+  const [url] = useState(() => window.URL.createObjectURL(file));
+  useEffect(() => {
+    return () => {
+      window.URL.revokeObjectURL(url);
+    };
+  }, [url]);
+  return url;
+};
 
 const useFlyTo = (map: L.Map, bounds: LatLngBounds) =>
   useEffect(() => {
@@ -162,6 +173,7 @@ function EditorMap(props: EditorProps) {
       props.setMap(lef.leafletElement);
     }
   };
+  const imageUrl = useUrl(slideshow.image.file);
   return (
     <div className={cx({
         map: true,
@@ -184,7 +196,7 @@ function EditorMap(props: EditorProps) {
         zoom={zoomLevel}
         onZoom={onZoom}
         center={[0, 0]}>
-        {maxBounds && <ImageOverlay url={window.URL.createObjectURL(slideshow.image.file)} bounds={maxBounds} />}
+        {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
         <AnnotationLayer
           onEachFeature={onEachFeature}
           style={geoStyle}
@@ -214,4 +226,10 @@ Editor.propTypes = {
   createSlideshow: PropTypes.func.isRequired,
 };
 
-export default decorator(props => props.slideshow && <Editor {...props} />);
+
+export default decorator(props => {
+  if (props.slideshow) {
+    return <Editor {...props} />;
+  }
+  return 'loading';
+});

@@ -1,6 +1,5 @@
 import * as React from 'react';
-import * as PropTypes from 'prop-types';
-import hoistNonReactStatics from 'hoist-non-react-statics';
+import { ReactReduxContext } from 'react-redux';
 
 import getInjectors from './sagaInjectors';
 import { InjectSagaParams } from 'types';
@@ -22,35 +21,21 @@ export default function hocWithSaga<P>({ key, saga, mode }: InjectSagaParams) {
     WrappedComponent: React.ComponentType<P>,
   ): React.ComponentType<P> {
     // dont wanna give access to HOC. Child only
-    class InjectSaga extends React.Component<P> {
-      public static WrappedComponent = WrappedComponent;
-      public static contextTypes = {
-        store: PropTypes.object.isRequired,
-      };
-      public static displayName = `withSaga(${WrappedComponent.displayName ||
-        WrappedComponent.name ||
-        'Component'})`;
-
-      public componentWillMount() {
-        const { injectSaga } = this.injectors;
-
-        injectSaga(key, { saga: saga, mode: mode }, this.props);
-      }
-
-      public componentWillUnmount() {
-        const { ejectSaga } = this.injectors;
-
-        ejectSaga(key);
-      }
-
-      public injectors = getInjectors(this.context.store);
-
-      public render() {
-        return <WrappedComponent {...this.props} />;
-      }
-    }
-
-    return hoistNonReactStatics(InjectSaga, WrappedComponent) as any;
+    const InjectSaga: React.SFC<any> = (props) => {
+      const context = React.useContext(ReactReduxContext);
+      React.useEffect(() => {
+        const injectors = getInjectors(context.store as any);
+        injectors.injectSaga(key, { saga: saga, mode: mode }, props);
+        return () => {
+          injectors.ejectSaga(key);
+        };
+      }, []);
+      return <WrappedComponent {...props} />;
+    };
+    InjectSaga.displayName = `withSaga(${WrappedComponent.displayName ||
+      WrappedComponent.name ||
+      'Component'})`;
+    return InjectSaga;
   }
   return wrap;
 }
