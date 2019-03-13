@@ -18,10 +18,9 @@ interface AnnotationLayerProps {
 const AnnotationLayer = (props: AnnotationLayerProps) => {
   return (
     <LayerGroup>
-      {props.data.map((annotation) => {
-        console.log(annotation.toJS());
-        return <React.Fragment key={annotation.properties.id}>{geometryToLayer(annotation, {})}</React.Fragment>;
-      })}
+      {props.data.map((annotation) =>
+        <React.Fragment key={annotation.properties.id}>{geometryToLayer(annotation, {})}</React.Fragment>,
+      )}
     </LayerGroup>
   );
 };

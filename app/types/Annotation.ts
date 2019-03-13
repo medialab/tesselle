@@ -30,6 +30,5 @@ export class AnnotationProperties extends Record({
 }
 
 export default interface Annotation extends Feature, Record<Annotation> {
-  id: string;
   properties: AnnotationProperties;
 }
