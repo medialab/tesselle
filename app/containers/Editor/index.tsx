@@ -15,6 +15,7 @@ import cx from 'classnames';
 import { Map, ImageOverlay, Rectangle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
+import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -160,10 +161,10 @@ function EditorMap(props: EditorProps) {
       <Map
         ref={tg}
         dragging={false}
-        zoomControl={false}
-        doubleClickZoom={false}
-        keyboard={false}
-        scrollWheelZoom={false}
+        // zoomControl={false}
+        // doubleClickZoom={false}
+        // keyboard={false}
+        // scrollWheelZoom={false}
         onMouseMove={onMouseMove}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
@@ -189,12 +190,16 @@ function EditorMap(props: EditorProps) {
 function Editor(props: EditorProps & RouterProps) {
   const slideshow = props.slideshow;
   return (
-    <div>
-      <div className="container">
+    <StretchedLayoutContainer
+      isFullHeight
+      isDirection="horizontal">
+      <StretchedLayoutItem isFlex={1} style={{padding: '1rem', overflow: 'auto'}}>
+        <Sidebar annotations={slideshow.annotations} />
+      </StretchedLayoutItem>
+      <StretchedLayoutItem isFlex={3}>
         <EditorMap {...props} />
-      </div>
-      <Sidebar annotations={slideshow.annotations} />
-    </div>
+      </StretchedLayoutItem>
+    </StretchedLayoutContainer>
   );
 }
 
