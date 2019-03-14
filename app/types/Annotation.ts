@@ -1,5 +1,4 @@
 import uuid from 'uuid';
-// import { FeatureCollection } from 'geojson';
 import { Feature } from 'geojson';
 import { Record } from 'immutable';
 

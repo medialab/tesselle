@@ -12,7 +12,7 @@ import { RouterProps } from 'react-router';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import cx from 'classnames';
-import { Map, ImageOverlay, Rectangle } from 'react-leaflet';
+import { Map, ImageOverlay } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
 import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
@@ -37,6 +37,7 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
+import DrawingLayer from 'components/DrawingLayer';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -97,6 +98,12 @@ const useUrl = (file: File) => {
   return url;
 };
 
+enum SupportedShapes {
+  rectangle = 'rectangle',
+  circle = 'circle',
+  point = 'point',
+}
+
 const useFlyTo = (map: L.Map, bounds: LatLngBounds) =>
   useEffect(() => {
     if (map && bounds) {
@@ -112,40 +119,13 @@ function EditorMap(props: EditorProps) {
   const maxBounds: LatLngBounds = useMapLock(map, props.slideshow.image);
   useFlyTo(map, maxBounds);
   const [zoomLevel, setZoomLevel] = useState((minZoom + maxZoom) / 2);
-  const [addingSlide, setAddingSlide] = useState(false);
-  const [drawing, setDrawing] = useState(false);
-  const [frame, setFrame] = useState();
+  const [addingShape, setAddingShape] = useState();
   const onZoom = useCallback((event: LeafletMouseEvent) => setZoomLevel(event.target.getZoom()), [zoomLevel]);
-  const onMouseDown = useCallback((event: LeafletMouseEvent) => {
-    if (addingSlide) {
-      setDrawing(true);
-      setFrame(
-        L.latLngBounds(
-          event.latlng,
-          event.latlng,
-        ),
-      );
-    }
-  }, [addingSlide]);
-  const onMouseMove = useCallback((event: LeafletMouseEvent) => {
-    if (drawing) {
-      frame.extend(event.latlng);
-      setFrame(
-        L.latLngBounds(
-          frame.getSouthWest(),
-          frame.getNorthEast(),
-        ),
-      );
-    }
-  }, [drawing, frame]);
-  const onMouseUp = useCallback(() => {
-    if (drawing) {
-      setDrawing(false);
-      props.createAnnotation(frame);
-    }
-  }, [drawing, frame]);
   const onRectangleClick = useCallback(() => {
-    setAddingSlide(state => !state);
+    setAddingShape(SupportedShapes.rectangle);
+  }, []);
+  const onCircleClick = useCallback(() => {
+    setAddingShape(SupportedShapes.circle);
   }, []);
   const tg = lef => {
     if (lef && (map !== lef.leafletElement)) {
@@ -153,21 +133,23 @@ function EditorMap(props: EditorProps) {
     }
   };
   const imageUrl = useUrl(slideshow.image.file);
+  const onDrown = useCallback((bounds: LatLngBounds) => {
+    props.createAnnotation(bounds);
+    setAddingShape(null);
+  }, []);
   return (
     <div className={cx({
         map: true,
-        creating: addingSlide,
+        creating: addingShape,
       })}>
       <Map
+        editable
         ref={tg}
         dragging={false}
         // zoomControl={false}
         // doubleClickZoom={false}
         // keyboard={false}
         // scrollWheelZoom={false}
-        onMouseMove={onMouseMove}
-        onMouseDown={onMouseDown}
-        onMouseUp={onMouseUp}
         maxBounds={maxBounds}
         crs={L.CRS.Simple}
         minZoom={minZoom}
@@ -180,8 +162,8 @@ function EditorMap(props: EditorProps) {
           key={`${slideshow.id}-${slideshow.annotations.size}`}
           data={slideshow.annotations}
         />
-        {(drawing && frame) && <Rectangle className="rectangle" color="red" bounds={frame} />}
-        <FloatinBar onRectangleClick={onRectangleClick} />
+        <DrawingLayer onDrown={onDrown} addingShape={addingShape} />
+        <FloatinBar onCircleClick={onCircleClick} onRectangleClick={onRectangleClick} />
       </Map>
     </div>
   );

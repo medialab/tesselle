@@ -10,6 +10,7 @@ import { Button } from 'quinoa-design-library';
 
 interface OwnProps {
   onRectangleClick: (event: any) => any;
+  onCircleClick;
 }
 
 const FloatingBar: React.SFC<OwnProps> = (props: OwnProps) => {
@@ -24,7 +25,7 @@ const FloatingBar: React.SFC<OwnProps> = (props: OwnProps) => {
       {isOpen && (
         <>
           <Button onClick={makeLogger('onClickAnnotation')}>.</Button>
-          <Button onClick={makeLogger('onClickCircle')}>O</Button>
+          <Button onClick={props.onCircleClick}>O</Button>
           <Button onClick={props.onRectangleClick}>[]</Button>
         </>
       )}
