@@ -9,7 +9,7 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation}) => {
   const ref = useRef<any>(null);
   useEffect(() => {
     if (ref.current && ref.current.leafletElement) {
-      // Hack because onDblClick doesn't fire on react eleemnt.
+      // Hack because onDblClick doesn't fire on react elemnt.
       ref.current.leafletElement.on('dblclick', toggleEdit);
     }
   }, []);
