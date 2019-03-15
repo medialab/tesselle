@@ -147,7 +147,7 @@ function EditorMap(props: EditorProps) {
         ref={tg}
         dragging={false}
         // zoomControl={false}
-        // doubleClickZoom={false}
+        doubleClickZoom={false}
         // keyboard={false}
         // scrollWheelZoom={false}
         maxBounds={maxBounds}

@@ -2,6 +2,7 @@ import { ActionType } from 'typesafe-actions';
 import * as actions from './actions';
 import { ApplicationRootState } from 'types';
 import Slideshow from 'types/Slideshow';
+import Annotation from 'types/Annotation';
 
 /* --- STATE --- */
 interface EditorState {

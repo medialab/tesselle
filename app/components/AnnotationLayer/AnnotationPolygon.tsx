@@ -12,7 +12,8 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation}) => {
   const ref = useRef<any>(null);
   useEffect(() => {
     if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
-      (ref.current.leafletElement as any).dragging.disable();
+      ref.current.leafletElement.on('dblclick', toggleEdit);
+      ref.current.leafletElement.dragging.disable();
     }
   }, []);
   const toggleEdit = useCallback((event) => {
@@ -22,7 +23,7 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation}) => {
       : event.target.dragging.disable();
   }, []);
   return (
-    <CustomTypePolygon draggable ref={ref} onclick={toggleEdit} positions={coordsToLatLngs(
+    <CustomTypePolygon draggable dblClick={toggleEdit} ref={ref} positions={coordsToLatLngs(
       coords,
       geometry.type === 'Polygon' ? 1 : 2,
     ).toJS()}>

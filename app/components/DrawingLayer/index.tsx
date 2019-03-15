@@ -141,15 +141,10 @@ const DrawingCircleLayer: React.SFC<SubProps> = (props: SubProps) => {
 
 // tslint:disable-next-line: max-classes-per-file
 class DrawingLayer extends MapLayer<any> {
-
   public createLeafletElement(props) {
     const el = new LeafletLayerGroup([], this.getOptions(props));
     this.contextValue = { ...props.leaflet, layerContainer: el };
     return el;
-  }
-
-  public updateLeafletElement(): any {
-
   }
   public render() {
     const props = this.props;
