@@ -57,5 +57,5 @@ export class AnnotationCircleProperties extends Record({
 }
 
 export default interface Annotation extends Feature, Record<Annotation> {
-  properties: AnnotationProperties;
+  properties: AnnotationCircleProperties & AnnotationProperties;
 }
