@@ -9,11 +9,12 @@ import {} from './types';
 
 import ActionTypes from './constants';
 import Slideshow from 'types/slideshow';
-import { LatLngBounds } from 'leaflet';
 import Annotation from 'types/Annotation';
 import { List } from 'immutable';
+import { Feature, Point } from 'geojson';
 
 export const defaultAction = () => action(ActionTypes.DEFAULT_ACTION);
+
 export const createSlideshowAction = createAsyncAction(
     ActionTypes.CREATE_SLIDESHOW,
     ActionTypes.CREATE_SLIDESHOW_SUCCESS,
@@ -21,7 +22,7 @@ export const createSlideshowAction = createAsyncAction(
   )<File, Slideshow, Error>();
 
 export const addAnnotationAction = createAction(ActionTypes.CREATE_ANNOTATION, action => {
-  return (feature: LatLngBounds) => action(feature);
+  return (feature: Feature<Point, any>) => action(feature);
 });
 
 export const setMap = createAction(ActionTypes.SET_MAP, action => (map: L.Map) => action(map));

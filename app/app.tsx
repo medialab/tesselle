@@ -17,6 +17,7 @@ import history from 'utils/history';
 import 'sanitize.css/sanitize.css';
 import 'leaflet';
 import 'leaflet-editable';
+import 'leaflet-path-drag';
 
 // Import root app
 import App from 'containers/App';

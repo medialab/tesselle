@@ -28,6 +28,34 @@ export class AnnotationProperties extends Record({
   }
 }
 
+interface AnnotationCirclePropertiesArgs extends AnnotationProperties {
+  radius: number;
+}
+
+// tslint:disable-next-line: max-classes-per-file
+export class AnnotationCircleProperties extends Record({
+  id: 'emptyId',
+  content: 'Empty annotation',
+  radius: 0,
+}) {
+  public id!: string;
+  public content!: string;
+  public radius!: number;
+  constructor(params?: AnnotationCirclePropertiesArgs) {
+    if (params) {
+      if (!params.id || params.id === 'emptyId') {
+        params.id = uuid();
+      }
+      super(params);
+    } else {
+      super({id: uuid()});
+    }
+  }
+  public with(values: AnnotationCirclePropertiesArgs) {
+    return this.merge(values) as this;
+  }
+}
+
 export default interface Annotation extends Feature, Record<Annotation> {
   properties: AnnotationProperties;
 }

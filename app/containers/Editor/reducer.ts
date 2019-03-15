@@ -9,25 +9,10 @@
 import ActionTypes from './constants';
 import { ContainerState, ContainerActions } from './types';
 import Slideshow from 'types/Slideshow';
-import Annotation, { AnnotationProperties } from 'types/Annotation';
-import { LatLngBounds, LatLng } from 'leaflet';
+import Annotation, { AnnotationProperties, AnnotationCircleProperties } from 'types/Annotation';
+
 import ImmutableGeoJSON from 'immutable-geojson';
 import { when, equals } from 'ramda';
-
-const pointToArray = (point: LatLng): number[] => [
-  point.lng,
-  point.lat,
-];
-
-const boundsToLatLngs = (latLngBounds: LatLngBounds): any => [
-  [
-    latLngBounds.getSouthWest(),
-    latLngBounds.getNorthWest(),
-    latLngBounds.getNorthEast(),
-    latLngBounds.getSouthEast(),
-    latLngBounds.getSouthWest(),
-  ].map(pointToArray),
-];
 
 export const initialState: ContainerState = {
   slideshow: null,
@@ -36,7 +21,9 @@ export const initialState: ContainerState = {
 };
 
 function propertiesReviver(key, value) {
-  return new AnnotationProperties(value.toJSON());
+  return value.has('radius')
+    ? new AnnotationCircleProperties(value.toJS())
+    : new AnnotationProperties(value.toJSON());
 }
 
 const fromJS = (value) => {
@@ -56,14 +43,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
           ...state,
           slideshow: state.slideshow.with({
             annotations: state.slideshow.annotations.push(
-              fromJS({
-                type: 'Feature',
-                geometry: {
-                  type: 'Polygon',
-                  coordinates: boundsToLatLngs(action.payload),
-                },
-                properties: {},
-              }),
+              fromJS(action.payload),
             ),
           }),
         };

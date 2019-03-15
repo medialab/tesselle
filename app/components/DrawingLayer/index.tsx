@@ -7,6 +7,8 @@
 import * as React from 'react';
 import { Rectangle, MapLayer, MapLayerProps, withLeaflet, Circle } from 'react-leaflet';
 import L, { LeafletMouseEvent, LeafletEventHandlerFn, LayerGroup as LeafletLayerGroup } from 'leaflet';
+import { Feature, Point, Polygon, MultiPolygon } from 'geojson';
+
 interface LayerProps extends MapLayerProps {
   onMouseMove: LeafletEventHandlerFn;
   onMouseDown: LeafletEventHandlerFn;
@@ -46,7 +48,7 @@ const LayerGroup = withLeaflet(class LayerGroup extends MapLayer<LayerProps> {
 });
 
 interface OwnProps extends LayerProps {
-  onDrown: (shape: L.LatLngBounds) => void;
+  onDrown: (shape: Feature<Point | Polygon | MultiPolygon, any>) => void;
   addingShape: string | undefined;
 }
 
@@ -58,6 +60,7 @@ const DrawingRectangleLayer: React.SFC<SubProps> = (props: SubProps) => {
   const { addingShape } = props;
   const [drawing, setDrawing]: [undefined | L.LatLng, (nesState: undefined | L.LatLng) => any] = React.useState();
   const [frame, setFrame] = React.useState();
+  const ref = React.useRef<Rectangle>(null);
 
   const onMouseDown = React.useCallback((event: LeafletMouseEvent) => {
     if (addingShape) {
@@ -81,18 +84,18 @@ const DrawingRectangleLayer: React.SFC<SubProps> = (props: SubProps) => {
     }
   }, [drawing, frame]);
   const onMouseUp = React.useCallback(() => {
-    if (drawing) {
+    if (drawing && ref.current) {
+      props.onDrown(ref.current.leafletElement.toGeoJSON());
       setDrawing(undefined);
-      props.onDrown(frame);
     }
-  }, [drawing, frame]);
+  }, [drawing, frame, ref]);
   return (
     <LayerGroup
       onMouseMove={onMouseMove}
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
     >
-      {(drawing && frame) && <Rectangle className="rectangle" color="red" bounds={frame} />}
+      {frame && <Rectangle ref={ref} className="rectangle" color="red" bounds={frame} />}
     </LayerGroup>
   );
 };
@@ -102,6 +105,7 @@ const DrawingCircleLayer: React.SFC<SubProps> = (props: SubProps) => {
   const [startLatLng, setStartLatLng]:
     [undefined | L.LatLng, (nesState: undefined | L.LatLng) => any] = React.useState();
   const [radius, setRadius] = React.useState();
+  const ref = React.useRef<Circle>(null);
 
   const onMouseDown = React.useCallback((event: LeafletMouseEvent) => {
     if (addingShape) {
@@ -117,18 +121,20 @@ const DrawingCircleLayer: React.SFC<SubProps> = (props: SubProps) => {
     }
   }, [startLatLng, radius]);
   const onMouseUp = React.useCallback(() => {
-    if (startLatLng) {
+    if (startLatLng && ref.current) {
+      const feature = ref.current.leafletElement.toGeoJSON();
+      feature.properties.radius = radius;
+      props.onDrown(feature);
       setStartLatLng(undefined);
-      // props.onDrown({radius: radius, center: drawing} as any);
     }
-  }, [startLatLng, radius]);
+  }, [startLatLng, radius, ref, props.onDrown]);
   return (
     <LayerGroup
       onMouseMove={onMouseMove}
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
     >
-      {startLatLng && <Circle radius={radius} center={startLatLng} />}
+      {startLatLng && <Circle ref={ref} radius={radius} center={startLatLng} />}
     </LayerGroup>
   );
 };
