@@ -12,7 +12,9 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation}) => {
   const ref = useRef<any>(null);
   useEffect(() => {
     if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
+      // Hack because onDblClick doesn't fire on react elemnt.
       ref.current.leafletElement.on('dblclick', toggleEdit);
+      // Edition is on by default.
       ref.current.leafletElement.dragging.disable();
     }
   }, []);
