@@ -10,7 +10,12 @@ import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from
 import { useDispatch } from 'utils/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-import { removeAnnotationAction, editAnnotationAction, editOrderAction } from 'containers/Editor/actions';
+import {
+  removeAnnotationAction,
+  editAnnotationAction,
+  editOrderAction,
+  changeSelectionAction,
+} from 'containers/Editor/actions';
 import Annotation from 'types/Annotation';
 import icons from 'quinoa-design-library/src/themes/millet/icons';
 
@@ -18,6 +23,7 @@ import './styles.css';
 
 interface MenuItemProps {
   data: Annotation;
+  selected: boolean;
 }
 
 const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProps, ref) => {
@@ -28,13 +34,15 @@ const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProp
     [props.data],
   );
   const save = React.useCallback(
-    (event) => {
-      return dispatch(editAnnotationAction(props.data, {
-        properties: {
-          content: content,
-          radius: props.data.properties.radius,
-        },
-      }));
+    () => {
+      if (content) {
+        dispatch(editAnnotationAction(props.data, {
+          properties: {
+            content: content,
+            radius: props.data.properties.radius,
+          },
+        }));
+      }
     },
     [props.data, content],
   );
@@ -43,12 +51,15 @@ const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProp
       setContent((event.target as HTMLTextAreaElement).value),
     [],
   );
-  const isActive = false;
+  const onfocus = React.useCallback(() => {
+    dispatch(changeSelectionAction(props.data));
+  }, []);
+  const selected = props.selected;
   return (
     <Box
     ref={ref}
     style={{
-      background: isActive ? '#3849a2' : 'transparent',
+      background: selected ? '#3849a2' : 'transparent',
     }}>
       <StretchedLayoutContainer isDirection="horizontal">
         <StretchedLayoutItem
@@ -57,13 +68,14 @@ const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProp
           }}
           isFlex={1}>
           <textarea
+            onFocus={onfocus}
             onChange={onInputChange}
             defaultValue={props.data.properties.content}
             onBlur={save}
             style={{
             width: '100%',
-            background: isActive ? '#3849a2' : 'transparent',
-            color: isActive ? 'white' : 'black',
+            background: selected ? '#3849a2' : 'transparent',
+            color: selected ? 'white' : 'black',
           }} className="textarea" />
         </StretchedLayoutItem>
         <StretchedLayoutItem>
@@ -95,6 +107,7 @@ const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProp
 
 interface OwnProps {
   annotations: List<Annotation>;
+  selectedAnnotation: Annotation;
 }
 
 const reorder = (list: List<Annotation>, startIndex: number, endIndex: number) => {
@@ -140,7 +153,7 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                  ><MenuItem data={feature} /></div>
+                  ><MenuItem data={feature} selected={feature === props.selectedAnnotation} /></div>
                 )}
                 </Draggable>
             ))}

@@ -33,15 +33,18 @@ import {
 import {
   makeSelectSlideshow,
   makeMapSelector,
+  makeSelectAnnotationSelector,
 } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
 import DrawingLayer from 'components/DrawingLayer';
+import Annotation from 'types/Annotation';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
   map: makeMapSelector(),
+  selectedAnnotation: makeSelectAnnotationSelector(),
 });
 
 const withConnect = connect(
@@ -64,7 +67,7 @@ export const decorator = compose(
 
 interface EditorProps {
   readonly slideshow: Slideshow;
-  readonly selectedAnnotation: number;
+  readonly selectedAnnotation: Annotation;
   readonly map: L.Map;
   readonly createAnnotation: (frame: LatLngBounds) => void;
   readonly setMap: (event) => void;
@@ -157,6 +160,7 @@ function EditorMap(props: EditorProps) {
         <AnnotationLayer
           key={`${slideshow.id}-${slideshow.annotations.size}`}
           data={slideshow.annotations}
+          selectedAnnotation={props.selectedAnnotation}
         />
         <DrawingLayer onDrown={onDrown} addingShape={addingShape} />
         <FloatinBar onCircleClick={onCircleClick} onRectangleClick={onRectangleClick} />
@@ -172,7 +176,7 @@ function Editor(props: EditorProps & RouterProps) {
       isFullHeight
       isDirection="horizontal">
       <StretchedLayoutItem isFlex={1} style={{padding: '1rem', overflow: 'auto'}}>
-        <Sidebar annotations={slideshow.annotations} />
+        <Sidebar annotations={slideshow.annotations} selectedAnnotation={props.selectedAnnotation} />
       </StretchedLayoutItem>
       <StretchedLayoutItem isFlex={3}>
         <EditorMap {...props} />

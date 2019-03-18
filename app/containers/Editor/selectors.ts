@@ -7,7 +7,7 @@ import { initialState } from './reducer';
  */
 
 const selectEditorDomain = (state: ApplicationRootState) => {
-  return state ? state.editor : initialState;
+  return (state && state.editor)  ? state.editor : initialState;
 };
 
 /**
@@ -30,10 +30,24 @@ export const makeSelectSlideshow = () =>
   );
 
 export const makeMapSelector = () =>
-    createSelector(
-      selectEditorDomain,
-      substate => substate && substate.map,
-    );
+  createSelector(
+    selectEditorDomain,
+    substate => substate && substate.map,
+  );
+
+const privateAnnotationSelector = createSelector(
+  selectEditorDomain,
+  (domain) => domain.selectedAnnotation,
+);
+
+export const makeSelectAnnotationSelector = () =>
+  createSelector(
+    makeSelectSlideshow(),
+    privateAnnotationSelector,
+    (slideshow, index) => {
+      return slideshow && slideshow.annotations.get(index);
+    },
+  );
 
 export default selectEditor;
 export { selectEditorDomain };

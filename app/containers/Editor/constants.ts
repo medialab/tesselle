@@ -14,6 +14,7 @@ enum ActionTypes {
   REMOVE_ANNOTATION = 'app/Editor/REMOVE_ANNOTATION',
   EDIT_ANNOTATION = 'app/Editor/EDIT_ANNOTATION',
   CHANGE_ORDER = 'app/Editor/CHANGE_ORDER',
+  CHANGE_SELECTED_ANNOTATION = 'app/Editor/CHANGE_SELECTED_ANNOTATION',
 }
 
 export default ActionTypes;

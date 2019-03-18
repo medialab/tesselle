@@ -7,7 +7,7 @@ import { LeafletMouseEvent } from 'leaflet';
 
 const CustomTypePolygon: any = Polygon;
 
-const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit}) => {
+const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit, selected}) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const ref = useRef<any>(null);
@@ -41,7 +41,13 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit}) =>
     }
   }, [editing]);
   return (
-    <CustomTypePolygon ref={ref} draggable onDblClick={toggleEdit} positions={position}>
+    <CustomTypePolygon
+      color={selected ? 'cyan' : 'lightblue'}
+      ref={ref}
+      draggable
+      onClick={toggleEdit}
+      positions={position}
+    >
       {!editing && (
         <Tooltip opacity={1} permanent>
           {annotation.properties.content}

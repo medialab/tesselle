@@ -45,3 +45,8 @@ export const editOrderAction = createAction(
   action => (annotations: List<Annotation>) => action(annotations),
 );
 
+export const changeSelectionAction = createAction(
+  ActionTypes.CHANGE_SELECTED_ANNOTATION,
+  action => (select: Annotation | number) => action(select),
+);
+
