@@ -5,7 +5,7 @@
  */
 
 import React, { useLayoutEffect, useState, useEffect, useCallback } from 'react';
-import L, { LatLngBounds, LeafletMouseEvent } from 'leaflet';
+import L, { LatLngBounds } from 'leaflet';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { RouterProps } from 'react-router';
@@ -118,9 +118,7 @@ function EditorMap(props: EditorProps) {
   } = props;
   const maxBounds: LatLngBounds = useMapLock(map, props.slideshow.image);
   useFlyTo(map, maxBounds);
-  const [zoomLevel, setZoomLevel] = useState((minZoom + maxZoom) / 2);
   const [addingShape, setAddingShape] = useState();
-  const onZoom = useCallback((event: LeafletMouseEvent) => setZoomLevel(event.target.getZoom()), [zoomLevel]);
   const onRectangleClick = useCallback(() => {
     setAddingShape(SupportedShapes.rectangle);
   }, []);
@@ -154,8 +152,6 @@ function EditorMap(props: EditorProps) {
         crs={L.CRS.Simple}
         minZoom={minZoom}
         maxZoom={maxZoom}
-        zoom={zoomLevel}
-        onZoom={onZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
         <AnnotationLayer

@@ -34,9 +34,9 @@ export const removeAnnotationAction = createAction(
 
 export const editAnnotationAction = createAction(
   ActionTypes.EDIT_ANNOTATION,
-  action => (annotation: Annotation, content: string) => action({
+  action => (annotation: Annotation, editedFeature: any) => action({
     annotation: annotation,
-    content: content,
+    editedFeature: editedFeature,
   }),
 );
 

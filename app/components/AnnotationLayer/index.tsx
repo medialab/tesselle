@@ -4,57 +4,53 @@
  *
  */
 
-import { LayerGroup, withLeaflet, MapLayer, MapLayerProps } from 'react-leaflet';
-import React from 'react';
+import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps } from 'react-leaflet';
+import React, { useCallback, memo } from 'react';
 
 import Annotation from 'types/Annotation';
 import { List } from 'immutable';
 import AnnotationPolygon from './AnnotationPolygon';
 import AnnotationCircle from './AnnotationCircle';
-import { LayerGroup as LeafletLayerGroup } from 'leaflet';
+import { AnnotationShapes } from './types';
+import { LayerGroup } from 'leaflet';
+import { useDispatch } from 'utils/hooks';
+import { editAnnotationAction } from 'containers/Editor/actions';
 
 interface AnnotationLayerProps extends MapLayerProps {
   data: List<Annotation>;
 }
 
-const GuessComponent = ({annotation}: {annotation: Annotation}) => {
+const GuessComponent = ({annotation, onEdit}: AnnotationShapes) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   switch (geometry.type) {
     case 'Point':
-    return <AnnotationCircle annotation={annotation} />;
+    return <AnnotationCircle onEdit={onEdit} annotation={annotation} />;
     case 'Polygon':
     case 'MultiPolygon':
-      return <AnnotationPolygon annotation={annotation} />;
+      return <AnnotationPolygon onEdit={onEdit} annotation={annotation} />;
   }
   return <React.Fragment />;
 };
 
-class AnnotationLayer extends MapLayer<AnnotationLayerProps> {
+const AnnotationLayer = (props: AnnotationLayerProps) => {
+  const dispatch = useDispatch();
+  const onEdit = useCallback((annotation: Annotation, layer: LayerGroup) => {
+    const features = layer.toGeoJSON() as any;
+    features.properties = annotation.properties.toJS();
+    dispatch(editAnnotationAction(
+      annotation,
+      features,
+    ));
+  }, []);
+  return (
+    <LeafletLayerGroup>
+      {props.data.map((annotation) =>
+        <React.Fragment key={annotation.properties.id}>
+          <GuessComponent onEdit={onEdit} annotation={annotation} />
+        </React.Fragment>,
+      )}
+    </LeafletLayerGroup>
+  );
+};
 
-  public componentDidMount() {
-    if (this.props.leaflet && this.props.leaflet.map) {
-      this.props.leaflet.map.on('editable:dragend', console.log);
-    } else {
-      throw new Error('Map did have not been given. Could not put edition listeners.');
-    }
-  }
-
-  public createLeafletElement(props) {
-    const el = new LeafletLayerGroup([], this.getOptions(props));
-    this.contextValue = { ...props.leaflet, layerContainer: el };
-    return el;
-  }
-  public render() {
-    return (
-      <LayerGroup>
-        {this.props.data.map((annotation) =>
-          <React.Fragment key={annotation.properties.id}>
-            <GuessComponent annotation={annotation} />
-          </React.Fragment>,
-        )}
-      </LayerGroup>
-    );
-  }
-}
-
-export default withLeaflet(AnnotationLayer);
+export default withLeaflet(memo(AnnotationLayer));

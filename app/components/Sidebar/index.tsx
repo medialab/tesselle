@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { List } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
-import { ReactReduxContext } from 'react-redux';
+import { useDispatch } from 'utils/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import { removeAnnotationAction, editAnnotationAction, editOrderAction } from 'containers/Editor/actions';
@@ -15,10 +15,6 @@ import Annotation from 'types/Annotation';
 import icons from 'quinoa-design-library/src/themes/millet/icons';
 
 import './styles.css';
-
-const useDispatch = () => {
-  return React.useContext(ReactReduxContext).store.dispatch;
-};
 
 interface MenuItemProps {
   data: Annotation;
@@ -32,7 +28,14 @@ const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProp
     [props.data],
   );
   const save = React.useCallback(
-    () => dispatch(editAnnotationAction(props.data, content)),
+    (event) => {
+      return dispatch(editAnnotationAction(props.data, {
+        properties: {
+          id: props.data.properties.id,
+          content: content,
+        },
+      }));
+    },
     [props.data, content],
   );
   const onInputChange = React.useCallback(
@@ -57,7 +60,6 @@ const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProp
             onChange={onInputChange}
             defaultValue={props.data.properties.content}
             onBlur={save}
-            autoFocus
             style={{
             width: '100%',
             background: isActive ? '#3849a2' : 'transparent',

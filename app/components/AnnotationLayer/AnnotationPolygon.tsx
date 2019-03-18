@@ -1,37 +1,45 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { Polygon, Tooltip } from 'react-leaflet';
 
 import { coordsToLatLngs } from 'utils/geo';
 import { AnnotationShapes } from './types';
+import { LeafletMouseEvent } from 'leaflet';
 
 const CustomTypePolygon: any = Polygon;
 
-const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation}) => {
+const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit}) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const ref = useRef<any>(null);
-  useEffect(() => {
+  const [editing, setEditing] = useState<boolean>(false);
+  useEffect((): any => {
     if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
-      // Hack because onDblClick doesn't fire on react elemnt.
-      ref.current.leafletElement.on('dblclick', toggleEdit);
       // Edition is on by default.
       ref.current.leafletElement.dragging.disable();
     }
   }, []);
-  const toggleEdit = useCallback((event) => {
-    event.target.editor ? event.target.disableEdit() : event.target.enableEdit();
-    (event.target.dragging && event.target.dragging._enabled)
-      ? event.target.dragging.enable()
-      : event.target.dragging.disable();
-  }, []);
+  const toggleEdit = useCallback((event: LeafletMouseEvent) => {
+    if (editing) {
+      event.target.disableEdit();
+      event.target.dragging.disable();
+      onEdit(annotation, event.target);
+      setEditing(false);
+    } else {
+      event.target.enableEdit();
+      event.target.dragging.enable();
+      setEditing(true);
+    }
+  }, [editing]);
   return (
-    <CustomTypePolygon draggable dblClick={toggleEdit} ref={ref} positions={coordsToLatLngs(
+    <CustomTypePolygon ref={ref} draggable onDblClick={toggleEdit} positions={coordsToLatLngs(
       coords,
       geometry.type === 'Polygon' ? 1 : 2,
     ).toJS()}>
-      <Tooltip opacity={1} permanent>
-        {annotation.properties.content}
-      </Tooltip>
+      {!editing && (
+        <Tooltip opacity={1} permanent>
+          {annotation.properties.content}
+        </Tooltip>
+      )}
     </CustomTypePolygon>
   );
 };

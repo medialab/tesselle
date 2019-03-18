@@ -11,7 +11,18 @@ import { ContainerState, ContainerActions } from './types';
 import Slideshow from 'types/Slideshow';
 import Annotation, { AnnotationProperties, AnnotationCircleProperties } from 'types/Annotation';
 
-import ImmutableGeoJSON from 'immutable-geojson';
+import {
+  Feature,
+  FeatureCollection,
+  GeometryCollection,
+  Point,
+  MultiPoint,
+  LineString,
+  MultiLineString,
+  Polygon,
+  MultiPolygon,
+} from 'immutable-geojson';
+import { fromJS as rawFromJs, Map } from 'immutable';
 import { when, equals } from 'ramda';
 
 export const initialState: ContainerState = {
@@ -27,7 +38,31 @@ function propertiesReviver(key, value) {
 }
 
 const fromJS = (value) => {
-  return ImmutableGeoJSON.fromJS(value, propertiesReviver);
+  switch (value.type) {
+    case undefined:
+      const res = Map({
+        properties: propertiesReviver('properties', rawFromJs(value.properties)),
+      });
+      return res;
+    case 'FeatureCollection':
+      return FeatureCollection(value, propertiesReviver);
+    case 'Feature':
+      return Feature(value, propertiesReviver);
+    case 'GeometryCollection':
+      return GeometryCollection(value);
+    case 'Point':
+      return Point(value);
+    case 'MultiPoint':
+      return MultiPoint(value);
+    case 'LineString':
+      return LineString(value);
+    case 'MultiLineString':
+      return MultiLineString(value);
+    case 'Polygon':
+      return Polygon(value);
+    case 'MultiPolygon':
+      return MultiPolygon(value);
+  }
 };
 
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
@@ -55,10 +90,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
             state.slideshow.annotations.map(
               when(
                 equals(action.payload.annotation),
-                (annotation: Annotation) => annotation.set(
-                  'properties',
-                  annotation.properties.set('content', action.payload.content),
-                ),
+                (annotation: Annotation) => annotation.merge(fromJS(action.payload.editedFeature)),
               ),
             ),
           ),
