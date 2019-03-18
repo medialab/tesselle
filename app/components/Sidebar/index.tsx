@@ -31,8 +31,8 @@ const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProp
     (event) => {
       return dispatch(editAnnotationAction(props.data, {
         properties: {
-          id: props.data.properties.id,
           content: content,
+          radius: props.data.properties.radius,
         },
       }));
     },

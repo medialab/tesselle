@@ -9,60 +9,16 @@
 import ActionTypes from './constants';
 import { ContainerState, ContainerActions } from './types';
 import Slideshow from 'types/Slideshow';
-import Annotation, { AnnotationProperties, AnnotationCircleProperties } from 'types/Annotation';
+import Annotation from 'types/Annotation';
 
-import {
-  Feature,
-  FeatureCollection,
-  GeometryCollection,
-  Point,
-  MultiPoint,
-  LineString,
-  MultiLineString,
-  Polygon,
-  MultiPolygon,
-} from 'immutable-geojson';
-import { fromJS as rawFromJs, Map } from 'immutable';
 import { when, equals } from 'ramda';
+import { fromJS } from 'utils/geo';
+import { isImmutable } from 'immutable';
 
 export const initialState: ContainerState = {
   slideshow: null,
   selectedAnnotation: 1,
   map: null,
-};
-
-function propertiesReviver(key, value) {
-  return value.has('radius')
-    ? new AnnotationCircleProperties(value.toJS())
-    : new AnnotationProperties(value.toJSON());
-}
-
-const fromJS = (value) => {
-  switch (value.type) {
-    case undefined:
-      const res = Map({
-        properties: propertiesReviver('properties', rawFromJs(value.properties)),
-      });
-      return res;
-    case 'FeatureCollection':
-      return FeatureCollection(value, propertiesReviver);
-    case 'Feature':
-      return Feature(value, propertiesReviver);
-    case 'GeometryCollection':
-      return GeometryCollection(value);
-    case 'Point':
-      return Point(value);
-    case 'MultiPoint':
-      return MultiPoint(value);
-    case 'LineString':
-      return LineString(value);
-    case 'MultiLineString':
-      return MultiLineString(value);
-    case 'Polygon':
-      return Polygon(value);
-    case 'MultiPolygon':
-      return MultiPolygon(value);
-  }
 };
 
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
@@ -90,7 +46,11 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
             state.slideshow.annotations.map(
               when(
                 equals(action.payload.annotation),
-                (annotation: Annotation) => annotation.merge(fromJS(action.payload.editedFeature)),
+                (annotation: Annotation) => annotation.merge(
+                  isImmutable(action.payload.editedFeature)
+                  ? action.payload.editedFeature
+                  : fromJS(action.payload.editedFeature),
+                ),
               ),
             ),
           ),

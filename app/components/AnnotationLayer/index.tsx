@@ -12,7 +12,6 @@ import { List } from 'immutable';
 import AnnotationPolygon from './AnnotationPolygon';
 import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
-import { LayerGroup } from 'leaflet';
 import { useDispatch } from 'utils/hooks';
 import { editAnnotationAction } from 'containers/Editor/actions';
 
@@ -34,12 +33,10 @@ const GuessComponent = ({annotation, onEdit}: AnnotationShapes) => {
 
 const AnnotationLayer = (props: AnnotationLayerProps) => {
   const dispatch = useDispatch();
-  const onEdit = useCallback((annotation: Annotation, layer: LayerGroup) => {
-    const features = layer.toGeoJSON() as any;
-    features.properties = annotation.properties.toJS();
+  const onEdit = useCallback((annotation: Annotation, newAnnotation: Annotation) => {
     dispatch(editAnnotationAction(
       annotation,
-      features,
+      newAnnotation,
     ));
   }, []);
   return (

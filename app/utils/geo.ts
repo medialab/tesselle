@@ -2,6 +2,54 @@ import L from 'leaflet';
 import { Feature } from 'geojson';
 import { map } from 'ramda';
 
+import {
+  Feature as ImmutableFeature,
+  FeatureCollection,
+  GeometryCollection,
+  Point,
+  MultiPoint,
+  LineString,
+  MultiLineString,
+  Polygon,
+  MultiPolygon,
+} from 'immutable-geojson';
+import { fromJS as rawFromJs, Map } from 'immutable';
+import { AnnotationCircleProperties, AnnotationProperties } from 'types/Annotation';
+
+function propertiesReviver(key, value) {
+  return value.has('radius')
+    ? new AnnotationCircleProperties(value.toJS())
+    : new AnnotationProperties(value.toJSON());
+}
+
+export const fromJS = (value) => {
+  switch (value.type) {
+    case undefined:
+      const res = Map({
+        properties: propertiesReviver('properties', rawFromJs(value.properties)),
+      });
+      return res;
+    case 'FeatureCollection':
+      return FeatureCollection(value, propertiesReviver);
+    case 'Feature':
+      return ImmutableFeature(value, propertiesReviver);
+    case 'GeometryCollection':
+      return GeometryCollection(value);
+    case 'Point':
+      return Point(value);
+    case 'MultiPoint':
+      return MultiPoint(value);
+    case 'LineString':
+      return LineString(value);
+    case 'MultiLineString':
+      return MultiLineString(value);
+    case 'Polygon':
+      return Polygon(value);
+    case 'MultiPolygon':
+      return MultiPolygon(value);
+  }
+};
+
 // @function formatNum(num: Number, digits?: Number): Number
 // Returns the number `num` rounded to `digits` decimals, or to 6 decimals by default.
 export function formatNum(num: number, digits: number | undefined): number {

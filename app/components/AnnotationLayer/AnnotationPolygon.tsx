@@ -1,7 +1,7 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { Polygon, Tooltip } from 'react-leaflet';
 
-import { coordsToLatLngs } from 'utils/geo';
+import { coordsToLatLngs, fromJS } from 'utils/geo';
 import { AnnotationShapes } from './types';
 import { LeafletMouseEvent } from 'leaflet';
 
@@ -12,6 +12,10 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit}) =>
   const coords = geometry ? geometry.coordinates : null;
   const ref = useRef<any>(null);
   const [editing, setEditing] = useState<boolean>(false);
+  const position = useMemo(() => coordsToLatLngs(
+    coords,
+    geometry.type === 'Polygon' ? 1 : 2,
+  ).toJS(), [coords, geometry.type]);
   useEffect((): any => {
     if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
       // Edition is on by default.
@@ -22,8 +26,14 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit}) =>
     if (editing) {
       event.target.disableEdit();
       event.target.dragging.disable();
-      onEdit(annotation, event.target);
       setEditing(false);
+      onEdit(
+        annotation,
+        fromJS(event.target.toGeoJSON()).set(
+          'properties',
+          annotation.properties,
+        ),
+      );
     } else {
       event.target.enableEdit();
       event.target.dragging.enable();
@@ -31,10 +41,7 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit}) =>
     }
   }, [editing]);
   return (
-    <CustomTypePolygon ref={ref} draggable onDblClick={toggleEdit} positions={coordsToLatLngs(
-      coords,
-      geometry.type === 'Polygon' ? 1 : 2,
-    ).toJS()}>
+    <CustomTypePolygon ref={ref} draggable onDblClick={toggleEdit} positions={position}>
       {!editing && (
         <Tooltip opacity={1} permanent>
           {annotation.properties.content}
