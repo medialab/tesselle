@@ -29,7 +29,7 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, onEdit, sele
   }, [editing]);
   return (
     <Circle
-      color={selected ? 'cyan' : 'lightblue'}
+      color={selected ? 'cyan' : 'purple'}
       onDblClick={toggleEdit}
       center={center}
       radius={annotation.properties.radius}

@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useLayoutEffect, useState, useEffect, useCallback } from 'react';
+import React, { useLayoutEffect, useState, useEffect, useCallback, useMemo } from 'react';
 import L, { LatLngBounds } from 'leaflet';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -92,7 +92,8 @@ function useMapLock(map: L.Map, image: Cover): LatLngBounds {
 }
 
 const useUrl = (file: File) => {
-  const [url] = useState(() => window.URL.createObjectURL(file));
+  const url = useMemo(() => window.URL.createObjectURL(file), [file]);
+  console.log(url);
   useEffect(() => {
     return () => {
       window.URL.revokeObjectURL(url);

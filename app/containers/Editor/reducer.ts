@@ -17,7 +17,7 @@ import { isImmutable } from 'immutable';
 
 export const initialState: ContainerState = {
   slideshow: null,
-  selectedAnnotation: 0,
+  selectedAnnotation: -1,
   map: null,
 };
 
@@ -92,6 +92,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
           image: action.payload.image,
           annotations: action.payload.annotations.map(fromJS),
         }),
+
       };
     case ActionTypes.SET_MAP:
       if (state.map !== action.payload) {

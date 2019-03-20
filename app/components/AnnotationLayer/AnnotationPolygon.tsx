@@ -1,58 +1,53 @@
-import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { Polygon, Tooltip } from 'react-leaflet';
 
-import { coordsToLatLngs, fromJS } from 'utils/geo';
+import { coordsToLatLngs } from 'utils/geo';
 import { AnnotationShapes } from './types';
-import { LeafletMouseEvent } from 'leaflet';
+import 'leaflet-editable';
 
 const CustomTypePolygon: any = Polygon;
 
-const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit, selected}) => {
+const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit, selected, map}) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const ref = useRef<any>(null);
-  const [editing, setEditing] = useState<boolean>(false);
   const position = useMemo(() => coordsToLatLngs(
     coords,
     geometry.type === 'Polygon' ? 1 : 2,
   ).toJS(), [coords, geometry.type]);
+  // const [edited, setEdited] = useState<boolean>(false);
+
   useEffect((): any => {
     if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
-      // Edition is on by default.
-      ref.current.leafletElement.dragging.disable();
+      if (!selected) {
+        ref.current.leafletElement.disableEdit();
+        ref.current.leafletElement.dragging.disable();
+        // onEdit(
+        //   annotation,
+        //   fromJS(ref.current.leafletElemen.toGeoJSON()).set(
+        //     'properties',
+        //     annotation.properties,
+        //   ),
+        // );
+      } else {
+        ref.current.leafletElement.enableEdit();
+        ref.current.leafletElement.dragging.enable();
+      }
     }
-  }, []);
-  const toggleEdit = useCallback((event: LeafletMouseEvent) => {
-    if (editing) {
-      event.target.disableEdit();
-      event.target.dragging.disable();
-      setEditing(false);
-      onEdit(
-        annotation,
-        fromJS(event.target.toGeoJSON()).set(
-          'properties',
-          annotation.properties,
-        ),
-      );
-    } else {
-      event.target.enableEdit();
-      event.target.dragging.enable();
-      setEditing(true);
-    }
-  }, [editing]);
+  }, [selected, ref]);
+
   return (
     <CustomTypePolygon
-      color={selected ? 'cyan' : 'lightblue'}
+      onMouseDown={console.log}
+      color={selected ? 'cyan' : 'purple'}
       ref={ref}
       draggable
-      onClick={toggleEdit}
+      edditable
       positions={position}
     >
-      {!editing && (
-        <Tooltip opacity={1} permanent>
-          {annotation.properties.content}
-        </Tooltip>
-      )}
+      <Tooltip opacity={1} permanent>
+        {annotation.properties.content}
+      </Tooltip>
     </CustomTypePolygon>
   );
 };

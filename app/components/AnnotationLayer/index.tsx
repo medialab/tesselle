@@ -18,16 +18,17 @@ import { editAnnotationAction } from 'containers/Editor/actions';
 interface AnnotationLayerProps extends MapLayerProps {
   data: List<Annotation>;
   selectedAnnotation: Annotation;
+  leaflet;
 }
 
-const GuessComponent = ({annotation, onEdit, selected}: AnnotationShapes) => {
+const GuessComponent = ({annotation, onEdit, selected, map}: AnnotationShapes) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   switch (geometry.type) {
     case 'Point':
-    return <AnnotationCircle selected={selected} onEdit={onEdit} annotation={annotation} />;
+    return <AnnotationCircle map={map} selected={selected} onEdit={onEdit} annotation={annotation} />;
     case 'Polygon':
     case 'MultiPolygon':
-      return <AnnotationPolygon selected={selected} onEdit={onEdit} annotation={annotation} />;
+      return <AnnotationPolygon map={map} selected={selected} onEdit={onEdit} annotation={annotation} />;
   }
   return <React.Fragment />;
 };
@@ -44,7 +45,11 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
     <LeafletLayerGroup>
       {props.data.map((annotation) =>
         <React.Fragment key={annotation.properties.id}>
-          <GuessComponent selected={annotation === props.selectedAnnotation} onEdit={onEdit} annotation={annotation} />
+          <GuessComponent
+            onEdit={onEdit}
+            map={props.leaflet.map}
+            annotation={annotation}
+            selected={annotation === props.selectedAnnotation} />
         </React.Fragment>,
       )}
     </LeafletLayerGroup>

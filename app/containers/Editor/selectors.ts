@@ -45,7 +45,7 @@ export const makeSelectAnnotationSelector = () =>
     makeSelectSlideshow(),
     privateAnnotationSelector,
     (slideshow, index) => {
-      return slideshow && slideshow.annotations.get(index);
+      return (slideshow && index >= 0) && slideshow.annotations.get(index);
     },
   );
 
