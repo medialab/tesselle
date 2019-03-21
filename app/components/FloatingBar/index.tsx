@@ -6,29 +6,45 @@
 
 import * as React from 'react';
 import Control from 'react-leaflet-control';
-import { Button } from 'quinoa-design-library';
+import { Button, Icon } from 'quinoa-design-library';
+import icons from 'quinoa-design-library/src/themes/millet/icons';
+import { SupportedShapes } from 'types';
+import './styles.css';
 
 interface OwnProps {
   onRectangleClick: (event: any) => any;
-  onCircleClick;
+  onCircleClick: (event: any) => any;
+  activeButton: SupportedShapes;
 }
 
 const FloatingBar: React.SFC<OwnProps> = (props: OwnProps) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const onMainButtonClick = React.useCallback(() => {
-    setIsOpen((state) => !state);
-  }, []);
-  const makeLogger = (message: string) => () => console.log(message);
+
+  const buttons = [{
+    icon: icons.anchorRectangle,
+    tool: SupportedShapes.rectangle,
+    event: props.onRectangleClick,
+  }, {
+    icon: icons.anchorEllipse,
+    tool: SupportedShapes.circle,
+    event: props.onCircleClick,
+  }];
+
   return (
-    <Control position="topleft">
-      <Button isColor={isOpen && 'warning'} onClick={onMainButtonClick}>+</Button>
-      {isOpen && (
-        <>
-          <Button onClick={makeLogger('onClickAnnotation')}>.</Button>
-          <Button onClick={props.onCircleClick}>O</Button>
-          <Button onClick={props.onRectangleClick}>[]</Button>
-        </>
-      )}
+    <Control position="bottomright">
+      <div className="buttons-container">
+        {buttons
+          .map(({icon, tool, event}) => (
+            <Button
+              onClick={event}
+              key={tool}
+              isColor={tool === props.activeButton ? 'primary' : ''}
+              style={{marginBottom: '.5rem'}} isRounded>
+              <Icon isSize="medium" isAlign="left">
+                <img src={icon[tool === props.activeButton ? 'white' : 'black'].svg} />
+              </Icon>
+            </Button>
+        ))}
+      </div>
     </Control>
   );
 };

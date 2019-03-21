@@ -9,12 +9,14 @@ import { List } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
 import { useDispatch } from 'utils/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { Formik, Field, Form, FormikValues, FormikErrors } from 'formik';
+import cx from 'classnames';
 
 import {
   removeAnnotationAction,
-  editAnnotationAction,
   editOrderAction,
   changeSelectionAction,
+  editAnnotationAction,
 } from 'containers/Editor/actions';
 import Annotation from 'types/Annotation';
 import icons from 'quinoa-design-library/src/themes/millet/icons';
@@ -26,57 +28,65 @@ interface MenuItemProps {
   selected: boolean;
 }
 
+const validator = (values: FormikValues) => {
+  const errors: FormikErrors<any> = {};
+  if (!values.content && !values.content.length) {
+    errors.content = 'Required';
+  }
+  return errors;
+};
+
 const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProps, ref) => {
-  const [content, setContent] = React.useState(props.data.properties.content);
   const dispatch = useDispatch();
   const onRemove = React.useCallback(
     () => dispatch(removeAnnotationAction(props.data)),
     [props.data],
   );
-  const save = React.useCallback(
-    () => {
-      if (content) {
-        dispatch(editAnnotationAction(props.data, {
-          properties: {
-            content: content,
-            radius: props.data.properties.radius,
-          },
-        }));
-      }
-    },
-    [props.data, content],
-  );
-  const onInputChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>) =>
-      setContent((event.target as HTMLTextAreaElement).value),
-    [],
-  );
-  const onfocus = React.useCallback(() => {
+  const changeSelection = React.useCallback(() => {
     dispatch(changeSelectionAction(props.data));
-  }, []);
-  const selected = props.selected;
+  }, [props.data]);
+  const onSubmit = React.useCallback((values) => {
+    dispatch(editAnnotationAction(props.data, {
+      properties: {
+        content: values.content,
+        radius: props.data.properties.radius,
+      },
+    }));
+  }, [props.data]);
   return (
     <Box
-    ref={ref}
-    style={{
-      background: selected ? '#3849a2' : 'transparent',
-    }}>
+      ref={ref}
+      style={{
+        background: props.selected ? '#3849a2' : 'transparent',
+      }}>
       <StretchedLayoutContainer isDirection="horizontal">
         <StretchedLayoutItem
           style={{
             paddingRight: '1rem',
           }}
           isFlex={1}>
-          <textarea
-            onFocus={onfocus}
-            onChange={onInputChange}
-            defaultValue={props.data.properties.content}
-            onBlur={save}
-            style={{
-            width: '100%',
-            background: selected ? '#3849a2' : 'transparent',
-            color: selected ? 'white' : 'black',
-          }} className="textarea" />
+          <Formik
+            initialValues={props.data.properties}
+            onSubmit={onSubmit}
+            validate={validator}
+          >{(innerProps) => {
+            const onBlur = (event) => {
+              innerProps.handleBlur(event);
+              innerProps.submitForm();
+            };
+            return (
+              <Form>
+                <Field
+                  onBlur={onBlur}
+                  onFocus={changeSelection}
+                  className={cx('textarea', 'sidebar--item-field', props.selected && 'sidebar--item-field--selected')}
+                  component="textarea"
+                  name="content"
+                />
+              </Form>
+            );
+          }}
+          </Formik>
         </StretchedLayoutItem>
         <StretchedLayoutItem>
           <StretchedLayoutContainer isDirection="vertical">

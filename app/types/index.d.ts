@@ -14,6 +14,12 @@ interface WithAnnotationProps {
   readonly annotation: Annotation;
 }
 
+export declare const enum SupportedShapes {
+  rectangle = 'rectangle',
+  circle = 'circle',
+  point = 'point',
+}
+
 export interface InjectReducerParams {
   key: keyof ApplicationRootState;
   reducer: Reducer<any, any>;

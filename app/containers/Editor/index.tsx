@@ -40,6 +40,7 @@ import saga from './saga';
 import './styles.css';
 import DrawingLayer from 'components/DrawingLayer';
 import Annotation from 'types/Annotation';
+import { SupportedShapes } from 'types';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -102,12 +103,6 @@ const useUrl = (file: File) => {
   return url;
 };
 
-enum SupportedShapes {
-  rectangle = 'rectangle',
-  circle = 'circle',
-  point = 'point',
-}
-
 const useFlyTo = (map: L.Map, bounds: LatLngBounds) =>
   useEffect(() => {
     if (map && bounds) {
@@ -164,7 +159,7 @@ function EditorMap(props: EditorProps) {
           selectedAnnotation={props.selectedAnnotation}
         />
         <DrawingLayer onDrown={onDrown} addingShape={addingShape} />
-        <FloatinBar onCircleClick={onCircleClick} onRectangleClick={onRectangleClick} />
+        <FloatinBar activeButton={addingShape} onCircleClick={onCircleClick} onRectangleClick={onRectangleClick} />
       </Map>
     </div>
   );
