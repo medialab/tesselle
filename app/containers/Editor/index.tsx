@@ -94,7 +94,6 @@ function useMapLock(map: L.Map, image: Cover): LatLngBounds {
 
 const useUrl = (file: File) => {
   const url = useMemo(() => window.URL.createObjectURL(file), [file]);
-  console.log(url);
   useEffect(() => {
     return () => {
       window.URL.revokeObjectURL(url);

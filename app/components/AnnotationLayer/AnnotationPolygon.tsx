@@ -15,13 +15,17 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = ({annotation, onEdit, sel
     coords,
     geometry.type === 'Polygon' ? 1 : 2,
   ).toJS(), [coords, geometry.type]);
-  // const [edited, setEdited] = useState<boolean>(false);
 
   useEffect((): any => {
     if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
       if (!selected) {
-        ref.current.leafletElement.disableEdit();
-        ref.current.leafletElement.dragging.disable();
+        try {
+
+          ref.current.leafletElement.disableEdit();
+          ref.current.leafletElement.dragging.disable();
+        } catch (e) {
+          console.log('only on reload');
+        }
         // onEdit(
         //   annotation,
         //   fromJS(ref.current.leafletElemen.toGeoJSON()).set(

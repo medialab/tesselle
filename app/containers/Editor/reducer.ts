@@ -22,18 +22,26 @@ export const initialState: ContainerState = {
 };
 
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
+  console.log(action.type);
   if (state.slideshow) {
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
         if (typeof(action.payload) === 'number') {
+          if (state.selectedAnnotation === action.payload) {
+            return state;
+          }
           return {
             ...state,
             selectedAnnotation: action.payload,
           };
         }
+        const selectIndex = state.slideshow.annotations.indexOf(action.payload);
+        if (selectIndex === state.selectedAnnotation) {
+          return state;
+        }
         return {
           ...state,
-          selectedAnnotation: state.slideshow.annotations.indexOf(action.payload),
+          selectedAnnotation: selectIndex,
         };
       case ActionTypes.CHANGE_ORDER:
         return {

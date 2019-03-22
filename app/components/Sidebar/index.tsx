@@ -26,6 +26,9 @@ import './styles.css';
 interface MenuItemProps {
   data: Annotation;
   selected: boolean;
+  refMdr;
+  draggableProps;
+  dragHandleProps;
 }
 
 const validator = (values: FormikValues) => {
@@ -36,7 +39,7 @@ const validator = (values: FormikValues) => {
   return errors;
 };
 
-const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProps, ref) => {
+const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps) => {
   const dispatch = useDispatch();
   const onRemove = React.useCallback(
     () => dispatch(removeAnnotationAction(props.data)),
@@ -46,72 +49,80 @@ const MenuItem: React.SFC<MenuItemProps> = React.forwardRef((props: MenuItemProp
     dispatch(changeSelectionAction(props.data));
   }, [props.data]);
   const onSubmit = React.useCallback((values) => {
-    dispatch(editAnnotationAction(props.data, {
-      properties: {
-        content: values.content,
-        radius: props.data.properties.radius,
-      },
-    }));
+    console.log('on submit');
+    if (values.content !== props.data.properties.content) {
+      dispatch(editAnnotationAction(props.data, {
+        properties: {
+          content: values.content,
+          radius: props.data.properties.radius,
+        },
+      }));
+    }
   }, [props.data]);
   return (
-    <Box
-      ref={ref}
-      style={{
-        background: props.selected ? '#3849a2' : 'transparent',
-      }}>
-      <StretchedLayoutContainer isDirection="horizontal">
-        <StretchedLayoutItem
-          style={{
-            paddingRight: '1rem',
-          }}
-          isFlex={1}>
-          <Formik
-            initialValues={props.data.properties}
-            onSubmit={onSubmit}
-            validate={validator}
-          >{(innerProps) => {
-            const onBlur = (event) => {
-              innerProps.handleBlur(event);
-              innerProps.submitForm();
-            };
-            return (
-              <Form>
-                <Field
-                  onBlur={onBlur}
-                  onFocus={changeSelection}
-                  className={cx('textarea', 'sidebar--item-field', props.selected && 'sidebar--item-field--selected')}
-                  component="textarea"
-                  name="content"
-                />
-              </Form>
-            );
-          }}
-          </Formik>
-        </StretchedLayoutItem>
-        <StretchedLayoutItem>
-          <StretchedLayoutContainer isDirection="vertical">
-            <Button
-              onClick={onRemove}
-              style={{marginBottom: '.5rem'}}
-              data-for="card-action" data-tip={'delete this annotation'}>
-              <Icon isSize="small" isAlign="left">
-                <img src={icons.remove.black.svg} />
-              </Icon>
-            </Button>
-            <Button style={{marginBottom: '.5rem'}} data-for="card-action" data-tip={'drag to change annotation order'}>
-              <Icon isSize="small" isAlign="left">
-                <img src={icons.move.black.svg} />
-              </Icon>
-            </Button>
-            <Button data-for="card-action" data-tip={'set a frame'}>
-              <Icon isSize="small" isAlign="left">
-                <img src={icons.cover.black.svg} />
-              </Icon>
-            </Button>
-          </StretchedLayoutContainer>
-        </StretchedLayoutItem>
-      </StretchedLayoutContainer>
-    </Box>
+    <div ref={props.refMdr} {...props.draggableProps}>
+      <Box style={{background: props.selected ? '#3849a2' : 'transparent'}}>
+        <StretchedLayoutContainer isDirection="horizontal">
+          <StretchedLayoutItem
+            style={{
+              paddingRight: '1rem',
+            }}
+            isFlex={1}>
+            <Formik
+              initialValues={props.data.properties}
+              onSubmit={onSubmit}
+              validate={validator}
+            >{(innerProps) => {
+              const onBlur = (event) => {
+                innerProps.handleBlur(event);
+                innerProps.submitForm();
+              };
+              return (
+                <Form>
+                  <Field
+                    onBlur={onBlur}
+                    onFocus={changeSelection}
+                    className={cx('textarea', 'sidebar--item-field', props.selected && 'sidebar--item-field--selected')}
+                    component="textarea"
+                    name="content"
+                  />
+                </Form>
+              );
+            }}
+            </Formik>
+          </StretchedLayoutItem>
+          <StretchedLayoutItem>
+            <StretchedLayoutContainer isDirection="vertical">
+              <Button
+                onClick={onRemove}
+                style={{marginBottom: '.5rem'}}
+                data-for="card-action" data-tip={'delete this annotation'}>
+                <Icon isSize="small" isAlign="left">
+                  <img src={icons.remove.black.svg} />
+                </Icon>
+              </Button>
+              <div {...props.dragHandleProps}>
+                <div
+                  className="button  is-lock-status-open"
+                  style={{marginBottom: '.5rem'}}
+                  data-for="card-action"
+                  data-tip={'drag to change annotation order'}
+                >
+                <Icon isSize="small" isAlign="left">
+                  <img src={icons.move.black.svg} />
+                </Icon>
+              </div>
+              </div>
+              <Button data-for="card-action" data-tip={'set a frame'}>
+                <Icon isSize="small" isAlign="left">
+                  <img src={icons.cover.black.svg} />
+                </Icon>
+              </Button>
+            </StretchedLayoutContainer>
+          </StretchedLayoutItem>
+        </StretchedLayoutContainer>
+      </Box>
+    </div>
   );
 });
 
@@ -160,10 +171,13 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
               <Draggable key={feature.properties.id} draggableId={feature.properties.id} index={index}>
                 {(provided) => (
                   <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                  ><MenuItem data={feature} selected={feature === props.selectedAnnotation} /></div>
+                  ><MenuItem
+                    refMdr={provided.innerRef}
+                    draggableProps={provided.draggableProps}
+                    dragHandleProps={provided.dragHandleProps}
+                    data={feature}
+                    selected={feature === props.selectedAnnotation} />
+                  </div>
                 )}
                 </Draggable>
             ))}
