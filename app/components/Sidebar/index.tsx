@@ -170,14 +170,12 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
             {props.annotations.map((feature, index) => (
               <Draggable key={feature.properties.id} draggableId={feature.properties.id} index={index}>
                 {(provided) => (
-                  <div
-                  ><MenuItem
+                  <MenuItem
                     refMdr={provided.innerRef}
                     draggableProps={provided.draggableProps}
                     dragHandleProps={provided.dragHandleProps}
                     data={feature}
                     selected={feature === props.selectedAnnotation} />
-                  </div>
                 )}
                 </Draggable>
             ))}

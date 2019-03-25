@@ -22,7 +22,6 @@ export const initialState: ContainerState = {
 };
 
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
-  console.log(action.type);
   if (state.slideshow) {
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
@@ -46,7 +45,15 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
       case ActionTypes.CHANGE_ORDER:
         return {
           ...state,
-          slideshow: state.slideshow.set('annotations', action.payload),
+          slideshow: state.slideshow.set(
+            'annotations',
+            action.payload,
+          ),
+          selectedAnnotation: state.selectedAnnotation >= 0
+            ? action.payload.indexOf(
+              state.slideshow.annotations.get(state.selectedAnnotation) as Annotation,
+            )
+            : -1,
         };
       case ActionTypes.CREATE_ANNOTATION:
         const annotation = fromJS(action.payload);
