@@ -4,7 +4,6 @@ import { Polygon, Tooltip } from 'react-leaflet';
 import { coordsToLatLngs, fromJS } from 'utils/geo';
 import { AnnotationShapes } from './types';
 import 'leaflet-editable';
-import { useWhyDidYouUpdate } from 'utils/hooks';
 
 const CustomTypePolygon: any = Polygon;
 
@@ -16,7 +15,7 @@ const okEvents = [
 ].join(' ');
 
 const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
-  const {annotation, onEdit, selected} = props;
+  const {annotation, onEdit, selected, onClick} = props;
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const ref = useRef<any>(null);
@@ -24,7 +23,6 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
     coords,
     geometry.type === 'Polygon' ? 1 : 2,
   ).toJS(), [selected]);
-  useWhyDidYouUpdate('AnnotationPolygon', props);
 
   useEffect(() => {
     if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
@@ -67,15 +65,18 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
 
   return (
     <CustomTypePolygon
+      onClick={onClick}
       color={selected ? 'cyan' : 'purple'}
       ref={ref}
       draggable
       edditable
       positions={position}
     >
-      <Tooltip opacity={1} permanent>
-        {annotation.properties.content}
-      </Tooltip>
+      {!selected && (
+        <Tooltip opacity={1} permanent>
+          {annotation.properties.content}
+        </Tooltip>
+      )}
     </CustomTypePolygon>
   );
 };

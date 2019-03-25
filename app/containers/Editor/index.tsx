@@ -29,6 +29,7 @@ import {
   createSlideshowAction,
   addAnnotationAction,
   setMap,
+  changeSelectionAction,
 } from './actions';
 import {
   makeSelectSlideshow,
@@ -53,6 +54,7 @@ const withConnect = connect(
   {
     createSlideshow: createSlideshowAction.request,
     createAnnotation: addAnnotationAction,
+    changeSelection: changeSelectionAction,
     setMap: setMap,
   },
 );
@@ -71,6 +73,7 @@ interface EditorProps {
   readonly selectedAnnotation: Annotation;
   readonly map: L.Map;
   readonly createAnnotation: (frame: LatLngBounds) => void;
+  readonly changeSelection: (annotation: Annotation | number) => void;
   readonly setMap: (event) => void;
 }
 
@@ -92,17 +95,13 @@ function useMapLock(map: L.Map, image: Cover): LatLngBounds {
   return maxBounds;
 }
 
-const useUrl = (file: File) => {
+const useUrl = (file: File): string => {
   const url = useMemo(() => window.URL.createObjectURL(file), [file]);
-  useEffect(() => {
-    return () => {
-      window.URL.revokeObjectURL(url);
-    };
-  }, [url]);
+  useEffect(() => () => window.URL.revokeObjectURL(url), [url]);
   return url;
 };
 
-const useFlyTo = (map: L.Map, bounds: LatLngBounds) =>
+const useFlyTo = (map: L.Map, bounds: LatLngBounds): void =>
   useEffect(() => {
     if (map && bounds) {
       map.fitBounds(bounds);
@@ -110,29 +109,40 @@ const useFlyTo = (map: L.Map, bounds: LatLngBounds) =>
   }, [map, bounds]);
 
 function EditorMap(props: EditorProps) {
-  const {
-    slideshow,
-    map,
-  } = props;
+  const {slideshow, map} = props;
+  const imageUrl: string = useUrl(slideshow.image.file);
   const maxBounds: LatLngBounds = useMapLock(map, props.slideshow.image);
-  useFlyTo(map, maxBounds);
-  const [addingShape, setAddingShape] = useState();
+  const [addingShape, setAddingShape] = useState(SupportedShapes.selector);
   const onRectangleClick = useCallback(() => {
     setAddingShape(SupportedShapes.rectangle);
   }, []);
   const onCircleClick = useCallback(() => {
     setAddingShape(SupportedShapes.circle);
   }, []);
-  const tg = lef => {
+  const onSelectClick = useCallback(() => {
+    setAddingShape(SupportedShapes.selector);
+  }, []);
+  const onDrown = useCallback((bounds: LatLngBounds) => {
+    props.createAnnotation(bounds);
+    setAddingShape(SupportedShapes.selector);
+  }, []);
+  const onLayerClick = useCallback((annotation) => {
+    if (addingShape === SupportedShapes.selector) {
+      props.changeSelection(annotation);
+    }},
+    [props.changeSelection, addingShape],
+  );
+  const onMapClick = useCallback((event) => {
+    if (addingShape === SupportedShapes.selector) {
+      props.changeSelection(-1);
+    }
+  }, [addingShape]);
+  const reactLeafletDangerousRef = lef => {
     if (lef && (map !== lef.leafletElement)) {
       props.setMap(lef.leafletElement);
     }
   };
-  const imageUrl = useUrl(slideshow.image.file);
-  const onDrown = useCallback((bounds: LatLngBounds) => {
-    props.createAnnotation(bounds);
-    setAddingShape(null);
-  }, []);
+  useFlyTo(map, maxBounds);
   return (
     <div className={cx({
         map: true,
@@ -140,10 +150,11 @@ function EditorMap(props: EditorProps) {
       })}>
       <Map
         editable
-        ref={tg}
+        onClick={onMapClick}
+        ref={reactLeafletDangerousRef}
         dragging={false}
-        // zoomControl={false}
         doubleClickZoom={false}
+        // zoomControl={false}
         // keyboard={false}
         // scrollWheelZoom={false}
         maxBounds={maxBounds}
@@ -155,10 +166,15 @@ function EditorMap(props: EditorProps) {
         <AnnotationLayer
           key={`${slideshow.id}-${slideshow.annotations.size}`}
           data={slideshow.annotations}
+          onLayerClick={onLayerClick}
           selectedAnnotation={props.selectedAnnotation}
         />
         <DrawingLayer onDrown={onDrown} addingShape={addingShape} />
-        <FloatinBar activeButton={addingShape} onCircleClick={onCircleClick} onRectangleClick={onRectangleClick} />
+        <FloatinBar
+          onSelectClick={onSelectClick}
+          activeButton={addingShape}
+          onCircleClick={onCircleClick}
+          onRectangleClick={onRectangleClick} />
       </Map>
     </div>
   );

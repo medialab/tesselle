@@ -14,12 +14,17 @@ import './styles.css';
 interface OwnProps {
   onRectangleClick: (event: any) => any;
   onCircleClick: (event: any) => any;
+  onSelectClick: (event: any) => any;
   activeButton: SupportedShapes;
 }
 
 const FloatingBar: React.SFC<OwnProps> = (props: OwnProps) => {
 
   const buttons = [{
+    icon: icons.move,
+    tool: SupportedShapes.selector,
+    event: props.onSelectClick,
+  }, {
     icon: icons.anchorRectangle,
     tool: SupportedShapes.rectangle,
     event: props.onRectangleClick,

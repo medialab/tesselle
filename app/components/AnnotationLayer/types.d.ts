@@ -6,4 +6,5 @@ interface AnnotationShapes {
   onEdit: (annotation: Annotation, newAnnotation: Annotation) => any;
   selected: boolean;
   map: L.Map;
+  onClick?: (annotation: Annotation) => any;
 }

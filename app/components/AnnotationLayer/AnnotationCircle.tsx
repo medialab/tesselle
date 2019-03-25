@@ -5,7 +5,7 @@ import { AnnotationShapes } from './types';
 
 const okEvents = ['editable:drag', 'editable:vertex:dragend'].join(' ');
 
-const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, onEdit}) => {
+const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, onEdit, onClick}) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const center = useMemo(() => coordsToLatLng(coords), [selected]);
@@ -50,6 +50,7 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, on
   return (
     <Circle
       ref={ref}
+      onClick={onClick}
       color={selected ? 'cyan' : 'purple'}
       center={center}
       radius={annotation.properties.radius}

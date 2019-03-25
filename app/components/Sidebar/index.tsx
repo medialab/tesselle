@@ -45,11 +45,11 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps) => {
     () => dispatch(removeAnnotationAction(props.data)),
     [props.data],
   );
-  const changeSelection = React.useCallback(() => {
+  const changeSelection = React.useCallback((event) => {
+    event.stopPropagation();
     dispatch(changeSelectionAction(props.data));
   }, [props.data]);
   const onSubmit = React.useCallback((values) => {
-    console.log('on submit');
     if (values.content !== props.data.properties.content) {
       dispatch(editAnnotationAction(props.data, {
         properties: {
@@ -60,7 +60,7 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps) => {
     }
   }, [props.data]);
   return (
-    <div ref={props.refMdr} {...props.draggableProps}>
+    <div ref={props.refMdr} {...props.draggableProps} onClick={changeSelection}>
       <Box style={{background: props.selected ? '#3849a2' : 'transparent'}}>
         <StretchedLayoutContainer isDirection="horizontal">
           <StretchedLayoutItem
@@ -81,7 +81,6 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps) => {
                 <Form>
                   <Field
                     onBlur={onBlur}
-                    onFocus={changeSelection}
                     className={cx('textarea', 'sidebar--item-field', props.selected && 'sidebar--item-field--selected')}
                     component="textarea"
                     name="content"
@@ -103,7 +102,7 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps) => {
               </Button>
               <div {...props.dragHandleProps}>
                 <div
-                  className="button  is-lock-status-open"
+                  className="button is-lock-status-open"
                   style={{marginBottom: '.5rem'}}
                   data-for="card-action"
                   data-tip={'drag to change annotation order'}
@@ -188,6 +187,11 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
 };
 
 const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
+  const dispatch = useDispatch();
+  const onClickSidebar = React.useCallback((event: React.SyntheticEvent) => {
+    event.stopPropagation();
+    dispatch(changeSelectionAction(-1));
+  }, []);
   if (!props.annotations) {
     return (
       <div className="sidebar">
@@ -202,8 +206,7 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
       </div>
     );
   }
-
-  return <div className="sidebar"><Orderable {...props} /></div>;
+  return <div onClick={onClickSidebar} className="sidebar"><Orderable {...props} /></div>;
 };
 
 export default Sidebar;
