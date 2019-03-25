@@ -15,6 +15,8 @@ import { AnnotationShapes } from './types';
 import { useDispatch } from 'utils/hooks';
 import { editAnnotationAction } from 'containers/Editor/actions';
 import L from 'leaflet';
+import { SupportedShapes } from 'types';
+import AnnotationRectangle from './AnnotationRectangle';
 
 interface AnnotationLayerProps extends MapLayerProps {
   data: List<Annotation>;
@@ -41,6 +43,17 @@ const GuessComponent = ({annotation, onEdit, selected, map, onClick}: Annotation
     );
     case 'Polygon':
     case 'MultiPolygon':
+      console.log();
+      if (annotation.properties.type === SupportedShapes.rectangle) {
+        return (
+          <AnnotationRectangle
+            onClick={onLayerClick}
+            map={map}
+            selected={selected}
+            onEdit={onEdit}
+            annotation={annotation} />
+        );
+      }
       return (
         <AnnotationPolygon
           onClick={onLayerClick}

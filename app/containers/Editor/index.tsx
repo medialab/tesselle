@@ -42,6 +42,7 @@ import './styles.css';
 import DrawingLayer from 'components/DrawingLayer';
 import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
+import { Feature } from 'geojson';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -72,7 +73,7 @@ interface EditorProps {
   readonly slideshow: Slideshow;
   readonly selectedAnnotation: Annotation;
   readonly map: L.Map;
-  readonly createAnnotation: (frame: LatLngBounds) => void;
+  readonly createAnnotation: (frame: Feature) => void;
   readonly changeSelection: (annotation: Annotation | number) => void;
   readonly setMap: (event) => void;
 }
@@ -122,9 +123,9 @@ function EditorMap(props: EditorProps) {
   const onSelectClick = useCallback(() => {
     setAddingShape(SupportedShapes.selector);
   }, []);
-  const onDrown = useCallback((bounds: LatLngBounds) => {
+  const onDrown = useCallback((bounds: Feature) => {
+    console.log(bounds);
     props.createAnnotation(bounds);
-    setAddingShape(SupportedShapes.selector);
   }, []);
   const onLayerClick = useCallback((annotation) => {
     if (addingShape === SupportedShapes.selector) {

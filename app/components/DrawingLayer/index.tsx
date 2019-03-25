@@ -8,6 +8,7 @@ import * as React from 'react';
 import { Rectangle, MapLayer, MapLayerProps, withLeaflet, Circle } from 'react-leaflet';
 import L, { LeafletMouseEvent, LeafletEventHandlerFn, LayerGroup as LeafletLayerGroup } from 'leaflet';
 import { Feature, Point, Polygon, MultiPolygon } from 'geojson';
+import { SupportedShapes } from 'types';
 
 interface LayerProps extends MapLayerProps {
   onMouseMove: LeafletEventHandlerFn;
@@ -85,10 +86,14 @@ const DrawingRectangleLayer: React.SFC<SubProps> = (props: SubProps) => {
   }, [drawing, frame]);
   const onMouseUp = React.useCallback(() => {
     if (drawing && ref.current) {
-      props.onDrown(ref.current.leafletElement.toGeoJSON());
+      const feature = ref.current.leafletElement.toGeoJSON();
+      feature.properties = {
+        type: SupportedShapes.rectangle,
+      };
+      props.onDrown(feature);
       setDrawing(undefined);
     }
-  }, [drawing, frame, ref]);
+  }, [drawing, frame]);
   return (
     <LayerGroup
       onMouseMove={onMouseMove}

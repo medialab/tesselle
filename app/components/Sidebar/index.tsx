@@ -26,7 +26,6 @@ import './styles.css';
 interface MenuItemProps {
   data: Annotation;
   selected: boolean;
-  refMdr;
   draggableProps;
   dragHandleProps;
 }
@@ -39,7 +38,7 @@ const validator = (values: FormikValues) => {
   return errors;
 };
 
-const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps) => {
+const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwardedRef) => {
   const dispatch = useDispatch();
   const onRemove = React.useCallback(
     () => dispatch(removeAnnotationAction(props.data)),
@@ -51,16 +50,19 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps) => {
   }, [props.data]);
   const onSubmit = React.useCallback((values) => {
     if (values.content !== props.data.properties.content) {
-      dispatch(editAnnotationAction(props.data, {
-        properties: {
-          content: values.content,
-          radius: props.data.properties.radius,
-        },
-      }));
+      dispatch(
+        editAnnotationAction(
+          props.data,
+          props.data.set(
+            'properties',
+            props.data.properties.set('content', values.content),
+          ),
+        ),
+      );
     }
   }, [props.data]);
   return (
-    <div ref={props.refMdr} {...props.draggableProps} onClick={changeSelection}>
+    <div ref={forwardedRef} {...props.draggableProps} onClick={changeSelection}>
       <Box style={{background: props.selected ? '#3849a2' : 'transparent'}}>
         <StretchedLayoutContainer isDirection="horizontal">
           <StretchedLayoutItem
@@ -170,7 +172,7 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
               <Draggable key={feature.properties.id} draggableId={feature.properties.id} index={index}>
                 {(provided) => (
                   <MenuItem
-                    refMdr={provided.innerRef}
+                    ref={provided.innerRef}
                     draggableProps={provided.draggableProps}
                     dragHandleProps={provided.dragHandleProps}
                     data={feature}

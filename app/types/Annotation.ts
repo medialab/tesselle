@@ -5,11 +5,13 @@ import { Record } from 'immutable';
 interface AnnotationPropertiesArgs {
   id?: string;
   content?: string;
+  type?: string;
 }
 
 export class AnnotationProperties extends Record({
     id: 'emptyId',
     content: 'Empty annotation',
+    type: 'rectangle',
 }) {
   public id!: string;
   public content!: string;
