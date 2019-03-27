@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { RouterProps } from 'react-router';
 import { createStructuredSelector } from 'reselect';
+import { Set } from 'immutable';
 import { compose } from 'redux';
 import cx from 'classnames';
 import { Map, ImageOverlay } from 'react-leaflet';
@@ -71,7 +72,7 @@ export const decorator = compose(
 
 interface EditorProps {
   readonly slideshow: Slideshow;
-  readonly selectedAnnotation: Annotation;
+  readonly selectedAnnotation: Set<Annotation>;
   readonly map: L.Map;
   readonly createAnnotation: (frame: Feature) => void;
   readonly changeSelection: (annotation: Annotation | number) => void;
@@ -127,6 +128,9 @@ function EditorMap(props: EditorProps) {
     setAddingShape(SupportedShapes.polygon);
   }, []);
   const onDrown = useCallback(props.createAnnotation, []);
+  const onSelect = useCallback((feature) => {
+    console.log(feature);
+  }, []);
   const onLayerClick = useCallback((annotation) => {
     if (addingShape === SupportedShapes.selector) {
       props.changeSelection(annotation);
@@ -164,7 +168,13 @@ function EditorMap(props: EditorProps) {
         maxZoom={maxZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
-        <DrawingLayer onDrown={onDrown} addingShape={addingShape} />
+        <DrawingLayer
+          onDrown={addingShape === SupportedShapes.selector
+            ? onSelect
+            : onDrown
+          }
+          addingShape={addingShape}
+        />
         <AnnotationLayer
           key={`${slideshow.id}-${slideshow.annotations.size}`}
           data={slideshow.annotations}

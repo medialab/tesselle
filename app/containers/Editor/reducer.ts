@@ -13,11 +13,11 @@ import Annotation from 'types/Annotation';
 
 import { when, equals } from 'ramda';
 import { fromJS } from 'utils/geo';
-import { isImmutable } from 'immutable';
+import { isImmutable, Set } from 'immutable';
 
 export const initialState: ContainerState = {
   slideshow: null,
-  selectedAnnotation: -1,
+  selectedAnnotation: Set(),
   map: null,
 };
 
@@ -25,22 +25,9 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
   if (state.slideshow) {
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
-        if (typeof(action.payload) === 'number') {
-          if (state.selectedAnnotation === action.payload) {
-            return state;
-          }
-          return {
-            ...state,
-            selectedAnnotation: action.payload,
-          };
-        }
-        const selectIndex = state.slideshow.annotations.indexOf(action.payload);
-        if (selectIndex === state.selectedAnnotation) {
-          return state;
-        }
         return {
           ...state,
-          selectedAnnotation: selectIndex,
+          selectedAnnotation: state.selectedAnnotation.add(action.payload),
         };
       case ActionTypes.CHANGE_ORDER:
         return {
@@ -49,11 +36,6 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
             'annotations',
             action.payload,
           ),
-          selectedAnnotation: state.selectedAnnotation >= 0
-            ? action.payload.indexOf(
-              state.slideshow.annotations.get(state.selectedAnnotation) as Annotation,
-            )
-            : -1,
         };
       case ActionTypes.CREATE_ANNOTATION:
         const annotation = fromJS(action.payload);
@@ -84,17 +66,15 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
           ),
         };
       case ActionTypes.REMOVE_ANNOTATION:
-        const index = state.slideshow.annotations.indexOf(action.payload);
-        let selectedAnnotation = state.selectedAnnotation;
-        if (index >= state.selectedAnnotation) {
-          selectedAnnotation = index - 1;
-        }
         return {
           ...state,
-          selectedAnnotation: selectedAnnotation,
-          slideshow: state.slideshow.with({
-            annotations: state.slideshow.annotations.remove(index),
-          }),
+          selectedAnnotation: state.selectedAnnotation.remove(action.payload),
+          slideshow: state.slideshow.set(
+            'annotations',
+            state.slideshow.annotations.remove(
+              state.slideshow.annotations.indexOf(action.payload),
+            ),
+          ),
         };
     }
   }

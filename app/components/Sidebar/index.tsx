@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { List } from 'immutable';
+import { List, Set } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
 import { useDispatch } from 'utils/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -129,7 +129,7 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
 
 interface OwnProps {
   annotations: List<Annotation>;
-  selectedAnnotation: Annotation;
+  selectedAnnotation: Set<Annotation>;
 }
 
 const reorder = (list: List<Annotation>, startIndex: number, endIndex: number) => {
@@ -168,15 +168,15 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}>
-            {props.annotations.map((feature, index) => (
-              <Draggable key={feature.properties.id} draggableId={feature.properties.id} index={index}>
+            {props.annotations.map((annotation, index) => (
+              <Draggable key={annotation.properties.id} draggableId={annotation.properties.id} index={index}>
                 {(provided) => (
                   <MenuItem
                     ref={provided.innerRef}
                     draggableProps={provided.draggableProps}
                     dragHandleProps={provided.dragHandleProps}
-                    data={feature}
-                    selected={feature === props.selectedAnnotation} />
+                    data={annotation}
+                    selected={props.selectedAnnotation.includes(annotation)} />
                 )}
                 </Draggable>
             ))}
@@ -192,7 +192,7 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
   const dispatch = useDispatch();
   const onClickSidebar = React.useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
-    dispatch(changeSelectionAction(-1));
+    dispatch(changeSelectionAction());
   }, []);
   if (!props.annotations) {
     return (

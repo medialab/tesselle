@@ -8,7 +8,7 @@ import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps } from 'rea
 import React, { useCallback, memo } from 'react';
 
 import Annotation from 'types/Annotation';
-import { List } from 'immutable';
+import { List, Set } from 'immutable';
 import AnnotationPolygon from './AnnotationPolygon';
 import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
@@ -20,7 +20,7 @@ import AnnotationRectangle from './AnnotationRectangle';
 
 interface AnnotationLayerProps extends MapLayerProps {
   data: List<Annotation>;
-  selectedAnnotation: Annotation;
+  selectedAnnotation: Set<Annotation>;
   leaflet;
   onLayerClick?: (annotation: Annotation) => any;
 }
@@ -28,6 +28,7 @@ interface AnnotationLayerProps extends MapLayerProps {
 const GuessComponent = ({annotation, onEdit, selected, map, onClick}: AnnotationShapes) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const onLayerClick = useCallback((event) => {
+    console.log('on layer click');
     L.DomEvent.stopPropagation(event);
     return onClick && onClick(annotation);
   }, [onClick, annotation]);
@@ -82,7 +83,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
             onEdit={onEdit}
             map={props.leaflet.map}
             annotation={annotation}
-            selected={annotation === props.selectedAnnotation} />
+            selected={props.selectedAnnotation.contains(annotation)} />
         </React.Fragment>,
       )}
     </LeafletLayerGroup>

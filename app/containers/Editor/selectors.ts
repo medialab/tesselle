@@ -40,14 +40,7 @@ const privateAnnotationSelector = createSelector(
   (domain) => domain.selectedAnnotation,
 );
 
-export const makeSelectAnnotationSelector = () =>
-  createSelector(
-    makeSelectSlideshow(),
-    privateAnnotationSelector,
-    (slideshow, index) => {
-      return (slideshow && index >= 0) && slideshow.annotations.get(index);
-    },
-  );
+export const makeSelectAnnotationSelector = () => privateAnnotationSelector;
 
 export default selectEditor;
 export { selectEditorDomain };

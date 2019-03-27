@@ -3,11 +3,12 @@ import * as actions from './actions';
 import { ApplicationRootState } from 'types';
 import Slideshow from 'types/Slideshow';
 import Annotation from 'types/Annotation';
+import { Set } from 'immutable';
 
 /* --- STATE --- */
 interface EditorState {
   readonly slideshow: Slideshow | null;
-  readonly selectedAnnotation: number;
+  readonly selectedAnnotation: Set<Annotation>;
   readonly map: L.Map | null;
 }
 
