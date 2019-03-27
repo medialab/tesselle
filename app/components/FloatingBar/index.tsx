@@ -15,6 +15,7 @@ interface OwnProps {
   onRectangleClick: (event: any) => any;
   onCircleClick: (event: any) => any;
   onSelectClick: (event: any) => any;
+  onPolygonClick: (event: any) => any;
   activeButton: SupportedShapes;
 }
 
@@ -32,6 +33,10 @@ const FloatingBar: React.SFC<OwnProps> = (props: OwnProps) => {
     icon: icons.anchorEllipse,
     tool: SupportedShapes.circle,
     event: props.onCircleClick,
+  }, {
+    icon: icons.anchorPolygon,
+    tool: SupportedShapes.polygon,
+    event: props.onPolygonClick,
   }];
 
   return (

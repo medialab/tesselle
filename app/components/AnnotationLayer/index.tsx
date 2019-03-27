@@ -43,7 +43,6 @@ const GuessComponent = ({annotation, onEdit, selected, map, onClick}: Annotation
     );
     case 'Polygon':
     case 'MultiPolygon':
-      console.log();
       if (annotation.properties.type === SupportedShapes.rectangle) {
         return (
           <AnnotationRectangle

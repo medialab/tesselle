@@ -18,6 +18,7 @@ export declare const enum SupportedShapes {
   rectangle = 'rectangle',
   circle = 'circle',
   point = 'point',
+  polygon = 'polygon',
   selector = 'selector',
 }
 

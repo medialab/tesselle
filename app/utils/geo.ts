@@ -14,12 +14,19 @@ import {
   MultiPolygon,
 } from 'immutable-geojson';
 import { fromJS as rawFromJs, Map } from 'immutable';
-import { AnnotationCircleProperties, AnnotationProperties } from 'types/Annotation';
+import {
+  annotationPropertiesCreator,
+  annotationCirclePropertiesCreator,
+  annotationRectanglePropertiesCreator,
+} from 'types/Annotation';
 
 function propertiesReviver(key, value) {
-  return value.has('radius')
-    ? new AnnotationCircleProperties(value.toJS())
-    : new AnnotationProperties(value.toJSON());
+  if (value.has('radius')) {
+    return annotationCirclePropertiesCreator(value.toMap());
+  } else if (value.has('type')) {
+    return annotationRectanglePropertiesCreator(value.toMap());
+  }
+  return annotationPropertiesCreator(value.toMap());
 }
 
 export const fromJS = (value) => {
@@ -128,3 +135,37 @@ export function asFeature(geojson: Feature) {
     geometry: geojson,
   };
 }
+
+// const allEvents = [
+//   'editable:shape:new',
+//   'editable:shape:delete',
+//   'editable:shape:deleted',
+//   'editable:vertex:new',
+//   'editable:vertex:click',
+//   'editable:vertex:clicked',
+//   'editable:vertex:rawclick',
+//   'editable:vertex:deleted',
+//   'editable:vertex:ctrlclick',
+//   'editable:vertex:shiftclick',
+//   'editable:vertex:metakeyclick',
+//   'editable:vertex:altclick',
+//   'editable:vertex:contextmenu',
+//   'editable:vertex:mousedown',
+//   'editable:vertex:drag',
+//   'editable:vertex:dragstart',
+//   'editable:vertex:dragend',
+//   'editable:middlemarker:mousedown',
+//   'editable:drawing:start',
+//   'editable:drawing:end',
+//   'editable:drawing:cancel',
+//   'editable:drawing:commit',
+//   'editable:drawing:mousedown',
+//   'editable:drawing:mouseup',
+//   'editable:drawing:click',
+//   'editable:drawing:clicked',
+//   'editable:created',
+//   'editable:enable',
+//   'editable:disable',
+//   'editable:editing',
+//   'editable:dragend',
+// ].join(' ');

@@ -1,63 +1,67 @@
 import uuid from 'uuid';
 import { Feature } from 'geojson';
-import { Record } from 'immutable';
+import { Record, Map } from 'immutable';
+import { pipe } from 'ramda';
 
-interface AnnotationPropertiesArgs {
-  id?: string;
-  content?: string;
-  type?: string;
+interface IAnnotationProperties {
+  id: string;
+  content: string;
 }
 
-export class AnnotationProperties extends Record({
-    id: 'emptyId',
-    content: 'Empty annotation',
-    type: 'rectangle',
-}) {
-  public id!: string;
-  public content!: string;
-  constructor(params?: AnnotationPropertiesArgs) {
-    if (params) {
-      if (!params.id || params.id === 'emptyId') {
-        params.id = uuid();
-      }
-      super(params);
-    } else {
-      super({id: uuid()});
-    }
-  }
-  public with(values: AnnotationPropertiesArgs) {
-    return this.merge(values) as this;
-  }
-}
-
-interface AnnotationCirclePropertiesArgs extends AnnotationProperties {
+interface IAnnotationCircleProperties extends IAnnotationProperties {
   radius: number;
+  type: 'circle';
 }
 
-// tslint:disable-next-line: max-classes-per-file
-export class AnnotationCircleProperties extends Record({
+interface IAnnotationRectangleProperties extends IAnnotationProperties {
+  type: 'rectangle';
+}
+
+interface AnnotationProperties extends Record<IAnnotationProperties>, IAnnotationProperties {}
+
+interface AnnotationCircleProperties extends Record<IAnnotationCircleProperties>, IAnnotationCircleProperties {}
+interface AnnotationRectangleProperties extends Record<IAnnotationRectangleProperties>,
+  IAnnotationRectangleProperties {}
+
+const makeAnnotationProperties = Record<IAnnotationProperties>({
+  id: 'emptyId',
+  content: 'Empty annotation',
+}, 'AnnotationProperties');
+
+const makeAnnotationCircleProperties = Record({
   id: 'emptyId',
   content: 'Empty annotation',
   radius: 0,
-}) {
-  public id!: string;
-  public content!: string;
-  public radius!: number;
-  constructor(params?: AnnotationCirclePropertiesArgs) {
-    if (params) {
-      if (!params.id || params.id === 'emptyId') {
-        params.id = uuid();
-      }
-      super(params);
-    } else {
-      super({id: uuid()});
-    }
+  type: 'circle',
+}, 'AnnotationCircleProperties');
+
+const makeAnnotationRectangleProperties = Record<IAnnotationRectangleProperties>({
+  id: 'emptyId',
+  content: 'Empty annotation',
+  type: 'rectangle',
+}, 'AnnotationRectangleProperties');
+
+const isIdededed = (properties: Map<string, any>): Map<string, any> => {
+  const id = properties.get('id');
+  if (id === 'emptyId' || id === undefined) {
+    return properties.set('id', uuid());
   }
-  public with(values: AnnotationCirclePropertiesArgs) {
-    return this.merge(values) as this;
-  }
-}
+  return properties;
+};
+
+export const annotationPropertiesCreator: Record.Factory<IAnnotationProperties> = pipe(
+  isIdededed,
+  makeAnnotationProperties,
+);
+export const annotationCirclePropertiesCreator: Record.Factory<AnnotationCircleProperties> = pipe(
+  isIdededed,
+  makeAnnotationCircleProperties,
+);
+export const annotationRectanglePropertiesCreator: Record.Factory<AnnotationRectangleProperties> = pipe(
+  isIdededed,
+  makeAnnotationRectangleProperties,
+);
 
 export default interface Annotation extends Feature, Record<Annotation> {
-  properties: AnnotationCircleProperties & AnnotationProperties;
+  properties: AnnotationProperties & AnnotationCircleProperties & AnnotationRectangleProperties;
 }

@@ -114,19 +114,19 @@ function EditorMap(props: EditorProps) {
   const imageUrl: string = useUrl(slideshow.image.file);
   const maxBounds: LatLngBounds = useMapLock(map, props.slideshow.image);
   const [addingShape, setAddingShape] = useState(SupportedShapes.selector);
+  const onSelectClick = useCallback(() => {
+    setAddingShape(SupportedShapes.selector);
+  }, []);
   const onRectangleClick = useCallback(() => {
     setAddingShape(SupportedShapes.rectangle);
   }, []);
   const onCircleClick = useCallback(() => {
     setAddingShape(SupportedShapes.circle);
   }, []);
-  const onSelectClick = useCallback(() => {
-    setAddingShape(SupportedShapes.selector);
+  const onPolygonClick = useCallback(() => {
+    setAddingShape(SupportedShapes.polygon);
   }, []);
-  const onDrown = useCallback((bounds: Feature) => {
-    console.log(bounds);
-    props.createAnnotation(bounds);
-  }, []);
+  const onDrown = useCallback(props.createAnnotation, []);
   const onLayerClick = useCallback((annotation) => {
     if (addingShape === SupportedShapes.selector) {
       props.changeSelection(annotation);
@@ -164,18 +164,19 @@ function EditorMap(props: EditorProps) {
         maxZoom={maxZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
+        <DrawingLayer onDrown={onDrown} addingShape={addingShape} />
         <AnnotationLayer
           key={`${slideshow.id}-${slideshow.annotations.size}`}
           data={slideshow.annotations}
           onLayerClick={onLayerClick}
           selectedAnnotation={props.selectedAnnotation}
         />
-        <DrawingLayer onDrown={onDrown} addingShape={addingShape} />
         <FloatinBar
           onSelectClick={onSelectClick}
           activeButton={addingShape}
           onCircleClick={onCircleClick}
-          onRectangleClick={onRectangleClick} />
+          onRectangleClick={onRectangleClick}
+          onPolygonClick={onPolygonClick} />
       </Map>
     </div>
   );

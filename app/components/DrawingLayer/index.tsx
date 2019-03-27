@@ -4,16 +4,16 @@
  *
  */
 
-import * as React from 'react';
-import { Rectangle, MapLayer, MapLayerProps, withLeaflet, Circle } from 'react-leaflet';
+import React, { useState, useRef, useCallback } from 'react';
+import { Rectangle, MapLayer, MapLayerProps, withLeaflet, Circle, PolygonProps, Path } from 'react-leaflet';
 import L, { LeafletMouseEvent, LeafletEventHandlerFn, LayerGroup as LeafletLayerGroup } from 'leaflet';
-import { Feature, Point, Polygon, MultiPolygon } from 'geojson';
+import geojson from 'geojson';
 import { SupportedShapes } from 'types';
 
 interface LayerProps extends MapLayerProps {
-  onMouseMove: LeafletEventHandlerFn;
-  onMouseDown: LeafletEventHandlerFn;
-  onMouseUp: LeafletEventHandlerFn;
+  onMouseMove?: LeafletEventHandlerFn;
+  onMouseDown?: LeafletEventHandlerFn;
+  onMouseUp?: LeafletEventHandlerFn;
 }
 
 const eventsMap = [
@@ -30,9 +30,11 @@ const LayerGroup = withLeaflet(class LayerGroup extends MapLayer<LayerProps> {
       layerContainer: el,
     };
     if (props.leaflet && props.leaflet.map) {
-      props.leaflet.map.on('mousemove', props.onMouseMove);
-      props.leaflet.map.on('mousedown', props.onMouseDown);
-      props.leaflet.map.on('mouseup', props.onMouseUp);
+      for (const [htmlName, jsxName] of eventsMap) {
+        if (props[jsxName]) {
+          props.leaflet.map.on(htmlName, props[jsxName]);
+        }
+      }
     }
     return el;
   }
@@ -49,7 +51,7 @@ const LayerGroup = withLeaflet(class LayerGroup extends MapLayer<LayerProps> {
 });
 
 interface OwnProps extends LayerProps {
-  onDrown: (shape: Feature<Point | Polygon | MultiPolygon, any>) => void;
+  onDrown: (shape: geojson.Feature<geojson.Point | geojson.Polygon | geojson.MultiPolygon, any>) => void;
   addingShape: string | undefined;
 }
 
@@ -57,13 +59,27 @@ interface SubProps extends OwnProps {
   map: L.Map;
 }
 
+// tslint:disable-next-line: max-classes-per-file
+const DrawingPolygonLayer = withLeaflet(class DrawingPolygonLayer extends Path<PolygonProps, L.Path> {
+  public createLeafletElement(props) {
+    const el = props.map.editTools.startPolygon();
+    el.on('editable:drawing:end', () => {
+      const feature = el.toGeoJSON();
+      if (feature.geometry.coordinates[0][0]) {
+        props.onDrown(el.toGeoJSON());
+      }
+    });
+    return el;
+  }
+});
+
 const DrawingRectangleLayer: React.SFC<SubProps> = (props: SubProps) => {
   const { addingShape } = props;
-  const [drawing, setDrawing]: [undefined | L.LatLng, (nesState: undefined | L.LatLng) => any] = React.useState();
-  const [frame, setFrame] = React.useState();
-  const ref = React.useRef<Rectangle>(null);
+  const [drawing, setDrawing]: [undefined | L.LatLng, (setState: undefined | L.LatLng) => any] = useState();
+  const [frame, setFrame] = useState();
+  const ref = useRef<Rectangle>(null);
 
-  const onMouseDown = React.useCallback((event: LeafletMouseEvent) => {
+  const onMouseDown = useCallback((event: LeafletMouseEvent) => {
     if (addingShape) {
       setDrawing(event.latlng);
       setFrame(
@@ -74,7 +90,7 @@ const DrawingRectangleLayer: React.SFC<SubProps> = (props: SubProps) => {
       );
     }
   }, [addingShape]);
-  const onMouseMove = React.useCallback((event: LeafletMouseEvent) => {
+  const onMouseMove = useCallback((event: LeafletMouseEvent) => {
     if (drawing) {
       setFrame(
         L.latLngBounds(
@@ -84,12 +100,10 @@ const DrawingRectangleLayer: React.SFC<SubProps> = (props: SubProps) => {
       );
     }
   }, [drawing, frame]);
-  const onMouseUp = React.useCallback(() => {
+  const onMouseUp = useCallback(() => {
     if (drawing && ref.current) {
       const feature = ref.current.leafletElement.toGeoJSON();
-      feature.properties = {
-        type: SupportedShapes.rectangle,
-      };
+      feature.properties.type = SupportedShapes.rectangle;
       props.onDrown(feature);
       setDrawing(undefined);
     }
@@ -107,25 +121,27 @@ const DrawingRectangleLayer: React.SFC<SubProps> = (props: SubProps) => {
 
 const DrawingCircleLayer: React.SFC<SubProps> = (props: SubProps) => {
   const { addingShape } = props;
-  const [startLatLng, setStartLatLng]:
-    [undefined | L.LatLng, (nesState: undefined | L.LatLng) => any] = React.useState();
-  const [radius, setRadius] = React.useState();
-  const ref = React.useRef<Circle>(null);
+  const [startLatLng, setStartLatLng]: [
+    undefined | L.LatLng,
+    (setState: undefined | L.LatLng) => any
+  ] = useState();
+  const [radius, setRadius] = useState();
+  const ref = useRef<Circle>(null);
 
-  const onMouseDown = React.useCallback((event: LeafletMouseEvent) => {
+  const onMouseDown = useCallback((event: LeafletMouseEvent) => {
     if (addingShape) {
       setStartLatLng(event.latlng);
       setRadius(0);
     }
   }, [addingShape]);
-  const onMouseMove = React.useCallback((event: LeafletMouseEvent) => {
+  const onMouseMove = useCallback((event: LeafletMouseEvent) => {
     if (startLatLng) {
       setRadius(
         props.map.distance(event.latlng, startLatLng),
       );
     }
   }, [startLatLng, radius]);
-  const onMouseUp = React.useCallback(() => {
+  const onMouseUp = useCallback(() => {
     if (startLatLng && ref.current) {
       const feature = ref.current.leafletElement.toGeoJSON();
       feature.properties.radius = radius;
@@ -151,13 +167,17 @@ class DrawingLayer extends MapLayer<any> {
     this.contextValue = { ...props.leaflet, layerContainer: el };
     return el;
   }
+
   public render() {
     const props = this.props;
     if (props.leaflet && props.leaflet.map)  {
-      if (props.addingShape === 'rectangle') {
+      if (props.addingShape === SupportedShapes.rectangle) {
         return <DrawingRectangleLayer map={props.leaflet.map} {...props as OwnProps} />;
-      } else if (props.addingShape === 'circle') {
+      } else if (props.addingShape === SupportedShapes.circle) {
         return <DrawingCircleLayer map={props.leaflet.map} {...props as OwnProps} />;
+      } else if (props.addingShape === SupportedShapes.polygon) {
+        // Random is not a good solution. But it does works well 🤷.
+        return <DrawingPolygonLayer key={Math.random()} map={props.leaflet.map} {...props as any} />;
       } else {
         return <React.Fragment />;
       }
