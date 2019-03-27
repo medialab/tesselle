@@ -20,7 +20,7 @@ import AnnotationRectangle from './AnnotationRectangle';
 
 interface AnnotationLayerProps extends MapLayerProps {
   data: List<Annotation>;
-  selectedAnnotation: Set<Annotation>;
+  selectedAnnotations: Set<Annotation>;
   leaflet;
   onLayerClick?: (annotation: Annotation) => any;
 }
@@ -83,7 +83,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
             onEdit={onEdit}
             map={props.leaflet.map}
             annotation={annotation}
-            selected={props.selectedAnnotation.contains(annotation)} />
+            selected={props.selectedAnnotations.contains(annotation)} />
         </React.Fragment>,
       )}
     </LeafletLayerGroup>

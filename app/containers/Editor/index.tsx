@@ -48,7 +48,7 @@ import { Feature } from 'geojson';
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
   map: makeMapSelector(),
-  selectedAnnotation: makeSelectAnnotationSelector(),
+  selectedAnnotations: makeSelectAnnotationSelector(),
 });
 
 const withConnect = connect(
@@ -72,7 +72,7 @@ export const decorator = compose(
 
 interface EditorProps {
   readonly slideshow: Slideshow;
-  readonly selectedAnnotation: Set<Annotation>;
+  readonly selectedAnnotations: Set<Annotation>;
   readonly map: L.Map;
   readonly createAnnotation: (frame: Feature) => void;
   readonly changeSelection: (annotation: Annotation | number) => void;
@@ -179,7 +179,7 @@ function EditorMap(props: EditorProps) {
           key={`${slideshow.id}-${slideshow.annotations.size}`}
           data={slideshow.annotations}
           onLayerClick={onLayerClick}
-          selectedAnnotation={props.selectedAnnotation}
+          selectedAnnotations={props.selectedAnnotations}
         />
         <FloatinBar
           onSelectClick={onSelectClick}
@@ -199,7 +199,7 @@ function Editor(props: EditorProps & RouterProps) {
       isFullHeight
       isDirection="horizontal">
       <StretchedLayoutItem isFlex={1} style={{padding: '1rem', overflow: 'auto'}}>
-        <Sidebar annotations={slideshow.annotations} selectedAnnotation={props.selectedAnnotation} />
+        <Sidebar annotations={slideshow.annotations} selectedAnnotations={props.selectedAnnotations} />
       </StretchedLayoutItem>
       <StretchedLayoutItem isFlex={3}>
         <EditorMap {...props} />

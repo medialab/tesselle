@@ -8,7 +8,7 @@ import { Set } from 'immutable';
 /* --- STATE --- */
 interface EditorState {
   readonly slideshow: Slideshow | null;
-  readonly selectedAnnotation: Set<Annotation>;
+  readonly selectedAnnotations: Set<Annotation>;
   readonly map: L.Map | null;
 }
 

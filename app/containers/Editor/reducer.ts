@@ -17,7 +17,7 @@ import { isImmutable, Set } from 'immutable';
 
 export const initialState: ContainerState = {
   slideshow: null,
-  selectedAnnotation: Set(),
+  selectedAnnotations: Set(),
   map: null,
 };
 
@@ -27,7 +27,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
         return {
           ...state,
-          selectedAnnotation: state.selectedAnnotation.add(action.payload),
+          selectedAnnotations: state.selectedAnnotations.add(action.payload),
         };
       case ActionTypes.CHANGE_ORDER:
         return {
@@ -46,7 +46,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
               annotation,
             ),
           }),
-          selectedAnnotation: state.slideshow.annotations.size,
+          selectedAnnotations: state.slideshow.annotations.size,
         };
       case ActionTypes.EDIT_ANNOTATION:
         return {
@@ -68,7 +68,7 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
       case ActionTypes.REMOVE_ANNOTATION:
         return {
           ...state,
-          selectedAnnotation: state.selectedAnnotation.remove(action.payload),
+          selectedAnnotations: state.selectedAnnotations.remove(action.payload),
           slideshow: state.slideshow.set(
             'annotations',
             state.slideshow.annotations.remove(

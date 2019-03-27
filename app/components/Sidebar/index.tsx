@@ -129,7 +129,7 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
 
 interface OwnProps {
   annotations: List<Annotation>;
-  selectedAnnotation: Set<Annotation>;
+  selectedAnnotations: Set<Annotation>;
 }
 
 const reorder = (list: List<Annotation>, startIndex: number, endIndex: number) => {
@@ -176,7 +176,7 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
                     draggableProps={provided.draggableProps}
                     dragHandleProps={provided.dragHandleProps}
                     data={annotation}
-                    selected={props.selectedAnnotation.includes(annotation)} />
+                    selected={props.selectedAnnotations.includes(annotation)} />
                 )}
                 </Draggable>
             ))}

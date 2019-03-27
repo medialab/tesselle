@@ -37,7 +37,7 @@ export const makeMapSelector = () =>
 
 const privateAnnotationSelector = createSelector(
   selectEditorDomain,
-  (domain) => domain.selectedAnnotation,
+  (domain) => domain.selectedAnnotations,
 );
 
 export const makeSelectAnnotationSelector = () => privateAnnotationSelector;
