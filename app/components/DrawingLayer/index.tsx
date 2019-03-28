@@ -34,7 +34,6 @@ export interface SubProps extends OwnProps {
   map: L.Map;
 }
 
-// tslint:disable-next-line: max-classes-per-file
 class DrawingLayer extends MapLayer<any> {
   public createLeafletElement(props) {
     const el = new LeafletLayerGroup([], this.getOptions(props));
@@ -46,14 +45,13 @@ class DrawingLayer extends MapLayer<any> {
     const props = this.props;
     if (props.leaflet && props.leaflet.map)  {
       switch (props.addingShape) {
+        case SupportedShapes.selector:
         case SupportedShapes.rectangle:
           return <DrawingRectangleLayer map={props.leaflet.map} {...props as OwnProps} />;
         case SupportedShapes.circle:
           return <DrawingCircleLayer map={props.leaflet.map} {...props as OwnProps} />;
         case SupportedShapes.polygon:
           return <DrawingPolygonLayer key={Math.random()} map={props.leaflet.map} {...props as any} />;
-        case SupportedShapes.selector:
-          return <DrawingRectangleLayer map={props.leaflet.map} {...props as OwnProps} />;
         default:
           return <React.Fragment />;
       }

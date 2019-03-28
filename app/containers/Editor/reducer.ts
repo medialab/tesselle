@@ -13,7 +13,7 @@ import Annotation from 'types/Annotation';
 
 import { when, equals } from 'ramda';
 import { fromJS } from 'utils/geo';
-import { isImmutable, Set } from 'immutable';
+import { isImmutable, Set, isCollection } from 'immutable';
 
 export const initialState: ContainerState = {
   slideshow: null,
@@ -21,14 +21,34 @@ export const initialState: ContainerState = {
   map: null,
 };
 
+function selectionReducer(state: ContainerState, action: ContainerActions) {
+  console.log(action.payload);
+  if (isCollection(action.payload)) {
+    console.log('isCollection');
+    return {
+      ...state,
+      selectedAnnotations: action.payload,
+    };
+  } else if (isImmutable(action.payload)) {
+    console.log('isImmutable');
+    return {
+      ...state,
+      selectedAnnotations: state.selectedAnnotations.add(action.payload as Annotation),
+    };
+  } else if (action.payload === undefined) {
+    return {
+      ...state,
+      selectedAnnotations: initialState.selectedAnnotations,
+    };
+  }
+  return state;
+}
+
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
   if (state.slideshow) {
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
-        return {
-          ...state,
-          selectedAnnotations: state.selectedAnnotations.add(action.payload),
-        };
+        return selectionReducer(state, action);
       case ActionTypes.CHANGE_ORDER:
         return {
           ...state,
@@ -38,12 +58,11 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
           ),
         };
       case ActionTypes.CREATE_ANNOTATION:
-        const annotation = fromJS(action.payload);
         return {
           ...state,
           slideshow: state.slideshow.with({
             annotations: state.slideshow.annotations.push(
-              annotation,
+              fromJS(action.payload),
             ),
           }),
           selectedAnnotations: state.slideshow.annotations.size,

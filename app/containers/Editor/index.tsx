@@ -17,6 +17,7 @@ import { Map, ImageOverlay } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
 import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
+import { booleanContains } from '@turf/turf';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -75,7 +76,7 @@ interface EditorProps {
   readonly selectedAnnotations: Set<Annotation>;
   readonly map: L.Map;
   readonly createAnnotation: (frame: Feature) => void;
-  readonly changeSelection: (annotation: Annotation | number) => void;
+  readonly changeSelection: (annotation?: Annotation | Set<Annotation>) => void;
   readonly setMap: (event) => void;
 }
 
@@ -110,6 +111,7 @@ const useFlyTo = (map: L.Map, bounds: LatLngBounds): void =>
     }
   }, [map, bounds]);
 
+
 function EditorMap(props: EditorProps) {
   const {slideshow, map} = props;
   const imageUrl: string = useUrl(slideshow.image.file);
@@ -128,8 +130,13 @@ function EditorMap(props: EditorProps) {
     setAddingShape(SupportedShapes.polygon);
   }, []);
   const onDrown = useCallback(props.createAnnotation, []);
-  const onSelect = useCallback((feature) => {
-    console.log(feature);
+  const onSelect = useCallback((feature: Feature) => {
+    console.log('onSelect');
+    props.changeSelection(
+      slideshow.annotations.filter(
+        annotation => booleanContains(feature, annotation.toJS()),
+      ).toSet(),
+    );
   }, []);
   const onLayerClick = useCallback((annotation) => {
     if (addingShape === SupportedShapes.selector) {
@@ -138,8 +145,9 @@ function EditorMap(props: EditorProps) {
     [props.changeSelection, addingShape],
   );
   const onMapClick = useCallback((event) => {
+    console.log('onMapClick');
     if (addingShape === SupportedShapes.selector) {
-      props.changeSelection(-1);
+      props.changeSelection();
     }
   }, [addingShape]);
   const reactLeafletDangerousRef = lef => {

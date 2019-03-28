@@ -4,7 +4,7 @@
  *
  */
 
-import { action, createAsyncAction, createAction } from 'typesafe-actions';
+import { createAsyncAction, createAction } from 'typesafe-actions';
 import {} from './types';
 
 import ActionTypes from './constants';
@@ -12,8 +12,6 @@ import Slideshow from 'types/slideshow';
 import Annotation from 'types/Annotation';
 import { List } from 'immutable';
 import { Feature, Point } from 'geojson';
-
-export const defaultAction = () => action(ActionTypes.DEFAULT_ACTION);
 
 export const createSlideshowAction = createAsyncAction(
     ActionTypes.CREATE_SLIDESHOW,
@@ -47,6 +45,6 @@ export const editOrderAction = createAction(
 
 export const changeSelectionAction = createAction(
   ActionTypes.CHANGE_SELECTED_ANNOTATION,
-  action => (select?: Annotation, meta?) => action(select, meta),
+  action => (select?: Annotation | Set<Annotation>, meta?) => action(select, meta),
 );
 
