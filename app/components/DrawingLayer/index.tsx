@@ -17,12 +17,14 @@ export interface LayerProps extends MapLayerProps {
   onMouseMove?: LeafletEventHandlerFn;
   onMouseDown?: LeafletEventHandlerFn;
   onMouseUp?: LeafletEventHandlerFn;
+  onClick?: LeafletEventHandlerFn;
 }
 
 export const eventsMap = [
   ['mousemove', 'onMouseMove'],
   ['mousedown', 'onMouseDown'],
   ['mouseup', 'onMouseUp'],
+  ['click', 'onClick'],
 ];
 
 interface OwnProps extends LayerProps {

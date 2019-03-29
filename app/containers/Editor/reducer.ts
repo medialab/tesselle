@@ -22,15 +22,12 @@ export const initialState: ContainerState = {
 };
 
 function selectionReducer(state: ContainerState, action: ContainerActions) {
-  console.log(action.payload);
   if (isCollection(action.payload)) {
-    console.log('isCollection');
     return {
       ...state,
       selectedAnnotations: action.payload,
     };
   } else if (isImmutable(action.payload)) {
-    console.log('isImmutable');
     return {
       ...state,
       selectedAnnotations: state.selectedAnnotations.add(action.payload as Annotation),
@@ -41,6 +38,7 @@ function selectionReducer(state: ContainerState, action: ContainerActions) {
       selectedAnnotations: initialState.selectedAnnotations,
     };
   }
+  throw new Error('selectionReducer case');
   return state;
 }
 
@@ -58,14 +56,15 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
           ),
         };
       case ActionTypes.CREATE_ANNOTATION:
+        const annotation: Annotation = fromJS(action.payload);
         return {
           ...state,
           slideshow: state.slideshow.with({
             annotations: state.slideshow.annotations.push(
-              fromJS(action.payload),
+              annotation,
             ),
           }),
-          selectedAnnotations: state.slideshow.annotations.size,
+          selectedAnnotations: Set([annotation]),
         };
       case ActionTypes.EDIT_ANNOTATION:
         return {

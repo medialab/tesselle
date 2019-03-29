@@ -5,7 +5,7 @@
  */
 
 import React, { useLayoutEffect, useState, useEffect, useCallback, useMemo } from 'react';
-import L, { LatLngBounds } from 'leaflet';
+import L, { LatLngBounds, DomEvent } from 'leaflet';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { RouterProps } from 'react-router';
@@ -17,7 +17,7 @@ import { Map, ImageOverlay } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
 import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
-import { booleanContains } from '@turf/turf';
+// import { booleanContains } from '@turf/turf';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -45,6 +45,7 @@ import DrawingLayer from 'components/DrawingLayer';
 import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
 import { Feature } from 'geojson';
+import { collision } from 'utils/geo';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -131,13 +132,14 @@ function EditorMap(props: EditorProps) {
   }, []);
   const onDrown = useCallback(props.createAnnotation, []);
   const onSelect = useCallback((feature: Feature) => {
-    console.log('onSelect');
-    props.changeSelection(
-      slideshow.annotations.filter(
-        annotation => booleanContains(feature, annotation.toJS()),
-      ).toSet(),
+    const selected = collision(feature, slideshow.annotations.toJS());
+    const selectedAnnotations = slideshow.annotations.filter(
+      (_, index) => selected[index],
     );
-  }, []);
+    props.changeSelection(
+      selectedAnnotations.toSet(),
+    );
+  }, [props.slideshow]);
   const onLayerClick = useCallback((annotation) => {
     if (addingShape === SupportedShapes.selector) {
       props.changeSelection(annotation);
@@ -145,7 +147,9 @@ function EditorMap(props: EditorProps) {
     [props.changeSelection, addingShape],
   );
   const onMapClick = useCallback((event) => {
-    console.log('onMapClick');
+    DomEvent.preventDefault(event);
+    DomEvent.stopPropagation(event);
+    DomEvent.stop(event);
     if (addingShape === SupportedShapes.selector) {
       props.changeSelection();
     }

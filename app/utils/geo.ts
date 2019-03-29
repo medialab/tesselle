@@ -1,6 +1,8 @@
 import L from 'leaflet';
 import { Feature } from 'geojson';
-import { map } from 'ramda';
+import { map, pipe } from 'ramda';
+import SAT, { Vector } from 'sat';
+import { center } from '@turf/turf';
 
 import {
   Feature as ImmutableFeature,
@@ -32,10 +34,9 @@ function propertiesReviver(key, value) {
 export const fromJS = (value) => {
   switch (value.type) {
     case undefined:
-      const res = Map({
+      return Map({
         properties: propertiesReviver('properties', rawFromJs(value.properties)),
       });
-      return res;
     case 'FeatureCollection':
       return FeatureCollection(value, propertiesReviver);
     case 'Feature':
@@ -135,6 +136,65 @@ export function asFeature(geojson: Feature) {
     geometry: geojson,
   };
 }
+
+function featureToSAT(feature) {
+  switch (feature.geometry.type) {
+    case 'Point':
+      const cx = new Vector(
+        feature.geometry.coordinates[0], feature.geometry.coordinates[1],
+      );
+      const res = new SAT.Circle(
+        cx,
+        feature.properties.radius,
+      );
+
+      console.log('cx', cx);
+      console.log('circle', res);
+      console.log('-'.repeat(100));
+      return res;
+    case 'Polygon':
+      const polygonCenter = center(feature);
+      const [ y, x ] = (polygonCenter.geometry as any).coordinates;
+      return new SAT.Polygon(
+        new Vector(x, y),
+        feature.geometry.coordinates[0].map(([y, x]) => new SAT.Vector(x, y)),
+      );
+  }
+  throw new Error('Case not handeled.');
+}
+
+const mapper = (master) => (feature) => {
+  if (feature instanceof SAT.Circle) {
+    if (master.points.length === 4) {
+      return false;
+    }
+    return SAT.testPolygonCircle(master, feature);
+  }
+  return SAT.testPolygonPolygon(master, feature);
+};
+
+export function collision(polygon, annotations: Feature[]) {
+  const quandmeme = featureToSAT(polygon);
+  console.log(quandmeme);
+  const annotationsSAT = annotations.map(pipe(featureToSAT, mapper(quandmeme)));
+  return annotationsSAT;
+}
+
+
+// const V = SAT.Vector;
+// const C = SAT.Circle;
+// const P = SAT.Polygon;
+
+// const circle = new C(new V(-0.191207, 0.578032), 20);
+// // A square
+// const polygon = new P(new V(0, 0), [
+//   new V(0, 0), new V(40, 0), new V(40, 40), new V(0, 40),
+// ]);
+// const collided = SAT.testPolygonCircle(polygon, circle, response);
+
+// collided => true
+// response.overlap => 10
+// response.overlapV => (10, 0)
 
 // const allEvents = [
 //   'editable:shape:new',
