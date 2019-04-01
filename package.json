@@ -117,6 +117,7 @@
     "react-file-drop": "^0.2.7",
     "react-final-form": "^4.1.0",
     "react-helmet": "5.2.0",
+    "react-hook-mousetrap": "^2.0.2",
     "react-intl": "2.8.0",
     "react-leaflet": "^2.2.1",
     "react-leaflet-control": "^2.1.1",

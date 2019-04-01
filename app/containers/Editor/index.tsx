@@ -17,6 +17,7 @@ import { Map, ImageOverlay } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
 import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
+import useMousetrap from 'react-hook-mousetrap';
 // import { booleanContains } from '@turf/turf';
 
 import injectSaga from 'utils/injectSaga';
@@ -112,11 +113,58 @@ const useFlyTo = (map: L.Map, bounds: LatLngBounds): void =>
     }
   }, [map, bounds]);
 
+// const useToggleTool = (toolState, setToolState, toolToToggle, key) => {
+//   const [keyboardMemory, setkeyboardMemory] = useState<SupportedShapes | null>(null);
+//   useMousetrap(key, () => {
+//     if (!keyboardMemory) {
+//       setkeyboardMemory(toolState);
+//       setToolState(toolToToggle);
+//     }
+//   }, 'keydown');
+//   useMousetrap(key, () => {
+//     console.log(keyboardMemory);
+//     setToolState(keyboardMemory);
+//     setkeyboardMemory(null);
+//   }, 'keyup');
+// };
+
+const useTools = (defaultTool): [any, React.Dispatch<any>, (toolToToggle: SupportedShapes, key: string) => void] => {
+  const [tool, setTool] = useState<SupportedShapes>(defaultTool);
+  const [keyboardMemory, setkeyboardMemory] = useState<SupportedShapes | null>(null);
+  function useToggleTool(toolToToggle: SupportedShapes, key: string) {
+    useMousetrap(key, () => {
+      if (!keyboardMemory) {
+        setkeyboardMemory(tool);
+        setTool(toolToToggle);
+      }
+    }, 'keydown');
+    useMousetrap(key, () => {
+      if (tool === toolToToggle) {
+        setTool(keyboardMemory || SupportedShapes.selector);
+        setkeyboardMemory(null);
+      }
+    }, 'keyup');
+  }
+
+  return [
+    tool,
+    (newState) => {
+      setTool(newState);
+      setkeyboardMemory(null);
+    },
+    useToggleTool,
+  ];
+};
+
 function EditorMap(props: EditorProps) {
   const {slideshow, map} = props;
   const imageUrl: string = useUrl(slideshow.image.file);
   const maxBounds: LatLngBounds = useMapLock(map, props.slideshow.image);
-  const [tool, setTool] = useState(SupportedShapes.selector);
+  const [tool, setTool, useToggleTool] = useTools(SupportedShapes.selector);
+
+  useToggleTool(SupportedShapes.selector, 'shift');
+  useToggleTool(SupportedShapes.edit, 'command');
+
   const onSelectClick = useCallback(() => {
     setTool(SupportedShapes.selector);
   }, []);
@@ -160,6 +208,7 @@ function EditorMap(props: EditorProps) {
       props.setMap(lef.leafletElement);
     }
   };
+
   useFlyTo(map, maxBounds);
   return (
     <div className={cx({
