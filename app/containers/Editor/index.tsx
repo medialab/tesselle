@@ -5,7 +5,7 @@
  */
 
 import React, { useLayoutEffect, useState, useEffect, useCallback, useMemo } from 'react';
-import L, { LatLngBounds, DomEvent } from 'leaflet';
+import L, { LatLngBounds } from 'leaflet';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { RouterProps } from 'react-router';
@@ -112,48 +112,49 @@ const useFlyTo = (map: L.Map, bounds: LatLngBounds): void =>
     }
   }, [map, bounds]);
 
-
 function EditorMap(props: EditorProps) {
   const {slideshow, map} = props;
   const imageUrl: string = useUrl(slideshow.image.file);
   const maxBounds: LatLngBounds = useMapLock(map, props.slideshow.image);
-  const [addingShape, setAddingShape] = useState(SupportedShapes.selector);
+  const [tool, setTool] = useState(SupportedShapes.selector);
   const onSelectClick = useCallback(() => {
-    setAddingShape(SupportedShapes.selector);
+    setTool(SupportedShapes.selector);
   }, []);
   const onRectangleClick = useCallback(() => {
-    setAddingShape(SupportedShapes.rectangle);
+    setTool(SupportedShapes.rectangle);
   }, []);
   const onCircleClick = useCallback(() => {
-    setAddingShape(SupportedShapes.circle);
+    setTool(SupportedShapes.circle);
   }, []);
   const onPolygonClick = useCallback(() => {
-    setAddingShape(SupportedShapes.polygon);
+    setTool(SupportedShapes.polygon);
   }, []);
-  const onDrown = useCallback(props.createAnnotation, []);
-  const onSelect = useCallback((feature: Feature) => {
-    const selected = collision(feature, slideshow.annotations.toJS());
-    const selectedAnnotations = slideshow.annotations.filter(
-      (_, index) => selected[index],
-    );
-    props.changeSelection(
-      selectedAnnotations.toSet(),
-    );
-  }, [props.slideshow]);
+  const onDrown = useCallback((frame) => {
+    props.createAnnotation(frame);
+    setTool(SupportedShapes.selector);
+  }, []);
   const onLayerClick = useCallback((annotation) => {
-    if (addingShape === SupportedShapes.selector) {
+    if (tool === SupportedShapes.selector) {
       props.changeSelection(annotation);
     }},
-    [props.changeSelection, addingShape],
+    [props.changeSelection, tool],
   );
   const onMapClick = useCallback((event) => {
-    DomEvent.preventDefault(event);
-    DomEvent.stopPropagation(event);
-    DomEvent.stop(event);
-    if (addingShape === SupportedShapes.selector) {
+    if (tool === SupportedShapes.selector) {
       props.changeSelection();
     }
-  }, [addingShape]);
+  }, [tool]);
+  const onEditClick = useCallback(() => {
+    setTool(SupportedShapes.edit);
+  }, []);
+  const onSelect = useCallback((feature: Feature) => {
+    const selected = collision(feature, slideshow.annotations.toJS());
+    props.changeSelection(
+      slideshow.annotations.filter(
+        (_, index) => selected[index],
+      ).toSet(),
+    );
+  }, [props.slideshow]);
   const reactLeafletDangerousRef = lef => {
     if (lef && (map !== lef.leafletElement)) {
       props.setMap(lef.leafletElement);
@@ -163,7 +164,7 @@ function EditorMap(props: EditorProps) {
   return (
     <div className={cx({
         map: true,
-        creating: addingShape,
+        creating: tool,
       })}>
       <Map
         editable
@@ -180,22 +181,24 @@ function EditorMap(props: EditorProps) {
         maxZoom={maxZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
-        <DrawingLayer
-          onDrown={addingShape === SupportedShapes.selector
+        {(tool !== SupportedShapes.edit) && <DrawingLayer
+          onDrown={tool === SupportedShapes.selector
             ? onSelect
             : onDrown
           }
-          addingShape={addingShape}
-        />
+          addingShape={tool}
+        />}
         <AnnotationLayer
+          onLayerClick={onLayerClick}
           key={`${slideshow.id}-${slideshow.annotations.size}`}
           data={slideshow.annotations}
-          onLayerClick={onLayerClick}
           selectedAnnotations={props.selectedAnnotations}
+          tool={tool}
         />
         <FloatinBar
+          onEditClick={onEditClick}
           onSelectClick={onSelectClick}
-          activeButton={addingShape}
+          activeButton={tool}
           onCircleClick={onCircleClick}
           onRectangleClick={onRectangleClick}
           onPolygonClick={onPolygonClick} />

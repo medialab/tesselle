@@ -6,6 +6,8 @@
 
 import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps } from 'react-leaflet';
 import React, { useCallback, memo } from 'react';
+import { SupportedShapes } from 'types';
+import { DomEvent } from 'leaflet';
 
 import Annotation from 'types/Annotation';
 import { List, Set } from 'immutable';
@@ -14,8 +16,6 @@ import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
 import { useDispatch } from 'utils/hooks';
 import { editAnnotationAction } from 'containers/Editor/actions';
-import L from 'leaflet';
-import { SupportedShapes } from 'types';
 import AnnotationRectangle from './AnnotationRectangle';
 
 interface AnnotationLayerProps extends MapLayerProps {
@@ -23,13 +23,13 @@ interface AnnotationLayerProps extends MapLayerProps {
   selectedAnnotations: Set<Annotation>;
   leaflet;
   onLayerClick?: (annotation: Annotation) => any;
+  tool: SupportedShapes;
 }
 
-const GuessComponent = ({annotation, onEdit, selected, map, onClick}: AnnotationShapes) => {
+const GuessComponent = ({annotation, onEdit, selected, map, onClick, tool}: AnnotationShapes) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const onLayerClick = useCallback((event) => {
-    console.log('on layer click');
-    L.DomEvent.stopPropagation(event);
+    DomEvent.stopPropagation(event);
     return onClick && onClick(annotation);
   }, [onClick, annotation]);
   switch (geometry.type) {
@@ -37,6 +37,7 @@ const GuessComponent = ({annotation, onEdit, selected, map, onClick}: Annotation
     return (
       <AnnotationCircle
         onClick={onLayerClick}
+        tool={tool}
         map={map}
         selected={selected}
         onEdit={onEdit}
@@ -48,6 +49,7 @@ const GuessComponent = ({annotation, onEdit, selected, map, onClick}: Annotation
         return (
           <AnnotationRectangle
             onClick={onLayerClick}
+            tool={tool}
             map={map}
             selected={selected}
             onEdit={onEdit}
@@ -57,6 +59,7 @@ const GuessComponent = ({annotation, onEdit, selected, map, onClick}: Annotation
       return (
         <AnnotationPolygon
           onClick={onLayerClick}
+          tool={tool}
           map={map}
           selected={selected}
           onEdit={onEdit}
@@ -79,6 +82,7 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
       {props.data.map((annotation) =>
         <React.Fragment key={annotation.properties.id}>
           <GuessComponent
+            tool={props.tool}
             onClick={props.onLayerClick}
             onEdit={onEdit}
             map={props.leaflet.map}

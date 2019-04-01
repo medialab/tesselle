@@ -11,20 +11,27 @@ import icons from 'quinoa-design-library/src/themes/millet/icons';
 import { SupportedShapes } from 'types';
 import './styles.css';
 
-interface OwnProps {
+interface FloatingBarProps {
   onRectangleClick: (event: any) => any;
   onCircleClick: (event: any) => any;
   onSelectClick: (event: any) => any;
   onPolygonClick: (event: any) => any;
+  onEditClick: (event: any) => any;
   activeButton: SupportedShapes;
 }
 
-const FloatingBar: React.SFC<OwnProps> = (props: OwnProps) => {
+console.log(icons);
+
+const FloatingBar: React.SFC<FloatingBarProps> = (props: FloatingBarProps) => {
 
   const buttons = [{
     icon: icons.move,
     tool: SupportedShapes.selector,
     event: props.onSelectClick,
+  }, {
+    icon: icons.remove,
+    tool: SupportedShapes.edit,
+    event: props.onEditClick,
   }, {
     icon: icons.anchorRectangle,
     tool: SupportedShapes.rectangle,
@@ -42,8 +49,7 @@ const FloatingBar: React.SFC<OwnProps> = (props: OwnProps) => {
   return (
     <Control position="bottomright">
       <div className="buttons-container">
-        {buttons
-          .map(({icon, tool, event}) => (
+        {buttons.map(({icon, tool, event}) => (
             <Button
               onClick={event}
               key={tool}

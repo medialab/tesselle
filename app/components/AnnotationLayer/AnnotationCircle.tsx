@@ -2,10 +2,11 @@ import React, { useMemo, useRef, useEffect } from 'react';
 import { Circle, Tooltip } from 'react-leaflet';
 import { coordsToLatLng, fromJS } from 'utils/geo';
 import { AnnotationShapes } from './types';
+import { SupportedShapes } from 'types';
 
 const okEvents = ['editable:drag', 'editable:vertex:dragend'].join(' ');
 
-const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, onEdit, onClick}) => {
+const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, onEdit, onClick, tool}) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const center = useMemo(() => coordsToLatLng(coords), [selected]);
@@ -29,24 +30,22 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, on
         ref.current.leafletElement.off(okEvents, save);
       };
     }
-    return () => {
-
-    };
+    return () => {};
   });
 
   useEffect(() => {
     if (ref.current && ref.current.leafletElement) {
       try {
-        if (!selected) {
-          ref.current.leafletElement.disableEdit();
-        } else {
+        if (selected && tool === SupportedShapes.edit) {
           ref.current.leafletElement.enableEdit();
+        } else {
+          ref.current.leafletElement.disableEdit();
         }
       } catch (e) {
         console.error(e);
       }
     }
-  }, [selected]);
+  }, [selected, tool]);
   return (
     <Circle
       ref={ref}

@@ -1,8 +1,7 @@
 import L from 'leaflet';
 import { Feature } from 'geojson';
-import { map, pipe } from 'ramda';
+import { map, pipe, max } from 'ramda';
 import SAT, { Vector } from 'sat';
-import { center } from '@turf/turf';
 
 import {
   Feature as ImmutableFeature,
@@ -21,6 +20,7 @@ import {
   annotationCirclePropertiesCreator,
   annotationRectanglePropertiesCreator,
 } from 'types/Annotation';
+import { SupportedShapes } from 'types';
 
 function propertiesReviver(key, value) {
   if (value.has('radius')) {
@@ -67,8 +67,7 @@ export function formatNum(num: number, digits: number | undefined): number {
 
 // @function latLngToCoords(latlng: LatLng, precision?: Number): Array
 // Reverse of [`coordsToLatLng`](#geojson-coordstolatlng)
-export function latLngToCoords(latlng: L.LatLng, precision: number): number[] {
-  precision = typeof precision === 'number' ? precision : 6;
+export function latLngToCoords(latlng: L.LatLng, precision: number = 6): number[] {
   return latlng.alt !== undefined ?
     [
       formatNum(latlng.lng, precision),
@@ -103,8 +102,11 @@ export function latLngsToCoords(latlngs: [], levelsDeep?: number, closed?: boole
 // @function coordsToLatLng(coords: Array): LatLng
 // Creates a `LatLng` object from an array of 2 numbers (longitude, latitude)
 // or 3 numbers (longitude, latitude, altitude) used in GeoJSON for points.
-export const coordsToLatLng = (coords: [number, number, number]): L.LatLng =>
-  new L.LatLng(coords[1], coords[0], coords[2]);
+export const coordsToLatLng = (coords: [number, number, number]): L.LatLng => new L.LatLng(
+  coords[1],
+  coords[0],
+  coords[2],
+);
 
 // @function coordsToLatLngs(coords: Array, levelsDeep?: Number, coordsToLatLng?: Function): Array
 // Creates a multidimensional array of `LatLng`s from a GeoJSON coordinates array.
@@ -137,95 +139,83 @@ export function asFeature(geojson: Feature) {
   };
 }
 
-function featureToSAT(feature) {
-  switch (feature.geometry.type) {
-    case 'Point':
-      const cx = new Vector(
-        feature.geometry.coordinates[0], feature.geometry.coordinates[1],
-      );
-      const res = new SAT.Circle(
-        cx,
+// We use this box creator function because of a SAT.js bug:
+// https://github.com/jriecken/sat-js/issues/55
+const createRectangle = (feature: FeatureCollection): SAT.Polygon => {
+  const coords = feature.geometry.coordinates[0];
+  const [ y, x ] = coords[0];
+  const width = Math.abs(coords[1][1] - coords[0][1]);
+  const height = Math.abs(coords[2][0] - coords[1][0]);
+  return new SAT.Box(new Vector(x, y), max(width, 0.0001), max(height, 0.0001)).toPolygon();
+};
+
+function featureToSAT(feature: FeatureCollection): SAT.Circle | SAT.Polygon | never {
+  switch (feature.properties.type) {
+    case SupportedShapes.circle:
+      return new SAT.Circle(
+        new Vector(
+          feature.geometry.coordinates[1], feature.geometry.coordinates[0],
+        ),
         feature.properties.radius,
       );
-
-      console.log('cx', cx);
-      console.log('circle', res);
-      console.log('-'.repeat(100));
-      return res;
-    case 'Polygon':
-      const polygonCenter = center(feature);
-      const [ y, x ] = (polygonCenter.geometry as any).coordinates;
+    case SupportedShapes.rectangle:
+    case undefined:
       return new SAT.Polygon(
-        new Vector(x, y),
+        new Vector(),
         feature.geometry.coordinates[0].map(([y, x]) => new SAT.Vector(x, y)),
       );
   }
   throw new Error('Case not handeled.');
 }
 
-const mapper = (master) => (feature) => {
+const collisionTester = (master: SAT.Polygon) => (feature: SAT.Polygon | SAT.Circle) => {
   if (feature instanceof SAT.Circle) {
-    if (master.points.length === 4) {
-      return false;
-    }
     return SAT.testPolygonCircle(master, feature);
   }
   return SAT.testPolygonPolygon(master, feature);
 };
 
-export function collision(polygon, annotations: Feature[]) {
-  const quandmeme = featureToSAT(polygon);
-  console.log(quandmeme);
-  const annotationsSAT = annotations.map(pipe(featureToSAT, mapper(quandmeme)));
-  return annotationsSAT;
+export function collision(selectionPolygon: Feature, annotations: Feature[]) {
+  return annotations.map(
+    pipe(
+      featureToSAT,
+      collisionTester(
+        createRectangle(selectionPolygon),
+      ),
+    ),
+  );
 }
 
-
-// const V = SAT.Vector;
-// const C = SAT.Circle;
-// const P = SAT.Polygon;
-
-// const circle = new C(new V(-0.191207, 0.578032), 20);
-// // A square
-// const polygon = new P(new V(0, 0), [
-//   new V(0, 0), new V(40, 0), new V(40, 40), new V(0, 40),
-// ]);
-// const collided = SAT.testPolygonCircle(polygon, circle, response);
-
-// collided => true
-// response.overlap => 10
-// response.overlapV => (10, 0)
-
-// const allEvents = [
-//   'editable:shape:new',
-//   'editable:shape:delete',
-//   'editable:shape:deleted',
-//   'editable:vertex:new',
-//   'editable:vertex:click',
-//   'editable:vertex:clicked',
-//   'editable:vertex:rawclick',
-//   'editable:vertex:deleted',
-//   'editable:vertex:ctrlclick',
-//   'editable:vertex:shiftclick',
-//   'editable:vertex:metakeyclick',
-//   'editable:vertex:altclick',
-//   'editable:vertex:contextmenu',
-//   'editable:vertex:mousedown',
-//   'editable:vertex:drag',
-//   'editable:vertex:dragstart',
-//   'editable:vertex:dragend',
-//   'editable:middlemarker:mousedown',
-//   'editable:drawing:start',
-//   'editable:drawing:end',
-//   'editable:drawing:cancel',
-//   'editable:drawing:commit',
-//   'editable:drawing:mousedown',
-//   'editable:drawing:mouseup',
-//   'editable:drawing:click',
-//   'editable:drawing:clicked',
-//   'editable:created',
-//   'editable:enable',
-//   'editable:disable',
-//   'editable:editing',
-//   'editable:dragend',
-// ].join(' ');
+export const allEvents = [
+  'editable:shape:new',
+  'editable:shape:delete',
+  'editable:shape:deleted',
+  'editable:vertex:new',
+  'editable:vertex:click',
+  'editable:vertex:clicked',
+  'editable:vertex:rawclick',
+  'editable:vertex:deleted',
+  'editable:vertex:ctrlclick',
+  'editable:vertex:shiftclick',
+  'editable:vertex:metakeyclick',
+  'editable:vertex:altclick',
+  'editable:vertex:contextmenu',
+  'editable:vertex:mousedown',
+  'editable:vertex:drag',
+  'editable:vertex:dragstart',
+  'editable:vertex:dragend',
+  'editable:middlemarker:mousedown',
+  'editable:drawing:start',
+  'editable:drawing:end',
+  'editable:drawing:cancel',
+  'editable:drawing:commit',
+  'editable:drawing:mousedown',
+  'editable:drawing:mouseup',
+  'editable:drawing:click',
+  'editable:drawing:clicked',
+  'editable:created',
+  'editable:enable',
+  'editable:disable',
+  'editable:editing',
+  'editable:dragend',
+].join(' ');

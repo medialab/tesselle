@@ -13,7 +13,7 @@ import Annotation from 'types/Annotation';
 
 import { when, equals } from 'ramda';
 import { fromJS } from 'utils/geo';
-import { isImmutable, Set, isCollection } from 'immutable';
+import { isImmutable, Set, isCollection, List } from 'immutable';
 
 export const initialState: ContainerState = {
   slideshow: null,
@@ -28,9 +28,12 @@ function selectionReducer(state: ContainerState, action: ContainerActions) {
       selectedAnnotations: action.payload,
     };
   } else if (isImmutable(action.payload)) {
+    const selectedAnnotations = state.selectedAnnotations.contains(action.payload as Annotation)
+      ? state.selectedAnnotations.remove(action.payload as Annotation)
+      : state.selectedAnnotations.add(action.payload as Annotation);
     return {
       ...state,
-      selectedAnnotations: state.selectedAnnotations.add(action.payload as Annotation),
+      selectedAnnotations: selectedAnnotations,
     };
   } else if (action.payload === undefined) {
     return {
@@ -39,10 +42,15 @@ function selectionReducer(state: ContainerState, action: ContainerActions) {
     };
   }
   throw new Error('selectionReducer case');
-  return state;
 }
 
+const updateSelection = (nextAnnotations: List<Annotation>, selection: Set<Annotation>): Set<Annotation> => {
+  const selectionsIds = selection.map(annotation => annotation.properties.id);
+  return nextAnnotations.filter(annotation => selectionsIds.contains(annotation.properties.id)).toSet();
+};
+
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
+  console.log(action.type);
   if (state.slideshow) {
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
@@ -67,21 +75,23 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
           selectedAnnotations: Set([annotation]),
         };
       case ActionTypes.EDIT_ANNOTATION:
+        const annotations: List<Annotation> = state.slideshow.annotations.map(
+          when(
+            equals(action.payload.annotation),
+            (annotation: Annotation) => annotation.merge(
+              isImmutable(action.payload.editedFeature)
+              ? action.payload.editedFeature
+              : fromJS(action.payload.editedFeature),
+            ),
+          ),
+        );
         return {
           ...state,
           slideshow: state.slideshow.set(
             'annotations',
-            state.slideshow.annotations.map(
-              when(
-                equals(action.payload.annotation),
-                (annotation: Annotation) => annotation.merge(
-                  isImmutable(action.payload.editedFeature)
-                  ? action.payload.editedFeature
-                  : fromJS(action.payload.editedFeature),
-                ),
-              ),
-            ),
+            annotations,
           ),
+          selectedAnnotations: updateSelection(annotations, state.selectedAnnotations),
         };
       case ActionTypes.REMOVE_ANNOTATION:
         return {
