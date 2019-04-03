@@ -150,13 +150,13 @@ function EditorMap(props: EditorProps) {
         maxZoom={maxZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
-        {(tool === SupportedShapes.selector) && <DrawingLayer
+        <DrawingLayer
           onDrown={tool === SupportedShapes.selector
             ? onSelect
             : onDrown
           }
           addingShape={tool}
-        />}
+        />
         <AnnotationLayer
           onLayerClick={onLayerClick}
           key={`${slideshow.id}-${slideshow.annotations.size}`}
