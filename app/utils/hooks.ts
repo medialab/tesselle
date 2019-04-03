@@ -1,5 +1,10 @@
 import { ReactReduxContext } from 'react-redux';
-import { useContext, useRef, useEffect } from 'react';
+import React, { useContext, useRef, useEffect, useState, useMemo, useLayoutEffect } from 'react';
+
+import useMousetrap from 'react-hook-mousetrap';
+import { SupportedShapes } from 'types';
+import { LatLngBounds } from 'leaflet';
+import Cover from 'types/Cover';
 
 export function useDispatch() {
   return useContext(ReactReduxContext).store.dispatch;
@@ -37,4 +42,62 @@ export function useWhyDidYouUpdate(name, props) {
     // Finally update previousProps with current props for next hook call
     previousProps.current = props;
   });
+}
+
+export const useTools = (defaultTool): [
+  any, React.Dispatch<any>,
+  (toolToToggle: SupportedShapes, key: string) => void
+] => {
+  const [tool, setTool] = useState<SupportedShapes>(defaultTool);
+  const [keyboardMemory, setkeyboardMemory] = useState<SupportedShapes | null>(null);
+  function useToggleTool(toolToToggle: SupportedShapes, key: string) {
+    useMousetrap(key, () => {
+      if (!keyboardMemory) {
+        setkeyboardMemory(tool);
+        setTool(toolToToggle);
+      }
+    }, 'keydown');
+    useMousetrap(key, () => {
+      if (tool === toolToToggle) {
+        setTool(keyboardMemory || SupportedShapes.selector);
+        setkeyboardMemory(null);
+      }
+    }, 'keyup');
+  }
+  return [
+    tool,
+    (newState) => {
+      setTool(newState);
+      setkeyboardMemory(null);
+    },
+    useToggleTool,
+  ];
+};
+
+export const useFlyTo = (map: L.Map, bounds: LatLngBounds): void =>
+  useEffect(() => {
+    if (map && bounds) {
+      map.fitBounds(bounds);
+    }
+  }, [map, bounds]);
+
+export const useUrl = (file: File): string => {
+  const url = useMemo(() => window.URL.createObjectURL(file), [file]);
+  useEffect(() => () => window.URL.revokeObjectURL(url), [url]);
+  return url;
+};
+
+export function useMapLock(map: L.Map, image: Cover): LatLngBounds {
+  const [maxBounds, setMaxBounds] = useState();
+  useLayoutEffect(() => {
+    if (map !== null) {
+      setMaxBounds(
+        new LatLngBounds(
+          map.unproject([0, image.height], map.getMaxZoom()),
+          map.unproject([image.width, 0], map.getMaxZoom()),
+        ),
+      );
+    }
+  }, [map, image]);
+  return maxBounds;
 }

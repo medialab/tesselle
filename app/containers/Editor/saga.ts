@@ -36,64 +36,6 @@ export function* createAndRedirect(action) {
   yield put(push('/editor'));
 }
 
-// export function* createSlide(action) {
-//   const slideshow: Slideshow = yield select(selectSlideshow);
-//   const map = yield select(makeMapSelector());
-//   const bounds: LatLngBounds = new LatLngBounds(
-//     map.unproject([0, slideshow.image.height], map.getMaxZoom()),
-//     map.unproject([slideshow.image.width, 0], map.getMaxZoom()),
-//   );
-//   const projected = [
-//     map.project(
-//       bounds.getSouthWest(), map.getMaxZoom(),
-//     ),
-//     map.project(
-//       bounds.getNorthEast(), map.getMaxZoom(),
-//     ),
-//   ];
-//   try {
-//     const imgFile = yield loadImage(
-//       slideshow.image.file,
-//       {
-//         maxWidth: 120,
-//         maxHeight: 120,
-//         top: projected[1].y,
-//         right: projected[1].x,
-//         bottom: projected[0].y,
-//         left: projected[0].x,
-//       },
-//     );
-//     yield put(
-//       createSlideAction.success({
-//         frame: bounds,
-//         file: imgFile,
-//       }),
-//     );
-//   } catch (e) {
-//     console.log('error');
-//     console.error(e);
-//   }
-// }
-
-// const saveFile = (file: File): void => {
-//   const svgUrl = URL.createObjectURL(file);
-//   const downloadLink = document.createElement('a');
-//   downloadLink.href = svgUrl;
-//   downloadLink.download = 'newesttree.svg';
-//   document.body.appendChild(downloadLink);
-//   downloadLink.click();
-//   document.body.removeChild(downloadLink);
-// };
-// const saveImg = (imageFile: File): void => {
-//   const downloadLink = document.createElement('a');
-//   downloadLink.href = window.URL.createObjectURL(imageFile);
-//   downloadLink.target = '_blank';
-//   downloadLink.download = 'newesttree.jpg';
-//   document.body.appendChild(downloadLink);
-//   downloadLink.click();
-//   document.body.removeChild(downloadLink);
-// };
-
 export function* saveSlideshow() {
   const slideshow: Slideshow = yield select(selectSlideshow);
   if (slideshow.toJS) {

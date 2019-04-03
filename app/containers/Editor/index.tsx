@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useLayoutEffect, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import L, { LatLngBounds } from 'leaflet';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -14,19 +14,21 @@ import { Set } from 'immutable';
 import { compose } from 'redux';
 import cx from 'classnames';
 import { Map, ImageOverlay } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import 'quinoa-design-library/themes/millet/style.css';
 import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
-import useMousetrap from 'react-hook-mousetrap';
 // import { booleanContains } from '@turf/turf';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import Cover from 'types/Cover';
 import Slideshow from 'types/Slideshow';
 import FloatinBar from 'components/FloatingBar';
 import AnnotationLayer from 'components/AnnotationLayer';
 import Sidebar from 'components/Sidebar';
+import DrawingLayer from 'components/DrawingLayer';
+import Annotation from 'types/Annotation';
+import { SupportedShapes } from 'types';
+import { Feature } from 'geojson';
+import { collision } from 'utils/geo';
+import { useTools, useFlyTo, useUrl, useMapLock } from 'utils/hooks';
 
 import {
   createSlideshowAction,
@@ -42,11 +44,6 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
-import DrawingLayer from 'components/DrawingLayer';
-import Annotation from 'types/Annotation';
-import { SupportedShapes } from 'types';
-import { Feature } from 'geojson';
-import { collision } from 'utils/geo';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -85,81 +82,10 @@ interface EditorProps {
 const minZoom = 8;
 const maxZoom = 12;
 
-function useMapLock(map: L.Map, image: Cover): LatLngBounds {
-  const [maxBounds, setMaxBounds] = useState();
-  useLayoutEffect(() => {
-    if (map !== null) {
-      setMaxBounds(
-        new L.LatLngBounds(
-          map.unproject([0, image.height], map.getMaxZoom()),
-          map.unproject([image.width, 0], map.getMaxZoom()),
-        ),
-      );
-    }
-  }, [map, image]);
-  return maxBounds;
-}
-
-const useUrl = (file: File): string => {
-  const url = useMemo(() => window.URL.createObjectURL(file), [file]);
-  useEffect(() => () => window.URL.revokeObjectURL(url), [url]);
-  return url;
-};
-
-const useFlyTo = (map: L.Map, bounds: LatLngBounds): void =>
-  useEffect(() => {
-    if (map && bounds) {
-      map.fitBounds(bounds);
-    }
-  }, [map, bounds]);
-
-// const useToggleTool = (toolState, setToolState, toolToToggle, key) => {
-//   const [keyboardMemory, setkeyboardMemory] = useState<SupportedShapes | null>(null);
-//   useMousetrap(key, () => {
-//     if (!keyboardMemory) {
-//       setkeyboardMemory(toolState);
-//       setToolState(toolToToggle);
-//     }
-//   }, 'keydown');
-//   useMousetrap(key, () => {
-//     console.log(keyboardMemory);
-//     setToolState(keyboardMemory);
-//     setkeyboardMemory(null);
-//   }, 'keyup');
-// };
-
-const useTools = (defaultTool): [any, React.Dispatch<any>, (toolToToggle: SupportedShapes, key: string) => void] => {
-  const [tool, setTool] = useState<SupportedShapes>(defaultTool);
-  const [keyboardMemory, setkeyboardMemory] = useState<SupportedShapes | null>(null);
-  function useToggleTool(toolToToggle: SupportedShapes, key: string) {
-    useMousetrap(key, () => {
-      if (!keyboardMemory) {
-        setkeyboardMemory(tool);
-        setTool(toolToToggle);
-      }
-    }, 'keydown');
-    useMousetrap(key, () => {
-      if (tool === toolToToggle) {
-        setTool(keyboardMemory || SupportedShapes.selector);
-        setkeyboardMemory(null);
-      }
-    }, 'keyup');
-  }
-
-  return [
-    tool,
-    (newState) => {
-      setTool(newState);
-      setkeyboardMemory(null);
-    },
-    useToggleTool,
-  ];
-};
-
 function EditorMap(props: EditorProps) {
   const {slideshow, map} = props;
   const imageUrl: string = useUrl(slideshow.image.file);
-  const maxBounds: LatLngBounds = useMapLock(map, props.slideshow.image);
+  const maxBounds: LatLngBounds = useMapLock(map, slideshow.image);
   const [tool, setTool, useToggleTool] = useTools(SupportedShapes.selector);
 
   useToggleTool(SupportedShapes.selector, 'shift');
@@ -210,6 +136,7 @@ function EditorMap(props: EditorProps) {
   };
 
   useFlyTo(map, maxBounds);
+
   return (
     <div className={cx({
         map: true,

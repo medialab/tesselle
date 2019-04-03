@@ -18,6 +18,8 @@ import 'sanitize.css/sanitize.css';
 import L from 'leaflet';
 import 'leaflet-editable';
 import 'leaflet-path-drag';
+import 'leaflet/dist/leaflet.css';
+import 'quinoa-design-library/themes/millet/style.css';
 
 // Waou le hack très moche.
 (L as any).Editable.CircleEditor.prototype.resize = function(e) {

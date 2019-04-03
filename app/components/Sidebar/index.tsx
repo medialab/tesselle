@@ -46,8 +46,10 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
   );
   const changeSelection = React.useCallback((event) => {
     event.stopPropagation();
-    dispatch(changeSelectionAction(props.data));
-  }, [props.data]);
+    if (!props.selected) {
+      dispatch(changeSelectionAction(props.data));
+    }
+  }, [props.data, props.selected]);
   const onSubmit = React.useCallback((values) => {
     if (values.content !== props.data.properties.content) {
       dispatch(

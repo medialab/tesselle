@@ -8,5 +8,5 @@ interface AnnotationShapes {
   selected: boolean;
   map: L.Map;
   onClick?: (annotation: Annotation) => any;
-  tool: SupportedShapes;
+  tool?: SupportedShapes;
 }

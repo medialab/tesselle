@@ -56,6 +56,7 @@ export const fromJS = (value) => {
     case 'MultiPolygon':
       return MultiPolygon(value);
   }
+  throw new Error('Shape not supported in fromJS');
 };
 
 // @function formatNum(num: Number, digits?: Number): Number
