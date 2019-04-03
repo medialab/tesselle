@@ -103,10 +103,7 @@ function EditorMap(props: EditorProps) {
   const onPolygonClick = useCallback(() => {
     setTool(SupportedShapes.polygon);
   }, []);
-  const onDrown = useCallback((frame) => {
-    props.createAnnotation(frame);
-    setTool(SupportedShapes.selector);
-  }, []);
+  const onDrown = useCallback(props.createAnnotation, []);
   const onLayerClick = useCallback((annotation) => {
     if (tool === SupportedShapes.selector) {
       props.changeSelection(annotation);
@@ -192,7 +189,7 @@ function Editor(props: EditorProps & RouterProps) {
       <StretchedLayoutItem isFlex={1} style={{padding: '1rem', overflow: 'auto'}}>
         <Sidebar annotations={slideshow.annotations} selectedAnnotations={props.selectedAnnotations} />
       </StretchedLayoutItem>
-      <StretchedLayoutItem isFlex={3}>
+      <StretchedLayoutItem isFlex={2}>
         <EditorMap {...props} />
       </StretchedLayoutItem>
     </StretchedLayoutContainer>

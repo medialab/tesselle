@@ -72,7 +72,6 @@ function editorReducer(state: ContainerState = initialState, action: ContainerAc
               annotation,
             ),
           }),
-          selectedAnnotations: Set([annotation]),
         };
       case ActionTypes.EDIT_ANNOTATION:
         const annotations: List<Annotation> = state.slideshow.annotations.map(

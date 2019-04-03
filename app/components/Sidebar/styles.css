@@ -1,13 +1,10 @@
 .sidebar {
-  width: var(--sidebar-width);
   height: 100vh;
 }
-
-.sidebar--item-field {
-  width: 100%;
-  color: black;
+.textarea:not([rows]) {
+  max-height: initial;
+  min-height: initial;
 }
-
 .sidebar--item-field--selected {
   background: #3849a2;
   color: white;

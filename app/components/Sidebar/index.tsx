@@ -9,8 +9,17 @@ import { List, Set } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
 import { useDispatch } from 'utils/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Formik, Field, Form, FormikValues, FormikErrors } from 'formik';
+import { Formik, Form, FormikValues, FormikErrors, Field } from 'formik';
 import cx from 'classnames';
+import Textarea from 'react-textarea-autosize';
+
+const CustomTextarea = React.memo(({field, form: {touched, errors}, ...props}: any) => (
+  <div>
+    <Textarea {...field} {...props} />
+    {touched[field.name] &&
+      errors[field.name] && <div className="error">{errors[field.name]}</div>}
+  </div>
+));
 
 import {
   removeAnnotationAction,
@@ -84,10 +93,12 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
               return (
                 <Form>
                   <Field
+                    minRows={1}
+                    maxRows={5}
                     onBlur={onBlur}
                     className={cx('textarea', 'sidebar--item-field', props.selected && 'sidebar--item-field--selected')}
-                    component="textarea"
                     name="content"
+                    component={CustomTextarea}
                   />
                 </Form>
               );
@@ -95,7 +106,7 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
             </Formik>
           </StretchedLayoutItem>
           <StretchedLayoutItem>
-            <StretchedLayoutContainer isDirection="vertical">
+            <StretchedLayoutContainer isDirection="horizontal">
               <Button
                 onClick={onRemove}
                 style={{marginBottom: '.5rem'}}
@@ -111,16 +122,11 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
                   data-for="card-action"
                   data-tip={'drag to change annotation order'}
                 >
-                <Icon isSize="small" isAlign="left">
-                  <img src={icons.move.black.svg} />
-                </Icon>
+                  <Icon isSize="small" isAlign="left">
+                    <img src={icons.move.black.svg} />
+                  </Icon>
+                </div>
               </div>
-              </div>
-              <Button data-for="card-action" data-tip={'set a frame'}>
-                <Icon isSize="small" isAlign="left">
-                  <img src={icons.cover.black.svg} />
-                </Icon>
-              </Button>
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
