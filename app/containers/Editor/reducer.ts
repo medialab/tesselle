@@ -30,7 +30,7 @@ function selectionReducer(state: ContainerState, action: ContainerActions) {
   } else if (isImmutable(action.payload)) {
     const selectedAnnotations = state.selectedAnnotations.contains(action.payload as Annotation)
       ? state.selectedAnnotations.remove(action.payload as Annotation)
-      : state.selectedAnnotations.add(action.payload as Annotation);
+      : Set([action.payload as Annotation]);
     return {
       ...state,
       selectedAnnotations: selectedAnnotations,

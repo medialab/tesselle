@@ -202,13 +202,6 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
     event.stopPropagation();
     dispatch(changeSelectionAction());
   }, []);
-  if (!props.annotations) {
-    return (
-      <div className="sidebar">
-        <h1>Select a slide</h1>
-      </div>
-    );
-  }
   if (props.annotations.size === 0) {
     return (
       <div className="sidebar">

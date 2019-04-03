@@ -30,7 +30,7 @@ export const DrawingRectangleLayer: React.SFC<SubProps> = (props: SubProps) => {
 
   return (
     <LayerGroup onMouseMove={onMouseMove} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>
-      {frame && <Rectangle ref={ref} className="rectangle" color="red" bounds={frame} />}
+      {frame && <Rectangle ref={ref} className="rectangle" color="white" weight={1} bounds={frame} />}
     </LayerGroup>
   );
 };

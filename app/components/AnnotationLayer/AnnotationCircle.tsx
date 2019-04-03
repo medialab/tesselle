@@ -36,7 +36,7 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, on
   useEffect(() => {
     if (ref.current && ref.current.leafletElement) {
       try {
-        if (selected && tool === SupportedShapes.edit) {
+        if (selected && tool === SupportedShapes.selector) {
           ref.current.leafletElement.enableEdit();
         } else {
           ref.current.leafletElement.disableEdit();

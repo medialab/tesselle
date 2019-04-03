@@ -89,7 +89,6 @@ function EditorMap(props: EditorProps) {
   const [tool, setTool, useToggleTool] = useTools(SupportedShapes.selector);
 
   useToggleTool(SupportedShapes.selector, 'shift');
-  useToggleTool(SupportedShapes.edit, 'command');
 
   const onSelectClick = useCallback(() => {
     setTool(SupportedShapes.selector);
@@ -115,9 +114,6 @@ function EditorMap(props: EditorProps) {
       props.changeSelection();
     }
   }, [tool]);
-  const onEditClick = useCallback(() => {
-    setTool(SupportedShapes.edit);
-  }, []);
   const onSelect = useCallback((feature: Feature) => {
     const selected = collision(feature, slideshow.annotations.toJS());
     props.changeSelection(
@@ -154,7 +150,7 @@ function EditorMap(props: EditorProps) {
         maxZoom={maxZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
-        {(tool !== SupportedShapes.edit) && <DrawingLayer
+        {(tool === SupportedShapes.selector) && <DrawingLayer
           onDrown={tool === SupportedShapes.selector
             ? onSelect
             : onDrown
@@ -169,7 +165,6 @@ function EditorMap(props: EditorProps) {
           tool={tool}
         />
         <FloatinBar
-          onEditClick={onEditClick}
           onSelectClick={onSelectClick}
           activeButton={tool}
           onCircleClick={onCircleClick}

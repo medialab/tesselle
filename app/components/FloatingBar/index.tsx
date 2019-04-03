@@ -16,11 +16,8 @@ interface FloatingBarProps {
   onCircleClick: (event: any) => any;
   onSelectClick: (event: any) => any;
   onPolygonClick: (event: any) => any;
-  onEditClick: (event: any) => any;
   activeButton: SupportedShapes;
 }
-
-console.log(icons);
 
 const FloatingBar: React.SFC<FloatingBarProps> = (props: FloatingBarProps) => {
 
@@ -28,10 +25,6 @@ const FloatingBar: React.SFC<FloatingBarProps> = (props: FloatingBarProps) => {
     icon: icons.move,
     tool: SupportedShapes.selector,
     event: props.onSelectClick,
-  }, {
-    icon: icons.remove,
-    tool: SupportedShapes.edit,
-    event: props.onEditClick,
   }, {
     icon: icons.anchorRectangle,
     tool: SupportedShapes.rectangle,

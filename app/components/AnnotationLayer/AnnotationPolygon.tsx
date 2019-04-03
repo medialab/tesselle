@@ -46,7 +46,7 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
 
   useEffect((): any => {
     if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
-      if (selected && tool === SupportedShapes.edit) {
+      if (selected && tool === SupportedShapes.selector) {
         try {
           ref.current.leafletElement.enableEdit();
           ref.current.leafletElement.dragging.enable();
