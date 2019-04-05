@@ -21,13 +21,10 @@ import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 import Slideshow from 'types/Slideshow';
 import FloatinBar from 'components/FloatingBar';
-import AnnotationLayer from 'components/AnnotationLayer';
 import Sidebar from 'components/Sidebar';
-import DrawingLayer from 'components/DrawingLayer';
 import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
 import { Feature } from 'geojson';
-import { collision } from 'utils/geo';
 import { useTools, useFlyTo, useUrl, useMapLock } from 'utils/hooks';
 
 import {
@@ -44,6 +41,8 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
+import FigureEditor from 'components/FigureEditor';
+// import FigureEditor from 'react-leaflet-figure-editor';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -102,26 +101,11 @@ function EditorMap(props: EditorProps) {
   const onPolygonClick = useCallback(() => {
     setTool(SupportedShapes.polygon);
   }, []);
-  const onDrown = useCallback(props.createAnnotation, []);
-  const onLayerClick = useCallback((annotation) => {
+  const onMapClick = useCallback(() => {
     if (tool === SupportedShapes.selector) {
-      props.changeSelection(annotation);
-    }},
-    [props.changeSelection, tool],
-  );
-  const onMapClick = useCallback((event) => {
-    if (tool === SupportedShapes.selector) {
-      props.changeSelection();
+      // props.changeSelection();
     }
   }, [tool]);
-  const onSelect = useCallback((feature: Feature) => {
-    const selected = collision(feature, slideshow.annotations.toJS());
-    props.changeSelection(
-      slideshow.annotations.filter(
-        (_, index) => selected[index],
-      ).toSet(),
-    );
-  }, [props.slideshow]);
   const reactLeafletDangerousRef = lef => {
     if (lef && (map !== lef.leafletElement)) {
       props.setMap(lef.leafletElement);
@@ -150,19 +134,11 @@ function EditorMap(props: EditorProps) {
         maxZoom={maxZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
-        <DrawingLayer
-          onDrown={tool === SupportedShapes.selector
-            ? onSelect
-            : onDrown
-          }
-          addingShape={tool}
-        />
-        <AnnotationLayer
-          onLayerClick={onLayerClick}
-          key={`${slideshow.id}-${slideshow.annotations.size}`}
+        <FigureEditor
           data={slideshow.annotations}
-          selectedAnnotations={props.selectedAnnotations}
-          tool={tool}
+          selectedId={props.selectedAnnotations.size >= 1
+            ? (props.selectedAnnotations.first() as Annotation).properties.id
+            : undefined}
         />
         <FloatinBar
           onSelectClick={onSelectClick}
