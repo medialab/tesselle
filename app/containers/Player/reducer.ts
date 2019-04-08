@@ -9,7 +9,7 @@ import { combineReducers } from 'redux';
 import ActionTypes from './constants';
 import { ContainerState, ContainerActions } from './types';
 import { fromJS } from 'utils/geo';
-import Slideshow from 'types/slideshow';
+import Slideshow from 'types/Slideshow';
 
 export const initialState: ContainerState = {
   default: null,

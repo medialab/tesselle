@@ -8,7 +8,7 @@ import { createAsyncAction, createAction } from 'typesafe-actions';
 import {} from './types';
 
 import ActionTypes from './constants';
-import Slideshow from 'types/slideshow';
+import Slideshow from 'types/Slideshow';
 import Annotation from 'types/Annotation';
 import { List } from 'immutable';
 import { Feature, Point } from 'geojson';
