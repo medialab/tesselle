@@ -1,20 +1,26 @@
+import { SupportedShapes } from 'types';
+
 export interface IFigurePolygon {
-  id: string;
   type: string;
-  coordinates: number[][][];
+  geometry: {
+    coordinates: number[][][];
+  };
   properties: {
+    type: SupportedShapes;
     id: string;
   };
 }
 
 export interface ICircle {
   type: string;
-  coordinates: number[];
-  pointRadius: number[];
-  radius: number;
+  geometry: {
+    coordinates: number[];
+  };
   properties: {
+    type: SupportedShapes;
     id: string;
     radius_units: string;
+    radius: number;
   };
 }
 
@@ -33,16 +39,22 @@ export interface IPoint {
 
 export interface IPointGeo {
   type: string;
-  coordinates: number[];
+  geometry: {
+    coordinates: number[];
+  };
   properties: {
+    type: SupportedShapes;
     id: string;
   };
 }
 
 export interface ILineString {
   type: string;
-  coordinates: number[][];
+  geometry: {
+    coordinates: number[][];
+  };
   properties: {
+    type: SupportedShapes;
     id: string;
   };
 }

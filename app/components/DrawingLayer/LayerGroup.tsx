@@ -1,6 +1,13 @@
 import { MapLayer, withLeaflet } from 'react-leaflet';
 import L from 'leaflet';
-import { LayerProps, eventsMap } from './index';
+import { LayerProps } from './index';
+
+const eventsMap = [
+  ['mousemove', 'onMouseMove'],
+  ['mousedown', 'onMouseDown'],
+  ['mouseup', 'onMouseUp'],
+  ['click', 'onClick'],
+];
 
 export const LayerGroup = withLeaflet(class LayerGroup extends MapLayer<LayerProps> {
   public createLeafletElement(props: LayerProps): L.LayerGroup {

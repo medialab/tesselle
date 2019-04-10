@@ -120,6 +120,7 @@ function EditorMap(props: EditorProps) {
         creating: tool,
       })}>
       <Map
+        boxZoom={false}
         editable
         onClick={onMapClick}
         ref={reactLeafletDangerousRef}
@@ -135,6 +136,7 @@ function EditorMap(props: EditorProps) {
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
         <FigureEditor
+          tool={tool}
           data={slideshow.annotations}
           selectedId={props.selectedAnnotations.size >= 1
             ? (props.selectedAnnotations.first() as Annotation).properties.id
