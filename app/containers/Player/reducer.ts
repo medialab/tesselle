@@ -30,7 +30,6 @@ export default combineReducers<ContainerState, ContainerActions>({
     }
   },
   map: (state = initialState.map, action) => {
-    console.log('map', state, action.type);
     switch (action.type) {
       case ActionTypes.SET_MAP:
         return state;

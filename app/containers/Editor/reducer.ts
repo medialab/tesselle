@@ -4,7 +4,7 @@
  *
  */
 
-// import { combineReducers } from 'redux';
+import { combineReducers } from 'redux';
 
 import ActionTypes from './constants';
 import { ContainerState, ContainerActions } from './types';
@@ -13,119 +13,87 @@ import Annotation from 'types/Annotation';
 
 import { when, equals } from 'ramda';
 import { fromJS } from 'utils/geo';
-import { isImmutable, Set, isCollection, List } from 'immutable';
+import { isImmutable, Set } from 'immutable';
 
 export const initialState: ContainerState = {
-  slideshow: undefined,
+  slideshow: null,
   selectedAnnotations: Set(),
-  map: undefined,
+  map: null,
 };
 
-function selectionReducer(state: ContainerState, action: ContainerActions) {
-  if (isCollection(action.payload)) {
-    return {
-      ...state,
-      selectedAnnotations: action.payload,
-    };
-  } else if (isImmutable(action.payload)) {
-    const selectedAnnotations = state.selectedAnnotations.contains(action.payload as Annotation)
-      ? state.selectedAnnotations.remove(action.payload as Annotation)
-      : Set([action.payload as Annotation]);
-    return {
-      ...state,
-      selectedAnnotations: selectedAnnotations,
-    };
-  } else if (action.payload === undefined) {
-    return {
-      ...state,
-      selectedAnnotations: initialState.selectedAnnotations,
-    };
-  }
-  throw new Error('selectionReducer case');
-}
+const replaceAnnotation = action => when(
+  equals(action.payload.annotation),
+  (annotation: Annotation) => annotation.merge(
+    isImmutable(action.payload.editedFeature)
+    ? action.payload.editedFeature
+    : fromJS(action.payload.editedFeature),
+  ),
+);
 
-const updateSelection = (nextAnnotations: List<Annotation>, selection: Set<Annotation>): Set<Annotation> => {
-  const selectionsIds = selection.map(annotation => annotation.properties.id);
-  return nextAnnotations.filter(annotation => selectionsIds.contains(annotation.properties.id)).toSet();
-};
-
-function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
-  if (state.slideshow) {
+export default combineReducers<ContainerState, ContainerActions>({
+  selectedAnnotations: (selectedAnnotations = initialState.selectedAnnotations, action: ContainerActions) => {
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
-        return selectionReducer(state, action);
-      case ActionTypes.CHANGE_ORDER:
-        return {
-          ...state,
-          slideshow: state.slideshow.set(
+        if (action.payload instanceof Set) {
+          return action.payload as any;
+        } else {
+          const annotation: Annotation = action.payload as Annotation;
+          if (selectedAnnotations.contains(annotation)) {
+            return selectedAnnotations.remove(annotation);
+          }
+          return Set([annotation]);
+        }
+      case ActionTypes.EDIT_ANNOTATION:
+        return selectedAnnotations.map(replaceAnnotation(action));
+      case ActionTypes.REMOVE_ANNOTATION:
+        return selectedAnnotations.remove(action.payload);
+    }
+    return selectedAnnotations;
+  },
+  map: (map = initialState.map, action) => {
+    if (action.type === ActionTypes.SET_MAP && map !== action.payload) {
+      return action.payload;
+    }
+    return map;
+  },
+  slideshow: (slideshow = initialState.slideshow, action) => {
+    if (slideshow) {
+      switch (action.type) {
+        case ActionTypes.CHANGE_ORDER:
+          return slideshow.set(
             'annotations',
             action.payload,
-          ),
-        };
-      case ActionTypes.CREATE_ANNOTATION:
-        const annotation: Annotation = fromJS(action.payload);
-        return {
-          ...state,
-          slideshow: state.slideshow.with({
-            annotations: state.slideshow.annotations.push(
+          );
+        case ActionTypes.CREATE_ANNOTATION:
+          const annotation: Annotation = fromJS(action.payload);
+          return slideshow.with({
+            annotations: slideshow.annotations.push(
               annotation,
             ),
-          }),
-        };
-      case ActionTypes.EDIT_ANNOTATION:
-        const annotations: List<Annotation> = state.slideshow.annotations.map(
-          when(
-            equals(action.payload.annotation),
-            (annotation: Annotation) => annotation.merge(
-              isImmutable(action.payload.editedFeature)
-              ? action.payload.editedFeature
-              : fromJS(action.payload.editedFeature),
-            ),
-          ),
-        );
-        return {
-          ...state,
-          slideshow: state.slideshow.set(
+          });
+        case ActionTypes.EDIT_ANNOTATION:
+          return slideshow.set(
             'annotations',
-            annotations,
-          ),
-          selectedAnnotations: updateSelection(annotations, state.selectedAnnotations),
-        };
-      case ActionTypes.REMOVE_ANNOTATION:
-        return {
-          ...state,
-          selectedAnnotations: state.selectedAnnotations.remove(action.payload),
-          slideshow: state.slideshow.set(
-            'annotations',
-            state.slideshow.annotations.remove(
-              state.slideshow.annotations.indexOf(action.payload),
-            ),
-          ),
-        };
+            slideshow.annotations.map(replaceAnnotation(action)),
+          );
+        case ActionTypes.REMOVE_ANNOTATION:
+            return slideshow.set(
+              'annotations',
+              slideshow.annotations.remove(
+                slideshow.annotations.indexOf(action.payload),
+              ),
+            );
+      }
+      return slideshow;
     }
-  }
-  switch (action.type) {
-    case ActionTypes.CREATE_SLIDESHOW_SUCCESS:
-      return {
-        ...state,
-        slideshow: new Slideshow({
+    switch (action.type) {
+      case ActionTypes.CREATE_SLIDESHOW_SUCCESS:
+        return new Slideshow({
           id: action.payload.id,
           image: action.payload.image,
           annotations: action.payload.annotations.map(fromJS),
-        }),
-
-      };
-    case ActionTypes.SET_MAP:
-      if (state.map !== action.payload) {
-        return {
-          ...state,
-          map: action.payload,
-        };
-      }
-      return state;
-    default:
-      return state;
-  }
-}
-
-export default editorReducer;
+        });
+    }
+    return slideshow;
+  },
+});

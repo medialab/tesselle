@@ -49,18 +49,18 @@ export const useTools = (defaultTool): [
   (toolToToggle: SupportedShapes, key: string) => void
 ] => {
   const [tool, setTool] = useState<SupportedShapes>(defaultTool);
-  const [keyboardMemory, setkeyboardMemory] = useState<SupportedShapes | null>(null);
+  const [isPressing, setIsPressing] = useState<SupportedShapes | null>(null);
   function useToggleTool(toolToToggle: SupportedShapes, key: string) {
     useMousetrap(key, () => {
-      if (!keyboardMemory) {
-        setkeyboardMemory(tool);
+      if (!isPressing) {
+        setIsPressing(tool);
         setTool(toolToToggle);
       }
     }, 'keydown');
     useMousetrap(key, () => {
       if (tool === toolToToggle) {
-        setTool(keyboardMemory || SupportedShapes.selector);
-        setkeyboardMemory(null);
+        setTool(isPressing || SupportedShapes.selector);
+        setIsPressing(null);
       }
     }, 'keyup');
   }
@@ -68,7 +68,7 @@ export const useTools = (defaultTool): [
     tool,
     (newState) => {
       setTool(newState);
-      setkeyboardMemory(null);
+      setIsPressing(null);
     },
     useToggleTool,
   ];
