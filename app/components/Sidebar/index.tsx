@@ -149,11 +149,8 @@ const reorder = (list: List<Annotation>, startIndex: number, endIndex: number) =
 };
 
 const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
-
   const dispatch = useDispatch();
-
   const onDragEnd = React.useCallback((result) => {
-    // dropped outside the list
     if (!result.destination) {
       return;
     }
@@ -212,4 +209,4 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
   return <div onClick={onClickSidebar} className="sidebar"><Orderable {...props} /></div>;
 };
 
-export default Sidebar;
+export default React.memo(Sidebar);

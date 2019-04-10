@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Map, ImageOverlay } from 'react-leaflet';
 import { createStructuredSelector } from 'reselect';
@@ -20,6 +19,7 @@ import L, { LatLngBounds } from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
 import { useUrl, useMapLock } from 'utils/hooks';
 import 'containers/Editor/styles.css';
+
 const minZoom = 8;
 const maxZoom = 12;
 
@@ -48,10 +48,6 @@ function Player(props) {
     </div>
   );
 }
-
-Player.propTypes = {
-  dispatch: PropTypes.func.isRequired,
-};
 
 const mapStateToProps = createStructuredSelector({
   player: makeSelectPlayer(),

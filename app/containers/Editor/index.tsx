@@ -6,7 +6,6 @@
 
 import React, { useCallback } from 'react';
 import L, { LatLngBounds } from 'leaflet';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { RouterProps } from 'react-router';
 import { createStructuredSelector } from 'reselect';
@@ -15,7 +14,6 @@ import { compose } from 'redux';
 import cx from 'classnames';
 import { Map, ImageOverlay } from 'react-leaflet';
 import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
-// import { booleanContains } from '@turf/turf';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -82,7 +80,7 @@ interface EditorProps {
 const minZoom = 8;
 const maxZoom = 12;
 
-function EditorMap(props: EditorProps) {
+const EditorMap: React.SFC<EditorProps> = (props) => {
   const {slideshow, map} = props;
   const imageUrl: string = useUrl(slideshow.image.file);
   const maxBounds: LatLngBounds = useMapLock(map, slideshow.image);
@@ -104,9 +102,10 @@ function EditorMap(props: EditorProps) {
   }, []);
   const onDrown = useCallback(props.createAnnotation, []);
   const onLayerClick = useCallback((annotation) => {
-    if (tool === SupportedShapes.selector) {
-      props.changeSelection(annotation);
-    }},
+      if (tool === SupportedShapes.selector) {
+        props.changeSelection(annotation);
+      }
+    },
     [props.changeSelection, tool],
   );
   const onMapClick = useCallback((event) => {
@@ -150,7 +149,7 @@ function EditorMap(props: EditorProps) {
         maxZoom={maxZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
-        {(tool === SupportedShapes.selector) && <DrawingLayer
+        {(tool !== SupportedShapes.selector) && <DrawingLayer
           onDrown={tool === SupportedShapes.selector
             ? onSelect
             : onDrown
@@ -159,7 +158,6 @@ function EditorMap(props: EditorProps) {
         />}
         <AnnotationLayer
           onLayerClick={onLayerClick}
-          key={`${slideshow.id}-${slideshow.annotations.size}`}
           data={slideshow.annotations}
           selectedAnnotations={props.selectedAnnotations}
           tool={tool}
@@ -173,28 +171,20 @@ function EditorMap(props: EditorProps) {
       </Map>
     </div>
   );
-}
-
-function Editor(props: EditorProps & RouterProps) {
-  const slideshow = props.slideshow;
-  return (
-    <StretchedLayoutContainer
-      isFullHeight
-      isDirection="horizontal">
-      <StretchedLayoutItem isFlex={1} style={{padding: '1rem', overflow: 'auto'}}>
-        <Sidebar annotations={slideshow.annotations} selectedAnnotations={props.selectedAnnotations} />
-      </StretchedLayoutItem>
-      <StretchedLayoutItem isFlex={2}>
-        <EditorMap {...props} />
-      </StretchedLayoutItem>
-    </StretchedLayoutContainer>
-  );
-}
-
-Editor.propTypes = {
-  createSlideshow: PropTypes.func.isRequired,
 };
 
+const Editor: React.SFC<EditorProps & RouterProps> = React.memo((props) => (
+  <StretchedLayoutContainer
+    isFullHeight
+    isDirection="horizontal">
+    <StretchedLayoutItem isFlex={1} style={{padding: '1rem', overflow: 'auto'}}>
+      <Sidebar annotations={props.slideshow.annotations} selectedAnnotations={props.selectedAnnotations} />
+    </StretchedLayoutItem>
+    <StretchedLayoutItem isFlex={2}>
+      <EditorMap {...props} />
+    </StretchedLayoutItem>
+  </StretchedLayoutContainer>
+));
 
 export default decorator(props => {
   if (props.slideshow) {

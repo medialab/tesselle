@@ -3,7 +3,7 @@ import { Rectangle, Tooltip } from 'react-leaflet';
 
 import { coordsToLatLngs, fromJS } from 'utils/geo';
 import { AnnotationShapes } from './types';
-import 'leaflet-editable';
+import { noop } from 'ramda';
 import { SupportedShapes } from 'types';
 
 const CustomTypeRectangle: any = Rectangle;
@@ -37,15 +37,11 @@ const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
         );
       };
       ref.current.leafletElement.on(onEndEvents, save);
-      // ref.current.leafletElement.on(allEvents, (event) => {
-      //   DomEvent.preventDefault(event);
-      //   console.log(event.type);
-      // });
       return () => {
         ref.current.leafletElement.off(onEndEvents, save);
       };
     }
-    return () => {};
+    return noop;
   }, [annotation]);
 
   useEffect((): any => {

@@ -3,7 +3,6 @@ import { Polygon, Tooltip } from 'react-leaflet';
 
 import { coordsToLatLngs, fromJS } from 'utils/geo';
 import { AnnotationShapes } from './types';
-import 'leaflet-editable';
 import { SupportedShapes } from 'types';
 
 const CustomTypePolygon: any = Polygon;

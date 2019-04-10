@@ -6,8 +6,8 @@ import { LayerGroup } from './LayerGroup';
 
 export const DrawingCircleLayer: React.SFC<SubProps> = (props: SubProps) => {
   const { addingShape } = props;
-  const [startLatLng, setStartLatLng]: [undefined | L.LatLng, (setState: undefined | L.LatLng) => any] = useState();
-  const [radius, setRadius] = useState();
+  const [startLatLng, setStartLatLng] = useState<L.LatLng>();
+  const [radius, setRadius] = useState<number>(0);
   const ref = useRef<Circle>(null);
   const onMouseDown = useCallback((event: LeafletMouseEvent) => {
     if (addingShape) {

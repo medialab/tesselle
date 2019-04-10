@@ -3,6 +3,7 @@ import { Circle, Tooltip } from 'react-leaflet';
 import { coordsToLatLng, fromJS } from 'utils/geo';
 import { AnnotationShapes } from './types';
 import { SupportedShapes } from 'types';
+import { noop } from 'ramda';
 
 const okEvents = ['editable:drag', 'editable:vertex:dragend'].join(' ');
 
@@ -10,7 +11,9 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, on
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const center = useMemo(() => coordsToLatLng(coords), [selected]);
-  const ref = useRef<any>(null);
+  // Because leaflet editor plugin is an ugly monkey patch and does not provide good typing.
+  // This is why we us a any caster.
+  const ref = useRef<Circle & any>(null);
   useEffect(() => {
     if (ref.current && ref.current.leafletElement) {
       const save = () => {
@@ -30,7 +33,7 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, on
         ref.current.leafletElement.off(okEvents, save);
       };
     }
-    return () => {};
+    return noop;
   });
 
   useEffect(() => {

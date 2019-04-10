@@ -6,11 +6,12 @@ import Slideshow, { slideshowCreator } from '../../types/Slideshow';
 import { createSlideshowAction } from './actions';
 import db from '../../utils/db';
 import { makeSelectSlideshow } from './selectors';
+import { isImmutable } from 'immutable';
 
 const selectSlideshow = makeSelectSlideshow();
 
 export function* setSlideshow(slideshow: Slideshow) {
-  if (slideshow.toJS) {
+  if (isImmutable(slideshow)) {
     yield db.setItem('slideshow', slideshow.toJS());
   }
   yield put(
@@ -38,7 +39,7 @@ export function* createAndRedirect(action) {
 
 export function* saveSlideshow() {
   const slideshow: Slideshow = yield select(selectSlideshow);
-  if (slideshow.toJS) {
+  if (isImmutable(slideshow)) {
     yield db.setItem('slideshow', slideshow.toJS());
   }
 }
@@ -48,11 +49,10 @@ export default function* editorSaga() {
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
   yield takeLatest(ActionTypes.CREATE_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.REMOVE_ANNOTATION, saveSlideshow);
-  yield takeLatest(ActionTypes.EDIT_ANNOTATION,   saveSlideshow);
-  yield takeLatest(ActionTypes.CHANGE_ORDER,      saveSlideshow);
+  yield takeLatest(ActionTypes.EDIT_ANNOTATION, saveSlideshow);
+  yield takeLatest(ActionTypes.CHANGE_ORDER, saveSlideshow);
   try {
     const rawSlideshow: Slideshow = yield db.getItem('slideshow');
-    // const slideshow = Slideshow.builder(rawSlideshow).build();
     if (rawSlideshow) {
       yield setSlideshow(rawSlideshow);
     } else {

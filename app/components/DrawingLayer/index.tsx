@@ -20,16 +20,9 @@ export interface LayerProps extends MapLayerProps {
   onClick?: LeafletEventHandlerFn;
 }
 
-export const eventsMap = [
-  ['mousemove', 'onMouseMove'],
-  ['mousedown', 'onMouseDown'],
-  ['mouseup', 'onMouseUp'],
-  ['click', 'onClick'],
-];
-
 interface OwnProps extends LayerProps {
   onDrown: (shape: geojson.Feature<geojson.Point | geojson.Polygon | geojson.MultiPolygon, any>) => void;
-  addingShape: string | undefined;
+  addingShape?: string;
 }
 
 export interface SubProps extends OwnProps {

@@ -16,9 +16,9 @@ import { fromJS } from 'utils/geo';
 import { isImmutable, Set, isCollection, List } from 'immutable';
 
 export const initialState: ContainerState = {
-  slideshow: null,
+  slideshow: undefined,
   selectedAnnotations: Set(),
-  map: null,
+  map: undefined,
 };
 
 function selectionReducer(state: ContainerState, action: ContainerActions) {
@@ -50,7 +50,6 @@ const updateSelection = (nextAnnotations: List<Annotation>, selection: Set<Annot
 };
 
 function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
-  console.log(action.type);
   if (state.slideshow) {
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:

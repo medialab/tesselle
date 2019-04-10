@@ -18,7 +18,6 @@ export const initialState: ContainerState = {
 
 export default combineReducers<ContainerState, ContainerActions>({
   default: (state = initialState.default, action) => {
-    console.log('default', state, action.type);
     switch (action.type) {
       case ActionTypes.CREATE_SLIDESHOW:
         return new Slideshow({

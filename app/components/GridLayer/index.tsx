@@ -8,8 +8,6 @@ import * as React from 'react';
 import L from 'leaflet';
 import { MapLayer, withLeaflet } from 'react-leaflet';
 
-// import styled from 'styles/styled-components';
-
 const DebugCoords = L.GridLayer.extend({
   createTile: (coords) => {
     const tile = document.createElement('div');
@@ -18,8 +16,6 @@ const DebugCoords = L.GridLayer.extend({
     return tile;
   },
 });
-
-// interface OwnProps {}
 
 class GridLayer extends MapLayer<any> {
   public createLeafletElement(props) {

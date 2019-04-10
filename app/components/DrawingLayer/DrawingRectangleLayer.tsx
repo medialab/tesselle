@@ -6,27 +6,27 @@ import { SubProps } from './index';
 import { LayerGroup } from './LayerGroup';
 
 export const DrawingRectangleLayer: React.SFC<SubProps> = (props: SubProps) => {
-  const [drawing, setDrawing] = useState();
-  const [frame, setFrame] = useState();
+  const [startPoint, setStartPoint] = useState<L.LatLng>();
+  const [frame, setFrame] = useState<L.LatLngBounds>();
   const ref = useRef<Rectangle>(null);
 
   const onMouseDown = useCallback((event: LeafletMouseEvent) => {
-    setDrawing(event.latlng);
+    setStartPoint(event.latlng);
   }, []);
   const onMouseMove = useCallback((event: LeafletMouseEvent) => {
-    if (drawing) {
-      setFrame(L.latLngBounds(drawing, event.latlng));
+    if (startPoint) {
+      setFrame(L.latLngBounds(startPoint, event.latlng));
     }
-  }, [drawing, frame]);
+  }, [startPoint, frame]);
   const onMouseUp = useCallback((event) => {
-    setDrawing(null);
-    if (drawing && frame && ref.current) {
+    setStartPoint(undefined);
+    if (startPoint && frame && ref.current) {
       const feature = ref.current.leafletElement.toGeoJSON();
       feature.properties.type = SupportedShapes.rectangle;
       props.onDrown(feature);
-      setFrame(null);
+      setFrame(undefined);
     }
-  }, [drawing, frame]);
+  }, [startPoint, frame]);
 
   return (
     <LayerGroup onMouseMove={onMouseMove} onMouseDown={onMouseDown} onMouseUp={onMouseUp}>

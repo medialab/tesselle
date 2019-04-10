@@ -21,7 +21,7 @@ import 'leaflet-path-drag';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
 
-// Waou le hack très moche.
+// This is a ugly hack. original CircleEditor#resize is using an old & deprecated leaflet API.
 (L as any).Editable.CircleEditor.prototype.resize = function(e) {
   const radius = this.map.distance(e.latlng, this.feature._latlng);
   this.feature.setRadius(radius);
