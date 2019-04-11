@@ -10,7 +10,7 @@ Comparable aplications and why we decided to create a new one.
 
 ## live demo
 
-http://medialab.github.io/glisseMontre
+At some point we will throw a live-demo on github.io
 
 ## local deployment
 
