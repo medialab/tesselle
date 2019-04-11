@@ -74,6 +74,7 @@ const getSvgSize = (svgElement: Element): Box | never => {
 
 export const slideshowCreator = (file: File): Promise<Slideshow> =>
   new Promise((resolve, reject) => {
+    console.log('slideshow creator', file.type);
     if (file.type === svgType) {
       const reader = new FileReader();
       reader.onload = () => {

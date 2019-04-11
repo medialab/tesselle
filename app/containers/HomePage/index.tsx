@@ -9,14 +9,12 @@
  * the linting exception.
  */
 
-import React, { useCallback } from 'react';
-import { FormattedMessage } from 'react-intl';
+import React, { useCallback, ChangeEvent } from 'react';
 import { Container, Hero, HeroHeader, HeroFooter, Title } from 'quinoa-design-library/components/';
 import FileDrop from 'react-file-drop';
 import { propSatisfies, pipe, when, __ } from 'ramda';
 import { RouterProps } from 'react-router';
 import { decorator } from '../Editor';
-import messages from './messages';
 import includes from 'ramda/es/includes';
 
 const validMimeTypes = ['image/jpeg', 'image/svg+xml'];
@@ -36,20 +34,27 @@ const ifFileIsImage = (func: () => any) => pipe(
   when(
     propSatisfies(isImage, 'type'),
     pipe((arg) => {
+      console.log(arg);
       return arg;
     }, func),
   ),
 );
 
 const HomePage = (props: HomePageProps & RouterProps) => {
+  const onDrop = useCallback(
+    ifFileIsImage((...args) => {
+      props.createSlideshow(...args);
+      console.log('go to create slidehsow');
+    }),
+    [],
+  );
+  const onUpload = useCallback((event: ChangeEvent<any>) => {
+    console.log('on input chang');
+    onDrop(event.target.files, event);
+  }, []);
   return (
     <section>
-      <FileDrop onDrop={
-        useCallback(
-          ifFileIsImage(props.createSlideshow),
-          [],
-        )
-      }>
+      <FileDrop onDrop={onDrop}>
         <Hero
           isColor="success"
           isSize="large">
@@ -57,13 +62,13 @@ const HomePage = (props: HomePageProps & RouterProps) => {
             <Title>Bienvenue sur Glisse-montre!</Title>
           </HeroHeader>
           <HeroFooter>
-            <h2>You can either start a project by droping a new image or drop a file to edit it.</h2>
+            <h2>Start a new project by droping an image in this green area or by using the file input.</h2>
           </HeroFooter>
         </Hero>
-        <Container>
-          <FormattedMessage {...messages.header} />
-        </Container>
       </FileDrop>
+      <Container>
+        <input type="file" onChange={onUpload} />
+      </Container>
     </section>
   );
 };
