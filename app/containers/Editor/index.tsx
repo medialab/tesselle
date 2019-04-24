@@ -19,13 +19,10 @@ import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 import Slideshow from 'types/Slideshow';
 import FloatinBar from 'components/FloatingBar';
-import AnnotationLayer from 'components/AnnotationLayer';
 import Sidebar from 'components/Sidebar';
-import DrawingLayer from 'components/DrawingLayer';
 import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
 import { Feature } from 'geojson';
-import { collision } from 'utils/geo';
 import { useTools, useFlyTo, useMapLock } from 'utils/hooks';
 
 import {
@@ -43,6 +40,8 @@ import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
 import IiifLayer from 'components/IiifLayer';
+import FigureEditor from 'components/FigureEditor';
+// import FigureEditor from 'react-leaflet-figure-editor';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -100,27 +99,19 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
   const onPolygonClick = useCallback(() => {
     setTool(SupportedShapes.polygon);
   }, []);
-  const onDrown = useCallback(props.createAnnotation, []);
-  const onLayerClick = useCallback((annotation) => {
-      if (tool === SupportedShapes.selector) {
-        props.changeSelection(annotation);
-      }
-    },
-    [props.changeSelection, tool],
-  );
+  // const onDrown = useCallback(props.createAnnotation, []);
+  // const onLayerClick = useCallback((annotation) => {
+  //     if (tool === SupportedShapes.selector) {
+  //       props.changeSelection(annotation);
+  //     }
+  //   },
+  //   [props.changeSelection, tool],
+  // );
   const onMapClick = useCallback(() => {
     if (tool === SupportedShapes.selector) {
       props.changeSelection();
     }
   }, [tool]);
-  const onSelect = useCallback((feature: Feature) => {
-    const selected = collision(feature, slideshow.annotations.toJS());
-    props.changeSelection(
-      slideshow.annotations.filter(
-        (_, index) => selected[index],
-      ).toSet(),
-    );
-  }, [props.slideshow]);
   const reactLeafletDangerousRef = lef => {
     if (lef && (map !== lef.leafletElement)) {
       props.setMap(lef.leafletElement);
@@ -135,6 +126,7 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
         creating: tool,
       })}>
       <Map
+        boxZoom={false}
         editable
         onClick={onMapClick}
         ref={reactLeafletDangerousRef}
@@ -148,18 +140,12 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
         maxZoom={maxZoom}
         center={[0, 0]}>
         <IiifLayer url={imageUrl} tileSize={512} />
-        {(tool !== SupportedShapes.selector) && <DrawingLayer
-          onDrown={tool === SupportedShapes.selector
-            ? onSelect
-            : onDrown
-          }
-          addingShape={tool}
-        />}
-        <AnnotationLayer
-          onLayerClick={onLayerClick}
-          data={slideshow.annotations}
-          selectedAnnotations={props.selectedAnnotations}
+        <FigureEditor
           tool={tool}
+          data={slideshow.annotations}
+          selectedId={props.selectedAnnotations.size >= 1
+            ? (props.selectedAnnotations.first() as Annotation).properties.id
+            : undefined}
         />
         <FloatinBar
           onSelectClick={onSelectClick}
