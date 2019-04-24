@@ -1,4 +1,4 @@
-import { resizeImage } from 'utils/imageManipulation';
+import { resizeImage, calculateAspectRatioFit } from 'utils/imageManipulation';
 
 function* staticPartialTileSizes(width: number, height: number, tilesize: number, scaleFactors: number[]) {
   for (const sf of scaleFactors) {
@@ -6,8 +6,8 @@ function* staticPartialTileSizes(width: number, height: number, tilesize: number
       continue;
     }
     const rts = tilesize * sf;
-    const xt = Math.floor ((width - 1) / rts) + 1;
-    const yt = Math.floor ((height - 1) / rts) + 1;
+    const xt = Math.floor((width - 1) / rts) + 1;
+    const yt = Math.floor((height - 1) / rts) + 1;
     for (let nx = 0; nx <= xt; nx++) {
       const rx = nx * rts;
       let rxe = rx + rts;
@@ -58,6 +58,8 @@ export default class IIIFStatic {
       scaleFactors.push(sf);
     }
     const res: any[] = [];
+    const now = new Date();
+    console.log('start', now);
     for (const [region, size] of staticPartialTileSizes(width, height, this.tilesize, scaleFactors)) {
       res.push(
         await this.generateTile(
@@ -66,10 +68,16 @@ export default class IIIFStatic {
         ),
       );
     }
+    const ratio = calculateAspectRatioFit(
+      width, height, 480, 512,
+    );
+    console.log(ratio);
     res.push(await this.generateTile(
-      [0, 0, 3840, 2560],
-      [480, 320],
+      [0, 0, width, height],
+      [ratio.width, ratio.height],
     ));
+    const past = new Date();
+    console.log('end', past);
     return res;
   }
 
