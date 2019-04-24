@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import ActionTypes from './constants';
 import Slideshow, { slideshowCreator } from '../../types/Slideshow';
 import { createSlideshowAction } from './actions';
-import db from '../../utils/db';
+import db from 'utils/db';
 import { makeSelectSlideshow } from './selectors';
 import { isImmutable } from 'immutable';
 
@@ -14,7 +14,6 @@ export function* setSlideshow(slideshow: Slideshow) {
   if (isImmutable(slideshow)) {
     yield db.setItem('slideshow', slideshow.toJS());
   }
-  yield slideshowCreator(slideshow.image.file);
   yield put(
     createSlideshowAction.success(
       slideshow,
@@ -22,9 +21,9 @@ export function* setSlideshow(slideshow: Slideshow) {
   );
 }
 
-export function* createSlideshow(action: any) {
+export function* createSlideshow(action: any, slice) {
   try {
-    const slideshow: Slideshow = yield slideshowCreator(action.payload);
+    const slideshow: Slideshow = yield slideshowCreator(action.payload, slice);
     // sagas: slideshow initalized
     // sagas: sending slideshow to reducer
     yield setSlideshow(slideshow);
@@ -38,7 +37,8 @@ export function* createSlideshow(action: any) {
 
 export function* createAndRedirect(action) {
   // sagas: createSlideshow
-  yield createSlideshow(action);
+  yield db.clear();
+  yield createSlideshow(action, true);
   // sagas: slidehsow created
   // sagas: redirect to editor
   yield put(push('/editor'));

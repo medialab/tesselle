@@ -2,9 +2,9 @@ import uuid from 'uuid';
 import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
 import Annotation from 'types/Annotation';
+import slicer from 'utils/slice';
+import db from 'utils/db';
 import Cover from './Cover';
-// import slicer from 'utils/slice';
-// import db from 'utils/db';
 
 interface SlideshowArgs {
   id?: string;
@@ -47,7 +47,7 @@ interface Box {
 const maxX = '1000';
 const maxY = '1000';
 const svgType = 'image/svg+xml';
-const xmlSerializer = new XMLSerializer();
+// const xmlSerializer = new XMLSerializer();
 
 const createObject = curry((specification, value) => map(f => f(value), specification));
 const parseWidth: () => number = pipe(nth(2), Number);
@@ -74,7 +74,26 @@ const getSvgSize = (svgElement: Element): Box | never => {
   throw new Error('No width / height nor viewBox');
 };
 
-export const slideshowCreator = (file: File): Promise<Slideshow> =>
+const generateInfo = img => {
+  return {
+    '@context': 'http://library.stanford.edu/iiif/image-api/1.1/context.json',
+    '@id': 'test-image',
+    'formats': ['jpg'],
+    'height': img.height,
+    'profile': 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0',
+    'qualities': ['native'],
+    'scale_factors': [
+      1,
+      2,
+      4,
+    ],
+    'tile_height': 512,
+    'tile_width': 512,
+    'width': img.width,
+  };
+};
+
+export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
   new Promise((resolve, reject) => {
     if (file.type === svgType) {
       const reader = new FileReader();
@@ -87,7 +106,7 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
           return resolve(
             new Slideshow({
               image: new Cover({
-                file: file,
+                file: false,
                 width: box.width,
                 height: box.height,
               }),
@@ -95,16 +114,16 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
         } catch (error) {
           svgElement.setAttribute('width', maxX);
           svgElement.setAttribute('height', maxY);
-          const newFile: File = new File([
-            new Blob(
-              [xmlSerializer.serializeToString(svgElement)],
-              {type: svgType},
-            ),
-          ], file.name, {type: svgType});
+          // const newFile: File = new File([
+          //   new Blob(
+          //     [xmlSerializer.serializeToString(svgElement)],
+          //     {type: svgType},
+          //   ),
+          // ], file.name, {type: svgType});
           const box: Box = getSvgSize(svgElement);
           return resolve(new Slideshow({
             image: new Cover({
-              file: newFile,
+              file: false,
               width: box.width,
               height: box.height,
             }),
@@ -123,15 +142,17 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
         if (img.height === 0) {
           return reject(new Error('Slideshow.image has a height of 0'));
         }
-
-        // for (const [url, file] of await slicer(img)) {
-        //   // console.log('ca se passe ?', i++);
-        //   console.log('db.setItem(url, file)', await db.setItem(url, file));
-        // }
-
+        console.log('fait ca', img.width, img.height);
+        console.log(url, img, file);
+        await db.setItem('info.json', generateInfo(img));
+        if (slicing) {
+          for (const [url, file] of await slicer(img)) {
+            await db.setItem(url, file);
+          }
+        }
         return resolve(new Slideshow({
           image: new Cover({
-            file: file,
+            file: slicing,
             width: img.width,
             height: img.height,
           }),
