@@ -12,7 +12,7 @@ import { createStructuredSelector } from 'reselect';
 import { Set } from 'immutable';
 import { compose } from 'redux';
 import cx from 'classnames';
-import { Map, ImageOverlay } from 'react-leaflet';
+import { Map } from 'react-leaflet';
 import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
 
 import injectSaga from 'utils/injectSaga';
@@ -26,7 +26,7 @@ import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
 import { Feature } from 'geojson';
 import { collision } from 'utils/geo';
-import { useTools, useFlyTo, useUrl, useMapLock } from 'utils/hooks';
+import { useTools, useFlyTo, useMapLock } from 'utils/hooks';
 
 import {
   createSlideshowAction,
@@ -42,6 +42,7 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
+import IiifLayer from 'components/IiifLayer';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -77,12 +78,11 @@ interface EditorProps {
   readonly setMap: (event) => void;
 }
 
-const minZoom = 8;
-const maxZoom = 12;
-
+const minZoom = 0;
+const maxZoom = 20;
 const EditorMap: React.SFC<EditorProps> = (props) => {
   const {slideshow, map} = props;
-  const imageUrl: string = useUrl(slideshow.image.file);
+  const imageUrl: string = 'http://localhost:3000/test-image/info.json';
   const maxBounds: LatLngBounds = useMapLock(map, slideshow.image);
   const [tool, setTool, useToggleTool] = useTools(SupportedShapes.selector);
 
@@ -108,7 +108,7 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
     },
     [props.changeSelection, tool],
   );
-  const onMapClick = useCallback((event) => {
+  const onMapClick = useCallback(() => {
     if (tool === SupportedShapes.selector) {
       props.changeSelection();
     }
@@ -143,12 +143,11 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
         // zoomControl={false}
         // keyboard={false}
         // scrollWheelZoom={false}
-        maxBounds={maxBounds}
         crs={L.CRS.Simple}
         minZoom={minZoom}
         maxZoom={maxZoom}
         center={[0, 0]}>
-        {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
+        <IiifLayer url={imageUrl} tileSize={512} />
         {(tool !== SupportedShapes.selector) && <DrawingLayer
           onDrown={tool === SupportedShapes.selector
             ? onSelect

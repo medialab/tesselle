@@ -12,6 +12,43 @@ function calculateAspectRatioFit(srcWidth: number, srcHeight: number, maxWidth: 
   return { width: srcWidth * ratio, height: srcHeight * ratio };
 }
 
+export function resizeImage(img, region, size, name) {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+    const [x, y, w, h] = region;
+    const drawingWidth = w;
+    const drawingHeight = h;
+
+    img.width = w;
+    img.height = h;
+    canvas.width = w;
+    canvas.height = h;
+    console.log('start draw');
+    context.drawImage(
+      img,
+      x,
+      y,
+      drawingWidth,
+      drawingHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
+    console.log('end draw', x, y, w, h);
+    canvas.toBlob((blob: Blob) => {
+      resolve(
+        new File(
+          [blob],
+          `default.jpg`,
+          {type: 'image/jpeg'},
+        ),
+      );
+    });
+  });
+}
+
 function loadImage(file: File, options: Options): Promise<File> {
   return new Promise((resolve, reject) => {
     const img = new Image();

@@ -3,6 +3,8 @@ import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
 import Annotation from 'types/Annotation';
 import Cover from './Cover';
+// import slicer from 'utils/slice';
+// import db from 'utils/db';
 
 interface SlideshowArgs {
   id?: string;
@@ -74,7 +76,6 @@ const getSvgSize = (svgElement: Element): Box | never => {
 
 export const slideshowCreator = (file: File): Promise<Slideshow> =>
   new Promise((resolve, reject) => {
-    console.log('slideshow creator', file.type);
     if (file.type === svgType) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -115,13 +116,19 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
     } else {
       const url = window.URL.createObjectURL(file);
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         if (img.width === 0) {
           return reject(new Error('Slideshow.image has a width of 0'));
         }
         if (img.height === 0) {
           return reject(new Error('Slideshow.image has a height of 0'));
         }
+
+        // for (const [url, file] of await slicer(img)) {
+        //   // console.log('ca se passe ?', i++);
+        //   console.log('db.setItem(url, file)', await db.setItem(url, file));
+        // }
+
         return resolve(new Slideshow({
           image: new Cover({
             file: file,
@@ -130,7 +137,10 @@ export const slideshowCreator = (file: File): Promise<Slideshow> =>
           }),
         }));
       };
-      img.onerror = reject;
+      img.onerror = (error) => {
+        console.error(error);
+        reject(error);
+      };
       img.src = url;
     }
   });

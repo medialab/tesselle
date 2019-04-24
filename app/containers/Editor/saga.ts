@@ -12,9 +12,9 @@ const selectSlideshow = makeSelectSlideshow();
 
 export function* setSlideshow(slideshow: Slideshow) {
   if (isImmutable(slideshow)) {
-    console.log('sagas: save slideshow');
     yield db.setItem('slideshow', slideshow.toJS());
   }
+  yield slideshowCreator(slideshow.image.file);
   yield put(
     createSlideshowAction.success(
       slideshow,
@@ -25,10 +25,10 @@ export function* setSlideshow(slideshow: Slideshow) {
 export function* createSlideshow(action: any) {
   try {
     const slideshow: Slideshow = yield slideshowCreator(action.payload);
-    console.log('sagas: slideshow initalized');
-    console.log('sagas: sending slideshow to reducer');
+    // sagas: slideshow initalized
+    // sagas: sending slideshow to reducer
     yield setSlideshow(slideshow);
-    console.log('sagas: slideshow sent to reducer');
+    // sagas: slideshow sent to reducer
     return slideshow;
   } catch (e) {
     console.info('This should not happend');
@@ -37,10 +37,10 @@ export function* createSlideshow(action: any) {
 }
 
 export function* createAndRedirect(action) {
-  console.log('sagas: createSlideshow');
+  // sagas: createSlideshow
   yield createSlideshow(action);
-  console.log('sagas: slidehsow created');
-  console.log('sagas: redirect to editor');
+  // sagas: slidehsow created
+  // sagas: redirect to editor
   yield put(push('/editor'));
 }
 

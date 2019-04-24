@@ -93,8 +93,8 @@ export function useMapLock(map: L.Map, image: Cover): LatLngBounds {
     if (map !== null) {
       setMaxBounds(
         new LatLngBounds(
-          map.unproject([0, image.height], map.getMaxZoom()),
-          map.unproject([image.width, 0], map.getMaxZoom()),
+          map.unproject([0, image.height * 2], map.getMaxZoom()),
+          map.unproject([image.width * 2, 0], map.getMaxZoom()),
         ),
       );
     }

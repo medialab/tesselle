@@ -57,7 +57,6 @@ export default combineReducers<ContainerState, ContainerActions>({
     return map;
   },
   slideshow: (slideshow = initialState.slideshow, action) => {
-    console.log(action);
     if (slideshow) {
       switch (action.type) {
         case ActionTypes.CHANGE_ORDER:

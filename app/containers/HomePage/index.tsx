@@ -26,6 +26,7 @@ interface HomePageProps {
 
 const stopPropagation = (files: FileList, event: any) => {
   event.preventDefault();
+  console.log(files[0]);
   return files[0];
 };
 
