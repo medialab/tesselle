@@ -4,35 +4,47 @@
  *
  */
 
-import { action, createAsyncAction, createAction } from 'typesafe-actions';
+import { createAsyncAction, createAction } from 'typesafe-actions';
 import {} from './types';
 
 import ActionTypes from './constants';
-import Slideshow from 'types/slideshow';
-import { LatLngBounds, Point } from 'leaflet';
-import Slide from 'types/Slide';
+import Slideshow from 'types/Slideshow';
+import Annotation from 'types/Annotation';
+import { List } from 'immutable';
+import { Feature, Point } from 'geojson';
 
-export const defaultAction = () => action(ActionTypes.DEFAULT_ACTION);
 export const createSlideshowAction = createAsyncAction(
     ActionTypes.CREATE_SLIDESHOW,
     ActionTypes.CREATE_SLIDESHOW_SUCCESS,
     ActionTypes.CREATE_SLIDESHOW_FAILURE,
   )<File, Slideshow, Error>();
 
-export const createSlideAction = createAsyncAction(
-  ActionTypes.CREATE_SLIDE,
-  ActionTypes.CREATE_SLIDE_SUCCESS,
-  ActionTypes.CREATE_SLIDE_FAILURE,
-)<{frame: LatLngBounds, projected: Point[]}, {frame: LatLngBounds, file: File}, Error>();
-
-export const removeSlideAction = createAction(ActionTypes.REMOVE_SLIDE, action => {
-  return (slide: Slide) => action(slide);
-});
-
 export const addAnnotationAction = createAction(ActionTypes.CREATE_ANNOTATION, action => {
-  return (feature: LatLngBounds) => action(feature);
+  return (feature: Feature<Point, any>) => action(feature);
 });
 
-export const changeSlideAction = createAction(ActionTypes.CHANGE_SLIDE, action => {
-  return (slide: Slide) => action(slide);
-});
+export const setMap = createAction(ActionTypes.SET_MAP, action => (map: L.Map) => action(map));
+
+export const removeAnnotationAction = createAction(
+  ActionTypes.REMOVE_ANNOTATION,
+  action => (annotation: Annotation) => action(annotation),
+);
+
+export const editAnnotationAction = createAction(
+  ActionTypes.EDIT_ANNOTATION,
+  action => (annotation: Annotation, editedFeature: any) => action({
+    annotation: annotation,
+    editedFeature: editedFeature,
+  }),
+);
+
+export const editOrderAction = createAction(
+  ActionTypes.CHANGE_ORDER,
+  action => (annotations: List<Annotation>) => action(annotations),
+);
+
+export const changeSelectionAction = createAction(
+  ActionTypes.CHANGE_SELECTED_ANNOTATION,
+  action => (select?: Annotation | Set<Annotation>, meta?) => action(select, meta),
+);
+

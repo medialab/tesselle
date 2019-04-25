@@ -15,6 +15,17 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import history from 'utils/history';
 import 'sanitize.css/sanitize.css';
+import L from 'leaflet';
+import 'leaflet-editable';
+import 'leaflet-path-drag';
+import 'leaflet/dist/leaflet.css';
+import 'quinoa-design-library/themes/millet/style.css';
+
+// This is a ugly hack. original CircleEditor#resize is using an old & deprecated leaflet API.
+(L as any).Editable.CircleEditor.prototype.resize = function(e) {
+  const radius = this.map.distance(e.latlng, this.feature._latlng);
+  this.feature.setRadius(radius);
+};
 
 // Import root app
 import App from 'containers/App';

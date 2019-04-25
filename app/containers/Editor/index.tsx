@@ -4,200 +4,58 @@
  *
  */
 
-import React, { useRef, useLayoutEffect, useState, useEffect, useCallback } from 'react';
-import L, { LatLngBounds, LeafletMouseEvent, Point } from 'leaflet';
-import PropTypes from 'prop-types';
+import React, { useCallback } from 'react';
+import L, { LatLngBounds } from 'leaflet';
 import { connect } from 'react-redux';
 import { RouterProps } from 'react-router';
 import { createStructuredSelector } from 'reselect';
+import { Set } from 'immutable';
 import { compose } from 'redux';
-import { Map as Mapp, ImageOverlay, Rectangle } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import { Button } from 'quinoa-design-library';
-import 'quinoa-design-library/themes/millet/style.css';
 import cx from 'classnames';
+import { Map, ImageOverlay } from 'react-leaflet';
+import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import Cover from 'types/Cover';
-import Slide from 'types/Slide';
 import Slideshow from 'types/Slideshow';
-import SlideTimeline from 'components/SlideTimeline';
 import FloatinBar from 'components/FloatingBar';
 import AnnotationLayer from 'components/AnnotationLayer';
+import Sidebar from 'components/Sidebar';
+import DrawingLayer from 'components/DrawingLayer';
+import Annotation from 'types/Annotation';
+import { SupportedShapes } from 'types';
+import { Feature } from 'geojson';
+import { collision } from 'utils/geo';
+import { useTools, useFlyTo, useUrl, useMapLock } from 'utils/hooks';
 
 import {
   createSlideshowAction,
-  createSlideAction,
-  removeSlideAction,
   addAnnotationAction,
-  changeSlideAction,
+  setMap,
+  changeSelectionAction,
 } from './actions';
-import { makeSelectSlideshow,
-  makeSelectSelectedSlide } from './selectors';
+import {
+  makeSelectSlideshow,
+  makeMapSelector,
+  makeSelectAnnotationSelector,
+} from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
 
-const Map = Mapp as any;
-
-interface EditorProps {
-  slideshow: Slideshow;
-  createSlide: (action: {frame: LatLngBounds, projected: Point[]}) => any;
-  removeSlide: (slide: Slide) => any;
-  createAnnotation: (frame: LatLngBounds) => void;
-  changeSlide: (slide: Slide) => any;
-  selectedSlide: number;
-}
-
-const minZoom = 8;
-const maxZoom = 12;
-
-function useMapLock(ref, image: Cover): [LatLngBounds, L.Map] {
-  const [maxBounds, setMaxBounds] = useState();
-  const [map, setMap] = useState();
-  useLayoutEffect(() => {
-    setMaxBounds(new L.LatLngBounds(
-      ref.current.leafletElement.unproject([0, image.height], ref.current.leafletElement.getMaxZoom()),
-      ref.current.leafletElement.unproject([image.width, 0], ref.current.leafletElement.getMaxZoom()),
-    ));
-    setMap(ref.current.leafletElement);
-  }, [ref, image]);
-  return [maxBounds, map];
-}
-
-const useFlyTo = (map: L.Map, bounds: LatLngBounds) =>
-  useEffect(() => {
-    if (map && bounds) {
-      map.fitBounds(bounds);
-    }
-  }, [map, bounds]);
-
-function Editor(props: EditorProps & RouterProps) {
-  const slideshow = props.slideshow;
-  const onSlideRemove = props.removeSlide;
-  const selectedSlide: null | Slide = slideshow.slides[props.selectedSlide - 1];
-
-  const ref = useRef();
-  const [maxBounds, map]: [LatLngBounds, L.Map] = useMapLock(ref, slideshow.image);
-  useFlyTo(map, maxBounds);
-  const [zoomLevel, setZoomLevel] = useState((minZoom + maxZoom) / 2);
-  const [addingSlide, setAddingSlide] = useState(false);
-  const [drawing, setDrawing] = useState(false);
-  const [frame, setFrame] = useState(maxBounds);
-  const onZoom = useCallback((event: LeafletMouseEvent) =>
-    setZoomLevel(event.target.getZoom())
-  , [zoomLevel]);
-  const createSlide = (): void => {
-    const bounds = maxBounds;
-    const projected = [
-      map.project(
-        bounds.getSouthWest(), map.getMaxZoom(),
-      ),
-      map.project(
-        bounds.getNorthEast(), map.getMaxZoom(),
-      ),
-    ];
-    props.createSlide({frame: bounds, projected: projected});
-  };
-  const onMouseDown = useCallback((event: LeafletMouseEvent) => {
-    if (addingSlide) {
-      setDrawing(true);
-      setFrame(
-        L.latLngBounds(
-          event.latlng,
-          event.latlng,
-        ),
-      );
-    }
-  }, [addingSlide]);
-  const onMouseMove = useCallback((event: LeafletMouseEvent) => {
-    if (drawing) {
-      frame.extend(event.latlng);
-      setFrame(
-        L.latLngBounds(
-          frame.getSouthWest(),
-          frame.getNorthEast(),
-        ),
-      );
-    }
-  }, [drawing, frame]);
-  const onMouseUp = useCallback(() => {
-    if (drawing) {
-      setDrawing(false);
-      props.createAnnotation(frame);
-    }
-  }, [drawing, frame]);
-  const onRectangleClick = useCallback(() => {
-    setAddingSlide(state => !state);
-  }, []);
-  return (
-    <div>
-      <div className="container">
-        <div className={cx({
-          map: true,
-          creating: addingSlide,
-        })}>
-          <Map
-            ref={ref}
-            dragging={false}
-            zoomControl={false}
-            doubleClickZoom={false}
-            keyboard={false}
-            scrollWheelZoom={false}
-            onMouseMove={onMouseMove}
-            onMouseDown={onMouseDown}
-            onMouseUp={onMouseUp}
-            maxBounds={maxBounds}
-            crs={L.CRS.Simple}
-            minZoom={minZoom}
-            maxZoom={maxZoom}
-            zoom={zoomLevel}
-            onZoom={onZoom}
-            center={[0, 0]}>
-            <ImageOverlay url={window.URL.createObjectURL(slideshow.image.file)} bounds={maxBounds} />
-            {(drawing && frame) && <Rectangle className="rectangle" color="red" bounds={frame} />}
-            {(selectedSlide && selectedSlide.annotations.length > 0) && (
-              <AnnotationLayer key={selectedSlide.id} data={selectedSlide.annotations as any} />
-            )}
-            <FloatinBar onRectangleClick={onRectangleClick} />
-          </Map>
-        </div>
-        <footer className="slides-container">
-          {props.slideshow.slides.map((slide: Slide) => (
-            <SlideTimeline
-              onRemove={onSlideRemove}
-              onClick={props.changeSlide}
-              key={slide.id}
-              selected={selectedSlide && selectedSlide.id === slide.id}
-              slide={slide} />
-          ))}
-          <div className="timeline__slide-container">
-            <Button className="timeline__slide-add-buttom" isRounded isColor="error" onClick={createSlide}>+1</Button>
-          </div>
-        </footer>
-      </div>
-    </div>
-  );
-}
-
-Editor.propTypes = {
-  createSlideshow: PropTypes.func.isRequired,
-};
-
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
-  selectedSlide: makeSelectSelectedSlide(),
+  map: makeMapSelector(),
+  selectedAnnotations: makeSelectAnnotationSelector(),
 });
 
 const withConnect = connect(
   mapStateToProps,
   {
     createSlideshow: createSlideshowAction.request,
-    createSlide: createSlideAction.request,
     createAnnotation: addAnnotationAction,
-    removeSlide: removeSlideAction,
-    changeSlide: changeSlideAction,
+    changeSelection: changeSelectionAction,
+    setMap: setMap,
   },
 );
 
@@ -210,4 +68,127 @@ export const decorator = compose(
   withConnect,
 );
 
-export default decorator(props => props.slideshow && <Editor {...props} />);
+interface EditorProps {
+  readonly slideshow: Slideshow;
+  readonly selectedAnnotations: Set<Annotation>;
+  readonly map: L.Map;
+  readonly createAnnotation: (frame: Feature) => void;
+  readonly changeSelection: (annotation?: Annotation | Set<Annotation>) => void;
+  readonly setMap: (event) => void;
+}
+
+const minZoom = 8;
+const maxZoom = 12;
+
+const EditorMap: React.SFC<EditorProps> = (props) => {
+  const {slideshow, map} = props;
+  const imageUrl: string = useUrl(slideshow.image.file);
+  const maxBounds: LatLngBounds = useMapLock(map, slideshow.image);
+  const [tool, setTool, useToggleTool] = useTools(SupportedShapes.selector);
+
+  useToggleTool(SupportedShapes.selector, 'shift');
+
+  const onSelectClick = useCallback(() => {
+    setTool(SupportedShapes.selector);
+  }, []);
+  const onRectangleClick = useCallback(() => {
+    setTool(SupportedShapes.rectangle);
+  }, []);
+  const onCircleClick = useCallback(() => {
+    setTool(SupportedShapes.circle);
+  }, []);
+  const onPolygonClick = useCallback(() => {
+    setTool(SupportedShapes.polygon);
+  }, []);
+  const onDrown = useCallback(props.createAnnotation, []);
+  const onLayerClick = useCallback((annotation) => {
+      if (tool === SupportedShapes.selector) {
+        props.changeSelection(annotation);
+      }
+    },
+    [props.changeSelection, tool],
+  );
+  const onMapClick = useCallback((event) => {
+    if (tool === SupportedShapes.selector) {
+      props.changeSelection();
+    }
+  }, [tool]);
+  const onSelect = useCallback((feature: Feature) => {
+    const selected = collision(feature, slideshow.annotations.toJS());
+    props.changeSelection(
+      slideshow.annotations.filter(
+        (_, index) => selected[index],
+      ).toSet(),
+    );
+  }, [props.slideshow]);
+  const reactLeafletDangerousRef = lef => {
+    if (lef && (map !== lef.leafletElement)) {
+      props.setMap(lef.leafletElement);
+    }
+  };
+
+  useFlyTo(map, maxBounds);
+
+  return (
+    <div className={cx({
+        map: true,
+        creating: tool,
+      })}>
+      <Map
+        editable
+        onClick={onMapClick}
+        ref={reactLeafletDangerousRef}
+        dragging={false}
+        doubleClickZoom={false}
+        // zoomControl={false}
+        // keyboard={false}
+        // scrollWheelZoom={false}
+        maxBounds={maxBounds}
+        crs={L.CRS.Simple}
+        minZoom={minZoom}
+        maxZoom={maxZoom}
+        center={[0, 0]}>
+        {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
+        {(tool !== SupportedShapes.selector) && <DrawingLayer
+          onDrown={tool === SupportedShapes.selector
+            ? onSelect
+            : onDrown
+          }
+          addingShape={tool}
+        />}
+        <AnnotationLayer
+          onLayerClick={onLayerClick}
+          data={slideshow.annotations}
+          selectedAnnotations={props.selectedAnnotations}
+          tool={tool}
+        />
+        <FloatinBar
+          onSelectClick={onSelectClick}
+          activeButton={tool}
+          onCircleClick={onCircleClick}
+          onRectangleClick={onRectangleClick}
+          onPolygonClick={onPolygonClick} />
+      </Map>
+    </div>
+  );
+};
+
+const Editor: React.SFC<EditorProps & RouterProps> = React.memo((props) => (
+  <StretchedLayoutContainer
+    isFullHeight
+    isDirection="horizontal">
+    <StretchedLayoutItem isFlex={1} style={{padding: '1rem', overflow: 'auto'}}>
+      <Sidebar annotations={props.slideshow.annotations} selectedAnnotations={props.selectedAnnotations} />
+    </StretchedLayoutItem>
+    <StretchedLayoutItem isFlex={2}>
+      <EditorMap {...props} />
+    </StretchedLayoutItem>
+  </StretchedLayoutContainer>
+));
+
+export default decorator(props => {
+  if (props.slideshow) {
+    return <Editor {...props} />;
+  }
+  return 'loading';
+});

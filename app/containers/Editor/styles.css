@@ -10,12 +10,14 @@ body { --rgba-primary-3: #1A1A46; } /* rgba( 26, 26, 70,1); */
 body { --rgba-primary-4: #060614; } /* rgba(  6,  6, 20,1); */
 
 body {
-  --foter-height: 120px;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 .leaflet-container {
-  height: calc(100vh - var(--foter-height));
-  width: 100vw;
+  height: 100%;
+  width: 100%;
+  min-width: 100px;
   margin: 0 auto;
 }
 
@@ -29,29 +31,21 @@ body {
   z-index: 9999;
 }
 
-.slides-container {
-  height: var(--foter-height);
-  position: absolute;
-  width: 100vw;
-  background: var(--rgba-primary-3);
-}
-
 .container {
   position: absolute;
+  width: 100vw;
+  width: calc(100vw - var(--sidebar-width));
+  height: 100vh;
 }
 
+.map {
+  height: 100%;
+  width: 100%;
+}
 .map.creating {
   cursor: crosshair;
 }
 
 .rectangle {
   pointer-events: none;
-}
-
-.timeline__slide-add-buttom {
-  position: relative;
-  left: 20px;
-  top: 40px;
-  background-color: var(--rgba-primary-1);
-  /* transform: translate(50%, 50%); */
 }

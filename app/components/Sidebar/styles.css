@@ -1,0 +1,11 @@
+.sidebar {
+  height: 100vh;
+}
+.textarea:not([rows]) {
+  max-height: initial;
+  min-height: initial;
+}
+.sidebar--item-field--selected {
+  background: #3849a2;
+  color: white;
+}

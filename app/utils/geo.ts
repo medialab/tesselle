@@ -1,6 +1,63 @@
 import L from 'leaflet';
 import { Feature } from 'geojson';
-import { map } from 'ramda';
+import { map, pipe, max } from 'ramda';
+import SAT, { Vector } from 'sat';
+
+import {
+  Feature as ImmutableFeature,
+  FeatureCollection,
+  GeometryCollection,
+  Point,
+  MultiPoint,
+  LineString,
+  MultiLineString,
+  Polygon,
+  MultiPolygon,
+} from 'immutable-geojson';
+import { fromJS as rawFromJs, Map } from 'immutable';
+import {
+  annotationPropertiesCreator,
+  annotationCirclePropertiesCreator,
+  annotationRectanglePropertiesCreator,
+} from 'types/Annotation';
+import { SupportedShapes } from 'types';
+
+function propertiesReviver(key, value) {
+  if (value.has('radius')) {
+    return annotationCirclePropertiesCreator(value.toMap());
+  } else if (value.has('type')) {
+    return annotationRectanglePropertiesCreator(value.toMap());
+  }
+  return annotationPropertiesCreator(value.toMap());
+}
+
+export const fromJS = (value) => {
+  switch (value.type) {
+    case undefined:
+      return Map({
+        properties: propertiesReviver('properties', rawFromJs(value.properties)),
+      });
+    case 'FeatureCollection':
+      return FeatureCollection(value, propertiesReviver);
+    case 'Feature':
+      return ImmutableFeature(value, propertiesReviver);
+    case 'GeometryCollection':
+      return GeometryCollection(value);
+    case 'Point':
+      return Point(value);
+    case 'MultiPoint':
+      return MultiPoint(value);
+    case 'LineString':
+      return LineString(value);
+    case 'MultiLineString':
+      return MultiLineString(value);
+    case 'Polygon':
+      return Polygon(value);
+    case 'MultiPolygon':
+      return MultiPolygon(value);
+  }
+  throw new Error('Shape not supported in fromJS');
+};
 
 // @function formatNum(num: Number, digits?: Number): Number
 // Returns the number `num` rounded to `digits` decimals, or to 6 decimals by default.
@@ -11,8 +68,7 @@ export function formatNum(num: number, digits: number | undefined): number {
 
 // @function latLngToCoords(latlng: LatLng, precision?: Number): Array
 // Reverse of [`coordsToLatLng`](#geojson-coordstolatlng)
-export function latLngToCoords(latlng: L.LatLng, precision: number): number[] {
-  precision = typeof precision === 'number' ? precision : 6;
+export function latLngToCoords(latlng: L.LatLng, precision: number = 6): number[] {
   return latlng.alt !== undefined ?
     [
       formatNum(latlng.lng, precision),
@@ -47,8 +103,11 @@ export function latLngsToCoords(latlngs: [], levelsDeep?: number, closed?: boole
 // @function coordsToLatLng(coords: Array): LatLng
 // Creates a `LatLng` object from an array of 2 numbers (longitude, latitude)
 // or 3 numbers (longitude, latitude, altitude) used in GeoJSON for points.
-export const coordsToLatLng = (coords: [number, number, number]): L.LatLng =>
-  new L.LatLng(coords[1], coords[0], coords[2]);
+export const coordsToLatLng = (coords: [number, number, number]): L.LatLng => new L.LatLng(
+  coords[1],
+  coords[0],
+  coords[2],
+);
 
 // @function coordsToLatLngs(coords: Array, levelsDeep?: Number, coordsToLatLng?: Function): Array
 // Creates a multidimensional array of `LatLng`s from a GeoJSON coordinates array.
@@ -80,3 +139,84 @@ export function asFeature(geojson: Feature) {
     geometry: geojson,
   };
 }
+
+// We use this box creator function because of a SAT.js bug:
+// https://github.com/jriecken/sat-js/issues/55
+const createRectangle = (feature: FeatureCollection): SAT.Polygon => {
+  const coords = feature.geometry.coordinates[0];
+  const [ y, x ] = coords[0];
+  const width = Math.abs(coords[1][1] - coords[0][1]);
+  const height = Math.abs(coords[2][0] - coords[1][0]);
+  return new SAT.Box(new Vector(x, y), max(width, 0.0001), max(height, 0.0001)).toPolygon();
+};
+
+function featureToSAT(feature: FeatureCollection): SAT.Circle | SAT.Polygon | never {
+  switch (feature.properties.type) {
+    case SupportedShapes.circle:
+      return new SAT.Circle(
+        new Vector(
+          feature.geometry.coordinates[1], feature.geometry.coordinates[0],
+        ),
+        feature.properties.radius,
+      );
+    case SupportedShapes.rectangle:
+    case undefined:
+      return new SAT.Polygon(
+        new Vector(),
+        feature.geometry.coordinates[0].map(([y, x]) => new SAT.Vector(x, y)),
+      );
+  }
+  throw new Error('Case not handeled.');
+}
+
+const collisionTester = (master: SAT.Polygon) => (feature: SAT.Polygon | SAT.Circle) => {
+  if (feature instanceof SAT.Circle) {
+    return SAT.testPolygonCircle(master, feature);
+  }
+  return SAT.testPolygonPolygon(master, feature);
+};
+
+export function collision(selectionPolygon: Feature, annotations: Feature[]) {
+  return annotations.map(
+    pipe(
+      featureToSAT,
+      collisionTester(
+        createRectangle(selectionPolygon),
+      ),
+    ),
+  );
+}
+
+export const allEvents = [
+  'editable:shape:new',
+  'editable:shape:delete',
+  'editable:shape:deleted',
+  'editable:vertex:new',
+  'editable:vertex:click',
+  'editable:vertex:clicked',
+  'editable:vertex:rawclick',
+  'editable:vertex:deleted',
+  'editable:vertex:ctrlclick',
+  'editable:vertex:shiftclick',
+  'editable:vertex:metakeyclick',
+  'editable:vertex:altclick',
+  'editable:vertex:contextmenu',
+  'editable:vertex:mousedown',
+  'editable:vertex:drag',
+  'editable:vertex:dragstart',
+  'editable:vertex:dragend',
+  'editable:middlemarker:mousedown',
+  'editable:drawing:start',
+  'editable:drawing:end',
+  'editable:drawing:cancel',
+  'editable:drawing:commit',
+  'editable:drawing:mousedown',
+  'editable:drawing:mouseup',
+  'editable:drawing:click',
+  'editable:drawing:clicked',
+  'editable:created',
+  'editable:enable',
+  'editable:disable',
+  'editable:editing',
+  'editable:dragend',
+].join(' ');

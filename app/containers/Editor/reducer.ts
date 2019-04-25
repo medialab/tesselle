@@ -4,114 +4,97 @@
  *
  */
 
-// import { combineReducers } from 'redux';
+import { combineReducers } from 'redux';
 
 import ActionTypes from './constants';
 import { ContainerState, ContainerActions } from './types';
 import Slideshow from 'types/Slideshow';
-import { update } from 'ramda';
-import { LatLngBounds, LatLng } from 'leaflet';
-import Slide from 'types/Slide';
-import { Feature } from 'geojson';
+import Annotation from 'types/Annotation';
 
-const pointToArray = (point: LatLng): number[] => [
-  point.lng,
-  point.lat,
-];
-
-const boundsToLatLngs = (latLngBounds: LatLngBounds): any => [
-  [
-    latLngBounds.getSouthWest(),
-    latLngBounds.getNorthWest(),
-    latLngBounds.getNorthEast(),
-    latLngBounds.getSouthEast(),
-    latLngBounds.getSouthWest(),
-  ].map(pointToArray),
-];
+import { when, equals } from 'ramda';
+import { fromJS } from 'utils/geo';
+import { isImmutable, Set } from 'immutable';
 
 export const initialState: ContainerState = {
   slideshow: null,
-  selectedSlide: 1,
+  selectedAnnotations: Set(),
+  map: null,
 };
 
-function editorReducer(state: ContainerState = initialState, action: ContainerActions) {
-  switch (action.type) {
-    case ActionTypes.CREATE_SLIDESHOW_SUCCESS:
-      return {
-        ...state,
-        slideshow: Slideshow.builder()
-          .id(action.payload.id)
-          .image(action.payload.image)
-          .slides(action.payload.slides)
-          .build(),
-      };
-    case ActionTypes.CREATE_SLIDE_SUCCESS:
-      if (state.slideshow) {
-        return {
-          ...state,
-          slideshow: Slideshow
-            .builder(state.slideshow)
-            .slides([
-              ...state.slideshow.slides,
-              Slide.builder().bounds(action.payload.frame).file(action.payload.file).build(),
-            ])
-            .build(),
-          selectedSlide: state.slideshow.slides.length + 1,
-        };
-      } else {
-        return state;
-      }
+const replaceAnnotation = action => when(
+  equals(action.payload.annotation),
+  (annotation: Annotation) => annotation.merge(
+    isImmutable(action.payload.editedFeature)
+    ? action.payload.editedFeature
+    : fromJS(action.payload.editedFeature),
+  ),
+);
 
-    case ActionTypes.CREATE_ANNOTATION:
-      if (state.slideshow) {
-        const slide = state.slideshow.slides[state.selectedSlide - 1];
-        const feature: Feature = {
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon',
-            coordinates: boundsToLatLngs(action.payload),
-          },
-          properties: {name: 'area1'},
-        };
-        return {
-          ...state,
-          slideshow: Slideshow.builder(state.slideshow)
-          .slides(
-            update(
-              state.selectedSlide - 1,
-              Slide.builder(slide).annotations([...slide.annotations, feature]).build(),
-              state.slideshow.slides,
+export default combineReducers<ContainerState, ContainerActions>({
+  selectedAnnotations: (selectedAnnotations = initialState.selectedAnnotations, action: ContainerActions) => {
+    switch (action.type) {
+      case ActionTypes.CHANGE_SELECTED_ANNOTATION:
+        if (action.payload instanceof Set) {
+          return action.payload as any;
+        } else {
+          const annotation: Annotation = action.payload as Annotation;
+          if (selectedAnnotations.contains(annotation)) {
+            return selectedAnnotations.remove(annotation);
+          }
+          return Set([annotation]);
+        }
+      case ActionTypes.EDIT_ANNOTATION:
+        return selectedAnnotations.map(replaceAnnotation(action));
+      case ActionTypes.REMOVE_ANNOTATION:
+        return selectedAnnotations.remove(action.payload);
+    }
+    return selectedAnnotations;
+  },
+  map: (map = initialState.map, action) => {
+    if (action.type === ActionTypes.SET_MAP && map !== action.payload) {
+      return action.payload;
+    }
+    return map;
+  },
+  slideshow: (slideshow = initialState.slideshow, action) => {
+    console.log(action);
+    if (slideshow) {
+      switch (action.type) {
+        case ActionTypes.CHANGE_ORDER:
+          return slideshow.set(
+            'annotations',
+            action.payload,
+          );
+        case ActionTypes.CREATE_ANNOTATION:
+          const annotation: Annotation = fromJS(action.payload);
+          return slideshow.with({
+            annotations: slideshow.annotations.push(
+              annotation,
             ),
-          )
-          .build(),
-        };
+          });
+        case ActionTypes.EDIT_ANNOTATION:
+          return slideshow.set(
+            'annotations',
+            slideshow.annotations.map(replaceAnnotation(action)),
+          );
+        case ActionTypes.REMOVE_ANNOTATION:
+            return slideshow.set(
+              'annotations',
+              slideshow.annotations.remove(
+                slideshow.annotations.indexOf(action.payload),
+              ),
+            );
       }
-      return state;
-    case ActionTypes.CHANGE_SLIDE:
-      if (state.slideshow) {
-        return {
-          ...state,
-          selectedSlide: state.slideshow.slides.indexOf(action.payload) + 1,
-        };
-      }
-      return state;
-    case ActionTypes.REMOVE_SLIDE:
-      if (state.slideshow) {
-        return {
-          ...state,
-          slideshow: Slideshow
-            .builder(state.slideshow)
-            .slides(state.slideshow.slides.filter(
-              slide => slide.id !== action.payload.id,
-            ))
-            .build(),
-          selectedSlide: 1,
-        };
-      }
-      return state;
-    default:
-      return state;
-  }
-}
-
-export default editorReducer;
+      return slideshow;
+    }
+    switch (action.type) {
+      case ActionTypes.CREATE_SLIDESHOW_SUCCESS:
+        return new Slideshow({
+          id: action.payload.id,
+          image: action.payload.image,
+          annotations: action.payload.annotations.map(fromJS),
+        });
+    }
+    return slideshow;
+  },
+});

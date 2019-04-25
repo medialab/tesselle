@@ -1,18 +1,20 @@
 import { takeLatest, put, select } from 'redux-saga/effects';
-import { push } from 'react-router-redux';
-import loadImage from 'utils/imageManipulation';
+import { push } from 'connected-react-router';
 
 import ActionTypes from './constants';
 import Slideshow, { slideshowCreator } from '../../types/Slideshow';
-import { createSlideshowAction, createSlideAction } from './actions';
+import { createSlideshowAction } from './actions';
 import db from '../../utils/db';
 import { makeSelectSlideshow } from './selectors';
-import { LatLngBounds, Point } from 'leaflet';
+import { isImmutable } from 'immutable';
 
 const selectSlideshow = makeSelectSlideshow();
 
 export function* setSlideshow(slideshow: Slideshow) {
-  yield db.setItem('slideshow', slideshow);
+  if (isImmutable(slideshow)) {
+    console.log('sagas: save slideshow');
+    yield db.setItem('slideshow', slideshow.toJS());
+  }
   yield put(
     createSlideshowAction.success(
       slideshow,
@@ -23,7 +25,10 @@ export function* setSlideshow(slideshow: Slideshow) {
 export function* createSlideshow(action: any) {
   try {
     const slideshow: Slideshow = yield slideshowCreator(action.payload);
+    console.log('sagas: slideshow initalized');
+    console.log('sagas: sending slideshow to reducer');
     yield setSlideshow(slideshow);
+    console.log('sagas: slideshow sent to reducer');
     return slideshow;
   } catch (e) {
     console.info('This should not happend');
@@ -32,66 +37,29 @@ export function* createSlideshow(action: any) {
 }
 
 export function* createAndRedirect(action) {
+  console.log('sagas: createSlideshow');
   yield createSlideshow(action);
+  console.log('sagas: slidehsow created');
+  console.log('sagas: redirect to editor');
   yield put(push('/editor'));
 }
 
-export function* createSlide(action) {
-  const {frame, projected}: {frame: LatLngBounds, projected: Point[]} = action.payload;
-  const slideshow: Slideshow = yield select(selectSlideshow);
-  const imgFile = yield loadImage(
-    slideshow.image.file,
-    {
-      maxWidth: 120,
-      maxHeight: 120,
-      top: projected[1].y,
-      right: projected[1].x,
-      bottom: projected[0].y,
-      left: projected[0].x,
-    },
-  );
-  yield put(
-    createSlideAction.success({
-      frame: frame,
-      file: imgFile,
-    }),
-  );
-}
-
-// const saveFile = (file: File): void => {
-//   const svgUrl = URL.createObjectURL(file);
-//   const downloadLink = document.createElement('a');
-//   downloadLink.href = svgUrl;
-//   downloadLink.download = 'newesttree.svg';
-//   document.body.appendChild(downloadLink);
-//   downloadLink.click();
-//   document.body.removeChild(downloadLink);
-// };
-// const saveImg = (imageFile: File): void => {
-//   const downloadLink = document.createElement('a');
-//   downloadLink.href = window.URL.createObjectURL(imageFile);
-//   downloadLink.target = '_blank';
-//   downloadLink.download = 'newesttree.jpg';
-//   document.body.appendChild(downloadLink);
-//   downloadLink.click();
-//   document.body.removeChild(downloadLink);
-// };
-
 export function* saveSlideshow() {
   const slideshow: Slideshow = yield select(selectSlideshow);
-  yield db.setItem('slideshow', slideshow);
+  if (isImmutable(slideshow)) {
+    yield db.setItem('slideshow', slideshow.toJS());
+  }
 }
 
 // Individual exports for testing
 export default function* editorSaga() {
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
-  yield takeLatest(ActionTypes.CREATE_SLIDE, createSlide);
-  yield takeLatest(ActionTypes.CREATE_SLIDE_SUCCESS, saveSlideshow);
   yield takeLatest(ActionTypes.CREATE_ANNOTATION, saveSlideshow);
-  yield takeLatest(ActionTypes.REMOVE_SLIDE, saveSlideshow);
+  yield takeLatest(ActionTypes.REMOVE_ANNOTATION, saveSlideshow);
+  yield takeLatest(ActionTypes.EDIT_ANNOTATION, saveSlideshow);
+  yield takeLatest(ActionTypes.CHANGE_ORDER, saveSlideshow);
   try {
     const rawSlideshow: Slideshow = yield db.getItem('slideshow');
-    // const slideshow = Slideshow.builder(rawSlideshow).build();
     if (rawSlideshow) {
       yield setSlideshow(rawSlideshow);
     } else {
