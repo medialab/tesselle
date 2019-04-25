@@ -3,10 +3,12 @@
 
 Project from [FORCCAST](http://controverses.org)
 
-## Usage scenarios 
+## Usage scenarios
 
-Why should we use this application ?
-Comparable aplications and why we decided to create a new one. 
+### Story telling with big images.
+
+Allow the opening and annotations of big images.
+Navigate througth annotations to tell a story.
 
 ## live demo
 
@@ -14,16 +16,22 @@ At some point we will throw a live-demo on github.io
 
 ## local deployment
 
-Requirements : node > ?
+Requirements : node >= 8
 
 ```
 git clone
-npm i 
-npm run start
+npm i
+npm start
 ```
 
 http://localhost:3000
 
 ## How it's been made ?
 
-Stack : ....
+Stack :
+  - Typescript
+  - React
+  - Redux
+  - Leaflet
+  - Localforage
+  - Iiif
