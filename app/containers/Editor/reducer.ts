@@ -34,15 +34,18 @@ export default combineReducers<ContainerState, ContainerActions>({
   selectedAnnotations: (selectedAnnotations = initialState.selectedAnnotations, action: ContainerActions) => {
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
-        if (action.payload instanceof Set) {
-          return action.payload as any;
-        } else {
-          const annotation: Annotation = action.payload as Annotation;
-          if (selectedAnnotations.contains(annotation)) {
-            return selectedAnnotations.remove(annotation);
+        if (action.payload) {
+          if (action.payload instanceof Set) {
+            return action.payload as any;
+          } else {
+            const annotation: Annotation = action.payload as Annotation;
+            if (selectedAnnotations.contains(annotation)) {
+              return selectedAnnotations.remove(annotation);
+            }
+            return Set([annotation]);
           }
-          return Set([annotation]);
         }
+        return selectedAnnotations;
       case ActionTypes.EDIT_ANNOTATION:
         return selectedAnnotations.map(replaceAnnotation(action));
       case ActionTypes.REMOVE_ANNOTATION:

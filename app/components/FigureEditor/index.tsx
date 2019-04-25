@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import * as L from 'leaflet';
 import {
   withLeaflet,
@@ -9,6 +9,7 @@ import {
   Rectangle,
   LayerGroup,
 } from 'react-leaflet';
+import EventedLayerGroup from '../DrawingLayer/LayerGroup';
 import { assocPath, when, init, path } from 'ramda';
 import * as turf from '@turf/turf';
 
@@ -49,62 +50,11 @@ const FigureEditorr: React.SFC<any> = props => {
     );
   };
 
-  // const select = useCallback((id: string) => setactiveFigureID(id), []);
-
-  // const addFigure = (figure: IFigurePolygon | ICircle): void => {
-  //   setFigureList([...figureList, figure]);
-  //   select(figure.properties.id);
-  // };
-
-  // const changeActiveFigure = (id: string): void => select(id);
-
-  // const addPoint = (e: IPoint): void => {
-  //   const activeFigure: any = getActiveFigure(figureList, activeFigureID);
-  //   if (activeFigure) {
-  //     if (activeFigure.geometry.type === 'Polygon') {
-  //       activeFigure.geometry.coordinates[0].push([e.lat, e.lng]);
-  //     } else if (activeFigure.geometry.type === 'Circle') {
-  //       if (activeFigure.geometry.coordinates.length) {
-  //         const radius = countRadius(activeFigure.geometry.coordinates, [
-  //           e.lat,
-  //           e.lng,
-  //         ]);
-  //         activeFigure.pointRadius = [e.lat, e.lng];
-  //         activeFigure.radius = radius;
-  //       } else {
-  //         activeFigure.geometry.coordinates = [e.lat, e.lng];
-  //       }
-  //     } else if (activeFigure.geometry.type === 'LineString') {
-  //       if (activeFigure.geometry.coordinates[0] && !activeFigure.geometry.coordinates[1]) {
-  //         activeFigure.geometry.coordinates[1] = [e.lat, e.lng];
-  //       } else if (!activeFigure.geometry.coordinates[0]) {
-  //         activeFigure.geometry.coordinates[0] = [e.lat, e.lng];
-  //       }
-  //     } else if (activeFigure.geometry.type === 'Point') {
-  //       activeFigure.geometry.coordinates = [e.lat, e.lng];
-  //     }
-  //   }
-  //   return setFigureList(figureList); // Ptet voir ici si ca merde.
-  // };
-
   const countRadius = (center: number[], point: number[]): number => {
     return L.latLng({ lat: center[0], lng: center[1] }).distanceTo(
       L.latLng({ lat: point[0], lng: point[1] }),
     );
   };
-
-  // const deleteFigure = (id: string) =>
-  //   setFigureList(figureList.filter(item => item.properties.id !== id));
-
-  // const deletePolygonPoint = (index: number | null) => {
-  //   const activeFigure: any = getActiveFigure(figureList, activeFigureID);
-  //   if (activeFigure && index !== null) {
-  //     activeFigure.geometry.coordinates[0] = activeFigure.geometry.coordinates[0].filter(
-  //       (item, indexPoint) => indexPoint !== index,
-  //     );
-  //   }
-  //   setFigureList(figureList);
-  // };
 
   const dragCircleCenter = (id: string) => (e: any) => {
     const activeFigure: any = getActiveFigure(figureList, activeFigureID);
@@ -127,10 +77,6 @@ const FigureEditorr: React.SFC<any> = props => {
         e.latlng.lat,
         e.latlng.lng,
       ]);
-      // activeFigure.pointRadius = props.map.distance(
-      //   e.latlng,
-      //   startLatLng,
-      // );
       activeFigure.pointRadius = [e.latlng.lat, e.latlng.lng];
       activeFigure.radius = radius;
     }
@@ -231,6 +177,7 @@ const FigureEditorr: React.SFC<any> = props => {
   };
 
   const addPoint = (e) => {
+    console.log('zdzdad');
     if (props.tool !== SupportedShapes.selector) {
       let figure: any = getActiveFigure(figureList, activeFigureID);
       if (!figure) {
@@ -316,14 +263,8 @@ const FigureEditorr: React.SFC<any> = props => {
     ));
   };
 
-  useEffect(() => {
-    props.leaflet.map.on('click', addPoint);
-    return () => {
-      props.leaflet.map.off('click', addPoint);
-    };
-  }, [props.tool]);
   return (
-    <React.Fragment>
+    <EventedLayerGroup onMouseDown={addPoint}>
       {figureList.map((figure: Annotation & any) => {
         const isSelected = figure.properties.id === props.selectedId;
         if (figure.properties.type === SupportedShapes.polygon) {
@@ -397,7 +338,7 @@ const FigureEditorr: React.SFC<any> = props => {
           return null;
         }
       })}
-    </React.Fragment>
+    </EventedLayerGroup>
   );
 };
 

@@ -119,7 +119,6 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
   };
 
   useFlyTo(map, maxBounds);
-
   return (
     <div className={cx({
         map: true,

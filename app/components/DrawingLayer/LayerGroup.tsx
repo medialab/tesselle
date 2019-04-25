@@ -25,6 +25,7 @@ export const LayerGroup = withLeaflet(class LayerGroup extends MapLayer<LayerPro
     }
     return el;
   }
+
   public updateLeafletElement(fromProps: LayerProps, toProps: LayerProps) {
     if ((fromProps.leaflet && fromProps.leaflet.map) && (toProps.leaflet && toProps.leaflet.map)) {
       for (const [htmlName, jsxName] of eventsMap) {
@@ -36,3 +37,5 @@ export const LayerGroup = withLeaflet(class LayerGroup extends MapLayer<LayerPro
     }
   }
 });
+
+export default LayerGroup;
