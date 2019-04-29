@@ -3,30 +3,34 @@
  * AnnotationLayer
  *
  */
+import 'leaflet-draw/dist/leaflet.draw.css';
 
-import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps } from 'react-leaflet';
-import React, { useCallback, memo } from 'react';
+import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps, FeatureGroup } from 'react-leaflet';
+import React, { useCallback, useRef } from 'react';
 import { SupportedShapes } from 'types';
 import { DomEvent } from 'leaflet';
+import { EditControl } from 'react-leaflet-draw';
 
 import Annotation from 'types/Annotation';
-import { List, Set } from 'immutable';
+import { List } from 'immutable';
 import AnnotationPolygon from './AnnotationPolygon';
 import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
 import { useDispatch } from 'utils/hooks';
 import { editAnnotationAction } from 'containers/Editor/actions';
 import AnnotationRectangle from './AnnotationRectangle';
+import { fromJS } from 'utils/geo';
 
 interface AnnotationLayerProps extends MapLayerProps {
   data: List<Annotation>;
-  selectedAnnotations?: Set<Annotation>;
+  selectedAnnotations?: List<Annotation>;
   leaflet;
   onLayerClick?: (annotation: Annotation) => any;
   tool?: SupportedShapes;
+  onCreated?: any;
 }
 
-const GuessComponent = ({annotation, onEdit, selected, map, onClick, tool}: AnnotationShapes) => {
+const GuessComponent = ({annotation, selected, map, onClick, tool}: AnnotationShapes) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const onLayerClick = useCallback((event) => {
     DomEvent.stopPropagation(event);
@@ -40,29 +44,28 @@ const GuessComponent = ({annotation, onEdit, selected, map, onClick, tool}: Anno
         tool={tool}
         map={map}
         selected={selected}
-        onEdit={onEdit}
         annotation={annotation} />
     );
     case 'Polygon':
     case 'MultiPolygon':
       if (annotation.properties.type === SupportedShapes.rectangle) {
+        console.log('oui c bon');
         return (
           <AnnotationRectangle
             onClick={onLayerClick}
             tool={tool}
             map={map}
             selected={selected}
-            onEdit={onEdit}
             annotation={annotation} />
         );
       }
+      console.log('nnoooooon');
       return (
         <AnnotationPolygon
           onClick={onLayerClick}
           tool={tool}
           map={map}
           selected={selected}
-          onEdit={onEdit}
           annotation={annotation} />
       );
   }
@@ -70,28 +73,83 @@ const GuessComponent = ({annotation, onEdit, selected, map, onClick, tool}: Anno
 };
 
 const AnnotationLayer = (props: AnnotationLayerProps) => {
+  let data = props.data;
+  if (props.selectedAnnotations) {
+    const annotations = props.selectedAnnotations;
+    data = props.data.filter(annotation => !annotations.contains(annotation));
+  }
+  const renderAnnotations = (annotation) => (
+    <React.Fragment key={annotation.properties.id}>
+      <GuessComponent
+        tool={props.tool}
+        onClick={props.onLayerClick}
+        map={props.leaflet.map}
+        annotation={annotation}
+        selected={(!!props.selectedAnnotations) && props.selectedAnnotations.contains(annotation)} />
+    </React.Fragment>
+  );
+
   const dispatch = useDispatch();
-  const onEdit = useCallback((annotation: Annotation, newAnnotation: Annotation) => {
-    dispatch(editAnnotationAction(
-      annotation,
-      newAnnotation,
-    ));
+
+  const onEdit = useCallback((event) => {
+    console.log(event);
+    if (
+      props.selectedAnnotations &&
+      containerRef.current &&
+      props.onCreated &&
+      event.layers.toGeoJSON(1).features.length >= 1
+    ) {
+      const featuresCollection = List(containerRef.current.leafletElement.getLayers());
+      props.selectedAnnotations.zip(featuresCollection).forEach(([annotation, layer]) => {
+        const feature = (layer as any).toGeoJSON();
+        if (annotation.properties.type === SupportedShapes.circle) {
+          dispatch(editAnnotationAction(annotation, fromJS(feature).set(
+            'properties',
+            annotation.properties.set(
+              'radius',
+              (layer as L.CircleMarker).getRadius(),
+            ),
+          )));
+        } else {
+          dispatch(
+            editAnnotationAction(
+              annotation,
+              fromJS(feature).set('properties', annotation.properties),
+            ),
+          );
+        }
+      });
+      return;
+    }
+  }, [props.selectedAnnotations, props.onCreated]);
+
+  const onCreate = useCallback((event) => {
+    if (event.layerType === SupportedShapes.circle) {
+      const feature = event.layer.toGeoJSON();
+      feature.properties.radius = (event.layer as L.CircleMarker).getRadius();
+      return props.onCreated(feature);
+    }
+    const feature = event.layer.toGeoJSON();
+    feature.properties.type = event.layerType;
+    return props.onCreated(feature);
   }, []);
+
+  const containerRef = useRef<FeatureGroup>(null);
+
   return (
     <LeafletLayerGroup>
-      {props.data.map((annotation) =>
-        <React.Fragment key={annotation.properties.id}>
-          <GuessComponent
-            tool={props.tool}
-            onClick={props.onLayerClick}
-            onEdit={onEdit}
-            map={props.leaflet.map}
-            annotation={annotation}
-            selected={(!!props.selectedAnnotations) && props.selectedAnnotations.contains(annotation)} />
-        </React.Fragment>,
-      )}
+      {data.map(renderAnnotations)}
+      <FeatureGroup ref={containerRef}>
+        <EditControl
+          position="topright"
+          onEdited={onEdit}
+          onCreated={onCreate}
+          onDeleted={console.log}
+        />
+        {props.selectedAnnotations && props.selectedAnnotations.map(renderAnnotations)}
+      </FeatureGroup>
     </LeafletLayerGroup>
   );
 };
 
-export default withLeaflet(memo(AnnotationLayer));
+export default withLeaflet(AnnotationLayer);

@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { List, Set } from 'immutable';
+import { List } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
 import { useDispatch } from 'utils/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -137,7 +137,7 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
 
 interface OwnProps {
   annotations: List<Annotation>;
-  selectedAnnotations: Set<Annotation>;
+  selectedAnnotations: List<Annotation>;
 }
 
 const reorder = (list: List<Annotation>, startIndex: number, endIndex: number) => {

@@ -1,21 +1,12 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import { Polygon, Tooltip } from 'react-leaflet';
 
-import { coordsToLatLngs, fromJS } from 'utils/geo';
+import { coordsToLatLngs } from 'utils/geo';
 import { AnnotationShapes } from './types';
 import { SupportedShapes } from 'types';
 
-const CustomTypePolygon: any = Polygon;
-
-const okEvents = [
-  'editable:vertex:dragend',
-  'editable:dragend',
-  'editable:vertex:deleted',
-  'editable:vertex:new',
-].join(' ');
-
 const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
-  const {annotation, onEdit, selected, onClick, tool} = props;
+  const {annotation, selected, onClick, tool} = props;
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const ref = useRef<any>(null);
@@ -23,25 +14,6 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
     coords,
     geometry.type === 'Polygon' ? 1 : 2,
   ).toJS(), [selected]);
-
-  useEffect(() => {
-    if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
-      const save = () => {
-        onEdit(
-          annotation,
-          fromJS(ref.current.leafletElement.toGeoJSON()).set(
-            'properties',
-            annotation.properties,
-          ),
-        );
-      };
-      ref.current.leafletElement.on(okEvents, save);
-      return () => {
-        ref.current.leafletElement.off(okEvents, save);
-      };
-    }
-    return () => {};
-  }, [annotation]);
 
   useEffect((): any => {
     if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
@@ -64,7 +36,7 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
   }, [selected, tool]);
 
   return (
-    <CustomTypePolygon
+    <Polygon
       onClick={onClick}
       color={selected ? 'cyan' : 'purple'}
       ref={ref}
@@ -77,7 +49,7 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
           {annotation.properties.content}
         </Tooltip>
       )}
-    </CustomTypePolygon>
+    </Polygon>
   );
 };
 

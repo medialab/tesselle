@@ -17,7 +17,6 @@ import history from 'utils/history';
 import 'sanitize.css/sanitize.css';
 // import 'leaflet-editable';
 import L from 'leaflet';
-import 'leaflet-path-drag';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
 

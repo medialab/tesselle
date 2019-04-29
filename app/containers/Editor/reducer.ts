@@ -13,11 +13,11 @@ import Annotation from 'types/Annotation';
 
 import { when, equals } from 'ramda';
 import { fromJS } from 'utils/geo';
-import { isImmutable, Set } from 'immutable';
+import { isImmutable, List } from 'immutable';
 
 export const initialState: ContainerState = {
   slideshow: null,
-  selectedAnnotations: Set(),
+  selectedAnnotations: List(),
   map: null,
 };
 
@@ -35,21 +35,21 @@ export default combineReducers<ContainerState, ContainerActions>({
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
         if (action.payload) {
-          if (action.payload instanceof Set) {
+          if (action.payload instanceof List) {
             return action.payload as any;
           } else {
             const annotation: Annotation = action.payload as Annotation;
             if (selectedAnnotations.contains(annotation)) {
-              return selectedAnnotations.remove(annotation);
+              return selectedAnnotations.remove(selectedAnnotations.indexOf(annotation));
             }
-            return Set([annotation]);
+            return List([annotation]);
           }
         }
         return selectedAnnotations;
       case ActionTypes.EDIT_ANNOTATION:
         return selectedAnnotations.map(replaceAnnotation(action));
       case ActionTypes.REMOVE_ANNOTATION:
-        return selectedAnnotations.remove(action.payload);
+        return selectedAnnotations.remove(selectedAnnotations.indexOf(action.payload));
     }
     return selectedAnnotations;
   },

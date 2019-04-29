@@ -2,6 +2,7 @@ import uuid from 'uuid';
 import { Feature } from 'geojson';
 import { Record, Map } from 'immutable';
 import { pipe } from 'ramda';
+import { SupportedShapes } from 'types';
 
 interface IAnnotationProperties {
   id: string;
@@ -10,11 +11,11 @@ interface IAnnotationProperties {
 
 interface IAnnotationCircleProperties extends IAnnotationProperties {
   radius: number;
-  type: 'circle';
+  type: SupportedShapes.circle;
 }
 
 interface IAnnotationRectangleProperties extends IAnnotationProperties {
-  type: 'rectangle';
+  type: SupportedShapes.rectangle;
 }
 
 interface AnnotationProperties extends Record<IAnnotationProperties>, IAnnotationProperties {}
@@ -32,13 +33,13 @@ const makeAnnotationCircleProperties = Record({
   id: 'emptyId',
   content: 'Empty annotation',
   radius: 0,
-  type: 'circle',
+  type: SupportedShapes.circle,
 }, 'AnnotationCircleProperties');
 
 const makeAnnotationRectangleProperties = Record<IAnnotationRectangleProperties>({
   id: 'emptyId',
   content: 'Empty annotation',
-  type: 'rectangle',
+  type: SupportedShapes.rectangle,
 }, 'AnnotationRectangleProperties');
 
 const isIdededed = (properties: Map<string, any>): Map<string, any> => {

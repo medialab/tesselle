@@ -4,7 +4,6 @@ import { SupportedShapes } from 'types';
 
 interface AnnotationShapes {
   annotation: Annotation;
-  onEdit: (annotation: Annotation, newAnnotation: Annotation) => any;
   selected: boolean;
   map: L.Map;
   onClick?: (annotation: Annotation) => any;

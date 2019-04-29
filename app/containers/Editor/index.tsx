@@ -9,7 +9,7 @@ import L, { LatLngBounds } from 'leaflet';
 import { connect } from 'react-redux';
 import { RouterProps } from 'react-router';
 import { createStructuredSelector } from 'reselect';
-import { Set } from 'immutable';
+import { List } from 'immutable';
 import { compose } from 'redux';
 import cx from 'classnames';
 import { Map } from 'react-leaflet';
@@ -24,6 +24,7 @@ import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
 import { Feature } from 'geojson';
 import { useTools, useFlyTo, useMapLock } from 'utils/hooks';
+import AnnotationLayer from 'components/AnnotationLayer';
 
 import {
   createSlideshowAction,
@@ -40,8 +41,6 @@ import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
 import IiifLayer from 'components/IiifLayer';
-import FigureEditor from 'components/FigureEditor';
-// import FigureEditor from 'react-leaflet-figure-editor';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -70,10 +69,10 @@ export const decorator = compose(
 
 interface EditorProps {
   readonly slideshow: Slideshow;
-  readonly selectedAnnotations: Set<Annotation>;
+  readonly selectedAnnotations: List<Annotation>;
   readonly map: L.Map;
   readonly createAnnotation: (frame: Feature) => void;
-  readonly changeSelection: (annotation?: Annotation | Set<Annotation>) => void;
+  readonly changeSelection: (annotation?: Annotation | List<Annotation>) => void;
   readonly setMap: (event) => void;
 }
 
@@ -99,14 +98,14 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
   const onPolygonClick = useCallback(() => {
     setTool(SupportedShapes.polygon);
   }, []);
-  // const onDrown = useCallback(props.createAnnotation, []);
-  // const onLayerClick = useCallback((annotation) => {
-  //     if (tool === SupportedShapes.selector) {
-  //       props.changeSelection(annotation);
-  //     }
-  //   },
-  //   [props.changeSelection, tool],
-  // );
+  const onCreate = useCallback(props.createAnnotation, []);
+  const onLayerClick = useCallback((annotation) => {
+      if (tool === SupportedShapes.selector) {
+        props.changeSelection(annotation);
+      }
+    },
+    [props.changeSelection, tool],
+  );
   const onMapClick = useCallback(() => {
     if (tool === SupportedShapes.selector) {
       props.changeSelection();
@@ -138,14 +137,14 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
         minZoom={minZoom}
         maxZoom={maxZoom}
         center={[0, 0]}>
-        <IiifLayer url={imageUrl} tileSize={512} />
-        <FigureEditor
-          tool={tool}
+        <AnnotationLayer
+          onLayerClick={onLayerClick}
+          onCreated={onCreate}
           data={slideshow.annotations}
-          selectedId={props.selectedAnnotations.size >= 1
-            ? (props.selectedAnnotations.first() as Annotation).properties.id
-            : undefined}
+          selectedAnnotations={props.selectedAnnotations}
+          tool={tool}
         />
+        <IiifLayer url={imageUrl} tileSize={512} />
         <FloatinBar
           onSelectClick={onSelectClick}
           activeButton={tool}
