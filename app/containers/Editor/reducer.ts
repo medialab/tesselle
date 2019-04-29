@@ -11,7 +11,7 @@ import { ContainerState, ContainerActions } from './types';
 import Slideshow from 'types/Slideshow';
 import Annotation from 'types/Annotation';
 
-import { when, equals } from 'ramda';
+import { when } from 'ramda';
 import { fromJS } from 'utils/geo';
 import { isImmutable, List } from 'immutable';
 
@@ -22,7 +22,7 @@ export const initialState: ContainerState = {
 };
 
 const replaceAnnotation = action => when(
-  equals(action.payload.annotation),
+  action.payload.annotation.equals.bind(action.payload.annotation),
   (annotation: Annotation) => annotation.merge(
     isImmutable(action.payload.editedFeature)
     ? action.payload.editedFeature
@@ -38,7 +38,7 @@ export default combineReducers<ContainerState, ContainerActions>({
           if (action.payload instanceof List) {
             return action.payload as any;
           } else {
-            const annotation: Annotation = action.payload as Annotation;
+            const annotation = action.payload as Annotation;
             if (selectedAnnotations.contains(annotation)) {
               return selectedAnnotations.remove(selectedAnnotations.indexOf(annotation));
             }
@@ -68,12 +68,10 @@ export default combineReducers<ContainerState, ContainerActions>({
             action.payload,
           );
         case ActionTypes.CREATE_ANNOTATION:
-          const annotation: Annotation = fromJS(action.payload);
-          return slideshow.with({
-            annotations: slideshow.annotations.push(
-              annotation,
-            ),
-          });
+          return slideshow.set(
+            'annotations',
+            slideshow.annotations.push(fromJS(action.payload)),
+          );
         case ActionTypes.EDIT_ANNOTATION:
           return slideshow.set(
             'annotations',

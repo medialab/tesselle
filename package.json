@@ -139,6 +139,7 @@
     "typesafe-actions": "^3.2.1",
     "typings-for-css-modules-loader": "^1.7.0",
     "update": "^0.7.4",
+    "use-debounce": "^2.0.0",
     "uuid": "^3.3.2",
     "warning": "4.0.3"
   },

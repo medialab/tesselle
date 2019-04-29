@@ -10,6 +10,7 @@ import React, { useCallback, useRef } from 'react';
 import { SupportedShapes } from 'types';
 import { DomEvent } from 'leaflet';
 import { EditControl } from 'react-leaflet-draw';
+import useDebouncedCallback from 'use-debounce/lib/callback';
 
 import Annotation from 'types/Annotation';
 import { List } from 'immutable';
@@ -49,7 +50,6 @@ const GuessComponent = ({annotation, selected, map, onClick, tool}: AnnotationSh
     case 'Polygon':
     case 'MultiPolygon':
       if (annotation.properties.type === SupportedShapes.rectangle) {
-        console.log('oui c bon');
         return (
           <AnnotationRectangle
             onClick={onLayerClick}
@@ -59,7 +59,6 @@ const GuessComponent = ({annotation, selected, map, onClick, tool}: AnnotationSh
             annotation={annotation} />
         );
       }
-      console.log('nnoooooon');
       return (
         <AnnotationPolygon
           onClick={onLayerClick}
@@ -71,6 +70,8 @@ const GuessComponent = ({annotation, selected, map, onClick, tool}: AnnotationSh
   }
   return <React.Fragment />;
 };
+
+const createLogger = str => args => console.log(str, args);
 
 const AnnotationLayer = (props: AnnotationLayerProps) => {
   let data = props.data;
@@ -91,25 +92,23 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
 
   const dispatch = useDispatch();
 
-  const onEdit = useCallback((event) => {
-    console.log(event);
-    if (
-      props.selectedAnnotations &&
-      containerRef.current &&
-      props.onCreated &&
-      event.layers.toGeoJSON(1).features.length >= 1
-    ) {
+  const rawOnEdit = () => {
+    if (props.selectedAnnotations && containerRef.current && props.onCreated) {
       const featuresCollection = List(containerRef.current.leafletElement.getLayers());
       props.selectedAnnotations.zip(featuresCollection).forEach(([annotation, layer]) => {
         const feature = (layer as any).toGeoJSON();
         if (annotation.properties.type === SupportedShapes.circle) {
-          dispatch(editAnnotationAction(annotation, fromJS(feature).set(
-            'properties',
-            annotation.properties.set(
-              'radius',
-              (layer as L.CircleMarker).getRadius(),
-            ),
-          )));
+          dispatch(
+            editAnnotationAction(
+              annotation,
+              annotation.set(
+                'geometry',
+                fromJS(feature.geometry),
+              ).setIn(
+                ['properties', 'radius'],
+                (layer as L.CircleMarker).getRadius(),
+              ),
+            ));
         } else {
           dispatch(
             editAnnotationAction(
@@ -121,8 +120,10 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
       });
       return;
     }
-  }, [props.selectedAnnotations, props.onCreated]);
+  };
 
+  const onEdit = useCallback(rawOnEdit, [props.selectedAnnotations, props.onCreated]);
+  const [debouncedOnEdit] = useDebouncedCallback(onEdit, 200);
   const onCreate = useCallback((event) => {
     if (event.layerType === SupportedShapes.circle) {
       const feature = event.layer.toGeoJSON();
@@ -144,7 +145,16 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
           position="topright"
           onEdited={onEdit}
           onCreated={onCreate}
-          onDeleted={console.log}
+          onDeleted={createLogger('onDeleted')}
+          onEditStart={createLogger('onEditStart')}
+          onEditStop={createLogger('onEditStop')}
+          onDeleteStart={createLogger('onDeleteStart')}
+          onDeleteStop={createLogger('onDeleteStop')}
+          onDrawStart={createLogger('onDrawStart')}
+          onDrawStop={createLogger('onDrawStop')}
+          onDrawVertex={createLogger('onDrawVertex')}
+          onEditMove={debouncedOnEdit}
+          onEditResize={debouncedOnEdit}
         />
         {props.selectedAnnotations && props.selectedAnnotations.map(renderAnnotations)}
       </FeatureGroup>
