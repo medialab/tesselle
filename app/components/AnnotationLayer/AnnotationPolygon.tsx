@@ -6,7 +6,7 @@ import { AnnotationShapes } from './types';
 import { useEdit } from 'utils/hooks';
 
 const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
-  const {annotation, selected, onClick} = props;
+  const {annotation, selected} = props;
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const ref = useRef<any>(null);
@@ -19,14 +19,8 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
 
   return (
     <Polygon
-      className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
-      onClick={onClick}
-      color={selected ? 'cyan' : '#aaa'}
-      weight={1.5}
-      lineCap="butt"
+      {...props}
       ref={ref}
-      draggable
-      edditable
       positions={position}
     >
       {!selected && (

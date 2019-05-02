@@ -16,7 +16,7 @@ import makeSelectPlayer from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import L, { LatLngBounds } from 'leaflet';
-import AnnotationLayer from 'components/AnnotationLayer';
+// import AnnotationLayer from 'components/AnnotationLayer';
 import { useUrl, useMapLock } from 'utils/hooks';
 import 'containers/Editor/styles.css';
 
@@ -41,9 +41,9 @@ function Player(props) {
         maxZoom={maxZoom}
         center={[0, 0]}>
         {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
-        <AnnotationLayer
+        {/* <AnnotationLayer
           data={slideshow.annotations}
-        />
+        /> */}
       </Map>>
     </div>
   );

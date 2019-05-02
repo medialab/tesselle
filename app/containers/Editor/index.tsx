@@ -79,6 +79,18 @@ interface EditorProps {
 
 const minZoom = 1;
 const maxZoom = 20;
+
+// Hack to allow only 1 futur shape to be drawn.
+let FUTUR_SHAPE;
+const lockFuturShape = (instance?) => {
+  if (FUTUR_SHAPE) {
+    FUTUR_SHAPE.disable();
+  }
+  FUTUR_SHAPE = instance;
+  if (instance) {
+    instance.enable();
+  }
+};
 const EditorMap: React.SFC<EditorProps> = (props) => {
   const {slideshow, map} = props;
   const imageUrl: string = 'http://localhost:3000/test-image/info.json';
@@ -86,18 +98,19 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
   const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
 
   const onSelectClick = useCallback(() => {
+    lockFuturShape();
     setTool(SupportedShapes.selector);
   }, []);
   const onRectangleClick = useCallback(() => {
-    new L.Draw.Rectangle(map).enable();
+    lockFuturShape(new L.Draw.Rectangle(map));
     setTool(SupportedShapes.rectangle);
   }, [map]);
   const onCircleClick = useCallback(() => {
+    lockFuturShape(new L.Draw.Circle(map));
     setTool(SupportedShapes.circle);
-    new L.Draw.Circle(map).enable();
   }, [map]);
   const onPolygonClick = useCallback(() => {
-    new L.Draw.Polygon(map).enable();
+    lockFuturShape(new L.Draw.Polygon(map));
     setTool(SupportedShapes.polygon);
   }, [map]);
 
@@ -106,6 +119,7 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
   useMousetrap('p', onPolygonClick);
   useMousetrap('r', onRectangleClick);
   useMousetrap('c', onCircleClick);
+  useMousetrap('esc', onSelectClick);
 
   const onCreate = useCallback((annotation) => {
     props.createAnnotation(annotation);

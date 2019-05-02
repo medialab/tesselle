@@ -25,13 +25,14 @@ import { fromJS } from 'utils/geo';
 
 interface AnnotationLayerProps extends MapLayerProps {
   data: List<Annotation>;
-  selectedAnnotations?: List<Annotation>;
+  selectedAnnotations: List<Annotation>;
   leaflet;
   onLayerClick?: (annotation: Annotation) => any;
   onCreated?: any;
 }
 
-const GuessComponent: React.SFC<AnnotationShapes> = ({annotation, selected, onClick}) => {
+const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
+  const {annotation, onClick} = props;
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const onLayerClick = useCallback((event) => {
     DomEvent.stopPropagation(event);
@@ -41,25 +42,22 @@ const GuessComponent: React.SFC<AnnotationShapes> = ({annotation, selected, onCl
     case 'Point':
     return (
       <AnnotationCircle
-        onClick={onLayerClick}
-        selected={selected}
-        annotation={annotation} />
+        {...props}
+        onClick={onLayerClick} />
     );
     case 'Polygon':
     case 'MultiPolygon':
       if (annotation.properties.type === SupportedShapes.rectangle) {
         return (
           <AnnotationRectangle
-            onClick={onLayerClick}
-            selected={selected}
-            annotation={annotation} />
+            {...props}
+            onClick={onLayerClick} />
         );
       }
       return (
         <AnnotationPolygon
-          onClick={onLayerClick}
-          selected={selected}
-          annotation={annotation} />
+          {...props}
+          onClick={onLayerClick} />
       );
   }
   return <React.Fragment />;
@@ -72,14 +70,20 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
     const annotations = props.selectedAnnotations;
     data = props.data.filter(annotation => !annotations.contains(annotation));
   }
-  const renderAnnotations: React.SFC<Annotation> = (annotation) => (
-    <React.Fragment key={annotation.properties.id}>
+  const renderAnnotations: React.SFC<Annotation> = (annotation) => {
+    const selected = props.selectedAnnotations.contains(annotation);
+    return (
       <GuessComponent
+        className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
+        key={annotation.properties.id}
+        color={selected ? 'cyan' : '#aaa'}
+        weight={1.5}
+        lineCap="butt"
         onClick={props.onLayerClick}
         annotation={annotation}
-        selected={(!!props.selectedAnnotations) && props.selectedAnnotations.contains(annotation)} />
-    </React.Fragment>
-  );
+        selected={selected} />
+    );
+  };
 
   const dispatch = useDispatch();
 
