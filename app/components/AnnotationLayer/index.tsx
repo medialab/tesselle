@@ -9,8 +9,8 @@ import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps, FeatureGro
 import React, { useCallback, useRef } from 'react';
 import { SupportedShapes } from 'types';
 import { DomEvent } from 'leaflet';
-import { EditControl } from 'react-leaflet-draw';
-import useDebouncedCallback from 'use-debounce/lib/callback';
+import EditControl from './EditControl';
+// import useDebouncedCallback from 'use-debounce/lib/callback';
 
 import Annotation from 'types/Annotation';
 import { List } from 'immutable';
@@ -75,6 +75,7 @@ const createLogger = str => args => console.log(str, args);
 
 const AnnotationLayer = (props: AnnotationLayerProps) => {
   let data = props.data;
+  const map = props.leaflet.map;
   if (props.selectedAnnotations) {
     const annotations = props.selectedAnnotations;
     data = props.data.filter(annotation => !annotations.contains(annotation));
@@ -123,15 +124,17 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
   };
 
   const onEdit = useCallback(rawOnEdit, [props.selectedAnnotations, props.onCreated]);
-  const [debouncedOnEdit] = useDebouncedCallback(onEdit, 200);
+  // const [debouncedOnEdit] = useDebouncedCallback(onEdit, 200);
   const onCreate = useCallback((event) => {
     if (event.layerType === SupportedShapes.circle) {
       const feature = event.layer.toGeoJSON();
       feature.properties.radius = (event.layer as L.CircleMarker).getRadius();
+      event.layer.remove(map);
       return props.onCreated(feature);
     }
     const feature = event.layer.toGeoJSON();
     feature.properties.type = event.layerType;
+    event.layer.remove(map);
     return props.onCreated(feature);
   }, []);
 
@@ -153,8 +156,14 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
           onDrawStart={createLogger('onDrawStart')}
           onDrawStop={createLogger('onDrawStop')}
           onDrawVertex={createLogger('onDrawVertex')}
-          onEditMove={debouncedOnEdit}
-          onEditResize={debouncedOnEdit}
+          onEditMove={rawOnEdit}
+          onEditResize={rawOnEdit}
+          onEditVertex={rawOnEdit}
+          draw={{
+            circlemarker: false,
+            marker: false,
+            polyline: false,
+          }}
         />
         {props.selectedAnnotations && props.selectedAnnotations.map(renderAnnotations)}
       </FeatureGroup>

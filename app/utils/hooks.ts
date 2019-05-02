@@ -101,3 +101,15 @@ export function useMapLock(map: L.Map, image: Cover): LatLngBounds {
   }, [map, image]);
   return maxBounds;
 }
+
+export const useEdit = (ref, selected) => {
+  useEffect(() => {
+    if (ref.current) {
+      if (selected) {
+        ref.current.leafletElement.editing.enable();
+      } else {
+        ref.current.leafletElement.editing.disable();
+      }
+    }
+  });
+};

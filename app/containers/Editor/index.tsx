@@ -94,6 +94,8 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
   }, []);
   const onCircleClick = useCallback(() => {
     setTool(SupportedShapes.circle);
+    const lui = new (L as any).Draw.Circle(map, {});
+    console.log(lui);
   }, []);
   const onPolygonClick = useCallback(() => {
     setTool(SupportedShapes.polygon);
@@ -106,7 +108,8 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
     },
     [props.changeSelection, tool],
   );
-  const onMapClick = useCallback(() => {
+  const onMapClick = useCallback((event) => {
+    console.log(event.latlng.lng, event.latlng.lat);
     if (tool === SupportedShapes.selector) {
       props.changeSelection();
     }
@@ -156,7 +159,7 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
   );
 };
 
-const Editor: React.SFC<EditorProps & RouterProps> = React.memo((props) => (
+const Editor: React.SFC<EditorProps & RouterProps> = (props) => (
   <StretchedLayoutContainer
     isFullHeight
     isDirection="horizontal">
@@ -167,7 +170,7 @@ const Editor: React.SFC<EditorProps & RouterProps> = React.memo((props) => (
       <EditorMap {...props} />
     </StretchedLayoutItem>
   </StretchedLayoutContainer>
-));
+);
 
 export default decorator(props => {
   if (props.slideshow) {

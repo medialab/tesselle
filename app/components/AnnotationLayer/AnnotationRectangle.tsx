@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Rectangle, Tooltip } from 'react-leaflet';
 
 import { coordsToLatLngs } from 'utils/geo';
 import { AnnotationShapes } from './types';
 import 'leaflet-editable';
+import { useEdit } from 'utils/hooks';
 
 const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
   const {annotation, selected, onClick} = props;
@@ -13,16 +14,19 @@ const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
     coords,
     geometry.type === 'Polygon' ? 1 : 2,
   ).toJS(), [coords]);
+  const ref = useRef<Rectangle & any>(null);
+  useEdit(ref, selected);
 
   return (
     <Rectangle
+      ref={ref}
       onClick={onClick}
       color={selected ? 'cyan' : 'purple'}
       draggable
       edditable
       bounds={position}
     >
-      {selected && (
+      {!selected && (
         <Tooltip opacity={1} permanent>
           {annotation.properties.content}
         </Tooltip>

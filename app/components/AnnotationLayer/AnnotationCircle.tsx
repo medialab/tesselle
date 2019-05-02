@@ -1,7 +1,8 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Circle, Tooltip } from 'react-leaflet';
 import { coordsToLatLng } from 'utils/geo';
 import { AnnotationShapes } from './types';
+import { useEdit } from 'utils/hooks';
 
 const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected}) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
@@ -9,17 +10,9 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected}) =
   const center = useMemo(() => coordsToLatLng(coords), [selected]);
   const color = selected ? 'cyan' : 'purple';
   const ref = useRef<Circle & any>(null);
+  useEdit(ref, selected);
   // Because leaflet editor plugin is an ugly monkey patch and does not provide good typing.
   // This is why we us a any caster.
-  useEffect(() => {
-    if (ref.current) {
-      if (selected) {
-        ref.current.leafletElement.editing.enable();
-      } else {
-        ref.current.leafletElement.editing.disable();
-      }
-    }
-  });
   return (
     <Circle
       ref={ref}

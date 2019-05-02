@@ -13,13 +13,13 @@ import { Formik, Form, FormikValues, FormikErrors, Field } from 'formik';
 import cx from 'classnames';
 import Textarea from 'react-textarea-autosize';
 
-const CustomTextarea = React.memo(({field, form: {touched, errors}, ...props}: any) => (
+const CustomTextarea = ({field, form: {touched, errors}, ...props}: any) => (
   <div>
     <Textarea {...field} {...props} />
     {touched[field.name] &&
       errors[field.name] && <div className="error">{errors[field.name]}</div>}
   </div>
-));
+);
 
 import {
   removeAnnotationAction,
@@ -196,6 +196,7 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
 const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
   const dispatch = useDispatch();
   const onClickSidebar = React.useCallback((event: React.SyntheticEvent) => {
+    console.log('coucou');
     event.stopPropagation();
     dispatch(changeSelectionAction());
   }, []);
@@ -209,4 +210,4 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
   return <div onClick={onClickSidebar} className="sidebar"><Orderable {...props} /></div>;
 };
 
-export default React.memo(Sidebar);
+export default Sidebar;
