@@ -15,7 +15,6 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import history from 'utils/history';
 import 'sanitize.css/sanitize.css';
-// import 'leaflet-editable';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';

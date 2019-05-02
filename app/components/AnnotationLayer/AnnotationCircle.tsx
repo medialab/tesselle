@@ -4,19 +4,21 @@ import { coordsToLatLng } from 'utils/geo';
 import { AnnotationShapes } from './types';
 import { useEdit } from 'utils/hooks';
 
-const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected}) => {
+const AnnotationCircle: React.SFC<AnnotationShapes> = ({annotation, selected, onClick}) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
   const center = useMemo(() => coordsToLatLng(coords), [selected]);
-  const color = selected ? 'cyan' : 'purple';
+  const color = selected ? 'cyan' : '#aaa';
   const ref = useRef<Circle & any>(null);
   useEdit(ref, selected);
-  // Because leaflet editor plugin is an ugly monkey patch and does not provide good typing.
-  // This is why we us a any caster.
   return (
     <Circle
+      className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
       ref={ref}
+      onClick={onClick}
       color={color}
+      weight={1.5}
+      lineCap="butt"
       center={center}
       radius={annotation.properties.radius}
     >

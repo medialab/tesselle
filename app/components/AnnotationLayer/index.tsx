@@ -10,6 +10,7 @@ import React, { useCallback, useRef } from 'react';
 import { SupportedShapes } from 'types';
 import { DomEvent } from 'leaflet';
 import EditControl from './EditControl';
+import './styles.css';
 // import useDebouncedCallback from 'use-debounce/lib/callback';
 
 import Annotation from 'types/Annotation';
@@ -27,11 +28,10 @@ interface AnnotationLayerProps extends MapLayerProps {
   selectedAnnotations?: List<Annotation>;
   leaflet;
   onLayerClick?: (annotation: Annotation) => any;
-  tool?: SupportedShapes;
   onCreated?: any;
 }
 
-const GuessComponent = ({annotation, selected, map, onClick, tool}: AnnotationShapes) => {
+const GuessComponent: React.SFC<AnnotationShapes> = ({annotation, selected, onClick}) => {
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const onLayerClick = useCallback((event) => {
     DomEvent.stopPropagation(event);
@@ -42,8 +42,6 @@ const GuessComponent = ({annotation, selected, map, onClick, tool}: AnnotationSh
     return (
       <AnnotationCircle
         onClick={onLayerClick}
-        tool={tool}
-        map={map}
         selected={selected}
         annotation={annotation} />
     );
@@ -53,8 +51,6 @@ const GuessComponent = ({annotation, selected, map, onClick, tool}: AnnotationSh
         return (
           <AnnotationRectangle
             onClick={onLayerClick}
-            tool={tool}
-            map={map}
             selected={selected}
             annotation={annotation} />
         );
@@ -62,8 +58,6 @@ const GuessComponent = ({annotation, selected, map, onClick, tool}: AnnotationSh
       return (
         <AnnotationPolygon
           onClick={onLayerClick}
-          tool={tool}
-          map={map}
           selected={selected}
           annotation={annotation} />
       );
@@ -71,21 +65,17 @@ const GuessComponent = ({annotation, selected, map, onClick, tool}: AnnotationSh
   return <React.Fragment />;
 };
 
-const createLogger = str => args => console.log(str, args);
-
-const AnnotationLayer = (props: AnnotationLayerProps) => {
+const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
   let data = props.data;
   const map = props.leaflet.map;
   if (props.selectedAnnotations) {
     const annotations = props.selectedAnnotations;
     data = props.data.filter(annotation => !annotations.contains(annotation));
   }
-  const renderAnnotations = (annotation) => (
+  const renderAnnotations: React.SFC<Annotation> = (annotation) => (
     <React.Fragment key={annotation.properties.id}>
       <GuessComponent
-        tool={props.tool}
         onClick={props.onLayerClick}
-        map={props.leaflet.map}
         annotation={annotation}
         selected={(!!props.selectedAnnotations) && props.selectedAnnotations.contains(annotation)} />
     </React.Fragment>
@@ -124,7 +114,6 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
   };
 
   const onEdit = useCallback(rawOnEdit, [props.selectedAnnotations, props.onCreated]);
-  // const [debouncedOnEdit] = useDebouncedCallback(onEdit, 200);
   const onCreate = useCallback((event) => {
     if (event.layerType === SupportedShapes.circle) {
       const feature = event.layer.toGeoJSON();
@@ -148,21 +137,20 @@ const AnnotationLayer = (props: AnnotationLayerProps) => {
           position="topright"
           onEdited={onEdit}
           onCreated={onCreate}
-          onDeleted={createLogger('onDeleted')}
-          onEditStart={createLogger('onEditStart')}
-          onEditStop={createLogger('onEditStop')}
-          onDeleteStart={createLogger('onDeleteStart')}
-          onDeleteStop={createLogger('onDeleteStop')}
-          onDrawStart={createLogger('onDrawStart')}
-          onDrawStop={createLogger('onDrawStop')}
-          onDrawVertex={createLogger('onDrawVertex')}
-          onEditMove={rawOnEdit}
-          onEditResize={rawOnEdit}
-          onEditVertex={rawOnEdit}
+          onEditMove={onEdit}
+          onEditResize={onEdit}
+          onEditVertex={onEdit}
+          edit={{
+            edit: false,
+            remove: false,
+          }}
           draw={{
             circlemarker: false,
             marker: false,
             polyline: false,
+            circle: false,
+            rectangle: false,
+            polygon: false,
           }}
         />
         {props.selectedAnnotations && props.selectedAnnotations.map(renderAnnotations)}

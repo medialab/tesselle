@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import L, { LatLngBounds } from 'leaflet';
 import { connect } from 'react-redux';
 import { RouterProps } from 'react-router';
@@ -14,6 +14,7 @@ import { compose } from 'redux';
 import cx from 'classnames';
 import { Map } from 'react-leaflet';
 import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
+import useMousetrap from 'react-hook-mousetrap';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -23,7 +24,7 @@ import Sidebar from 'components/Sidebar';
 import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
 import { Feature } from 'geojson';
-import { useTools, useFlyTo, useMapLock } from 'utils/hooks';
+import { useFlyTo, useMapLock } from 'utils/hooks';
 import AnnotationLayer from 'components/AnnotationLayer';
 
 import {
@@ -76,31 +77,40 @@ interface EditorProps {
   readonly setMap: (event) => void;
 }
 
-const minZoom = 0;
+const minZoom = 1;
 const maxZoom = 20;
 const EditorMap: React.SFC<EditorProps> = (props) => {
   const {slideshow, map} = props;
   const imageUrl: string = 'http://localhost:3000/test-image/info.json';
   const maxBounds: LatLngBounds = useMapLock(map, slideshow.image);
-  const [tool, setTool, useToggleTool] = useTools(SupportedShapes.selector);
-
-  useToggleTool(SupportedShapes.selector, 'shift');
+  const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
 
   const onSelectClick = useCallback(() => {
     setTool(SupportedShapes.selector);
   }, []);
   const onRectangleClick = useCallback(() => {
+    new L.Draw.Rectangle(map).enable();
     setTool(SupportedShapes.rectangle);
-  }, []);
+  }, [map]);
   const onCircleClick = useCallback(() => {
     setTool(SupportedShapes.circle);
-    const lui = new (L as any).Draw.Circle(map, {});
-    console.log(lui);
-  }, []);
+    new L.Draw.Circle(map).enable();
+  }, [map]);
   const onPolygonClick = useCallback(() => {
+    new L.Draw.Polygon(map).enable();
     setTool(SupportedShapes.polygon);
+  }, [map]);
+
+  useFlyTo(map, maxBounds);
+
+  useMousetrap('p', onPolygonClick);
+  useMousetrap('r', onRectangleClick);
+  useMousetrap('c', onCircleClick);
+
+  const onCreate = useCallback((annotation) => {
+    props.createAnnotation(annotation);
+    setTool(SupportedShapes.selector);
   }, []);
-  const onCreate = useCallback(props.createAnnotation, []);
   const onLayerClick = useCallback((annotation) => {
       if (tool === SupportedShapes.selector) {
         props.changeSelection(annotation);
@@ -109,7 +119,6 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
     [props.changeSelection, tool],
   );
   const onMapClick = useCallback((event) => {
-    console.log(event.latlng.lng, event.latlng.lat);
     if (tool === SupportedShapes.selector) {
       props.changeSelection();
     }
@@ -120,7 +129,6 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
     }
   };
 
-  useFlyTo(map, maxBounds);
   return (
     <div className={cx({
         map: true,
@@ -138,14 +146,12 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
         // scrollWheelZoom={false}
         crs={L.CRS.Simple}
         minZoom={minZoom}
-        maxZoom={maxZoom}
-        center={[0, 0]}>
+        maxZoom={maxZoom}>
         <AnnotationLayer
           onLayerClick={onLayerClick}
           onCreated={onCreate}
           data={slideshow.annotations}
           selectedAnnotations={props.selectedAnnotations}
-          tool={tool}
         />
         <IiifLayer url={imageUrl} tileSize={512} />
         <FloatinBar

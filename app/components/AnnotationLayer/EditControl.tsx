@@ -19,11 +19,6 @@ const eventHandlers = {
   onDeleteStop: 'draw:deletestop',
 };
 
-// ...Object.keys(eventHandlers).reduce((acc, val) => {
-//   acc[val] = () => void;
-//   return acc;
-// }, {}),
-
 interface DrawProps {
   polyline?: object | boolean;
   polygon?: object | boolean;
@@ -34,18 +29,11 @@ interface DrawProps {
 }
 
 interface EditProps {
-  edit: object | boolean;
-  remove: object | boolean;
-  poly: object | boolean;
-  allowIntersection: object | boolean;
+  edit?: object | boolean;
+  remove?: object | boolean;
+  poly?: object | boolean;
+  allowIntersection?: object | boolean;
 }
-
-// enum MapPositions {
-//   topright = 'topright',
-//   topleft = 'topleft',
-//   bottomright = 'bottomright',
-//   bottomleft = 'bottomleft',
-// }
 
 interface EditControlProps {
   onMounted?: (arg?: any) => any;
@@ -70,15 +58,15 @@ interface EditControlProps {
 class EditControl extends MapControl<EditControlProps & MapControlProps> {
 
   public createLeafletElement(props) {
-    return createDrawElement(props) as any;
+    return createDrawElement(props);
   }
 
   private onDrawCreate = (e) => {
     const { onCreated } = this.props;
-    if (this.props.leaflet) {
-      const { layerContainer } = this.props.leaflet;
-      if (layerContainer) {
-        if (onCreated) {
+    if (onCreated) {
+      if (this.props.leaflet) {
+        const { layerContainer } = this.props.leaflet;
+        if (layerContainer) {
           onCreated(e);
         }
       }
@@ -127,7 +115,6 @@ class EditControl extends MapControl<EditControlProps & MapControlProps> {
   }
 
   public componentDidUpdate(prevProps, prevState) {
-    // super updates positions if thats all that changed so call this first
     if (super.componentDidUpdate) {
       super.componentDidUpdate(prevProps, prevState);
     }
@@ -144,7 +131,7 @@ class EditControl extends MapControl<EditControlProps & MapControlProps> {
         return false;
       }
       this.leafletElement.remove();
-      this.leafletElement = createDrawElement(this.props) as any;
+      this.leafletElement = createDrawElement(this.props);
       this.leafletElement.addTo(this.props.leaflet.map);
     }
 

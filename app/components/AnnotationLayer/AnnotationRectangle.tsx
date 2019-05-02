@@ -19,12 +19,15 @@ const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
 
   return (
     <Rectangle
+      className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
       ref={ref}
       onClick={onClick}
-      color={selected ? 'cyan' : 'purple'}
+      color={selected ? 'cyan' : '#aaa'}
       draggable
       edditable
       bounds={position}
+      weight={1.5}
+      lineCap="butt"
     >
       {!selected && (
         <Tooltip opacity={1} permanent>

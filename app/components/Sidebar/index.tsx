@@ -31,6 +31,7 @@ import Annotation from 'types/Annotation';
 import icons from 'quinoa-design-library/src/themes/millet/icons';
 
 import './styles.css';
+import { DomEvent } from 'leaflet';
 
 interface MenuItemProps {
   data: Annotation;
@@ -50,7 +51,10 @@ const validator = (values: FormikValues) => {
 const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwardedRef) => {
   const dispatch = useDispatch();
   const onRemove = React.useCallback(
-    () => dispatch(removeAnnotationAction(props.data)),
+    (event) => {
+      DomEvent.stopPropagation(event);
+      return dispatch(removeAnnotationAction(props.data));
+    },
     [props.data],
   );
   const changeSelection = React.useCallback((event) => {
@@ -196,7 +200,6 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
 const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
   const dispatch = useDispatch();
   const onClickSidebar = React.useCallback((event: React.SyntheticEvent) => {
-    console.log('coucou');
     event.stopPropagation();
     dispatch(changeSelectionAction());
   }, []);

@@ -19,8 +19,11 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
 
   return (
     <Polygon
+      className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
       onClick={onClick}
-      color={selected ? 'cyan' : 'purple'}
+      color={selected ? 'cyan' : '#aaa'}
+      weight={1.5}
+      lineCap="butt"
       ref={ref}
       draggable
       edditable

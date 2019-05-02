@@ -23,14 +23,11 @@ export const initialState: ContainerState = {
 
 const replaceAnnotation = action => when(
   action.payload.annotation.equals.bind(action.payload.annotation),
-  (annotation: Annotation) => {
-    console.log('oui c bon');
-    return annotation.merge(
-      isImmutable(action.payload.editedFeature)
-      ? action.payload.editedFeature
-      : fromJS(action.payload.editedFeature),
-    );
-  },
+  (annotation: Annotation) => annotation.merge(
+    isImmutable(action.payload.editedFeature)
+    ? action.payload.editedFeature
+    : fromJS(action.payload.editedFeature),
+  ),
 );
 
 export default combineReducers<ContainerState, ContainerActions>({
