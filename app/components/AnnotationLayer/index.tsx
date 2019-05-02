@@ -40,54 +40,23 @@ const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
   }, [onClick, annotation]);
   switch (geometry.type) {
     case 'Point':
-    return (
-      <AnnotationCircle
-        {...props}
-        onClick={onLayerClick} />
-    );
+      return <AnnotationCircle {...props} onClick={onLayerClick} />;
     case 'Polygon':
     case 'MultiPolygon':
       if (annotation.properties.type === SupportedShapes.rectangle) {
-        return (
-          <AnnotationRectangle
-            {...props}
-            onClick={onLayerClick} />
-        );
+        return <AnnotationRectangle {...props} onClick={onLayerClick} />;
       }
-      return (
-        <AnnotationPolygon
-          {...props}
-          onClick={onLayerClick} />
-      );
+      return <AnnotationPolygon {...props} onClick={onLayerClick} />;
   }
   return <React.Fragment />;
 };
 
 const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
-  let data = props.data;
   const map = props.leaflet.map;
-  if (props.selectedAnnotations) {
-    const annotations = props.selectedAnnotations;
-    data = props.data.filter(annotation => !annotations.contains(annotation));
-  }
-  const renderAnnotations: React.SFC<Annotation> = (annotation) => {
-    const selected = props.selectedAnnotations.contains(annotation);
-    return (
-      <GuessComponent
-        className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
-        key={annotation.properties.id}
-        color={selected ? 'cyan' : '#aaa'}
-        weight={1.5}
-        lineCap="butt"
-        onClick={props.onLayerClick}
-        annotation={annotation}
-        selected={selected} />
-    );
-  };
 
   const dispatch = useDispatch();
 
-  const rawOnEdit = () => {
+  const onEdit = useCallback(() => {
     if (props.selectedAnnotations && containerRef.current && props.onCreated) {
       const featuresCollection = List(containerRef.current.leafletElement.getLayers());
       props.selectedAnnotations.zip(featuresCollection).forEach(([annotation, layer]) => {
@@ -115,9 +84,7 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
       });
       return;
     }
-  };
-
-  const onEdit = useCallback(rawOnEdit, [props.selectedAnnotations, props.onCreated]);
+  }, [props.selectedAnnotations, props.onCreated]);
   const onCreate = useCallback((event) => {
     if (event.layerType === SupportedShapes.circle) {
       const feature = event.layer.toGeoJSON();
@@ -135,7 +102,6 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
 
   return (
     <LeafletLayerGroup>
-      {data.map(renderAnnotations)}
       <FeatureGroup ref={containerRef}>
         <EditControl
           position="topright"
@@ -157,7 +123,20 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
             polygon: false,
           }}
         />
-        {props.selectedAnnotations && props.selectedAnnotations.map(renderAnnotations)}
+        {props.data.map((annotation) => {
+          const selected = props.selectedAnnotations.contains(annotation);
+          return (
+            <GuessComponent
+              className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
+              key={annotation.properties.id}
+              color={selected ? 'cyan' : '#aaa'}
+              weight={1.5}
+              lineCap="butt"
+              onClick={props.onLayerClick}
+              annotation={annotation}
+              selected={selected} />
+          );
+        })}
       </FeatureGroup>
     </LeafletLayerGroup>
   );

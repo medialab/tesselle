@@ -19,6 +19,7 @@ const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
 
   return (
     <Rectangle
+      key={props.className}
       ref={ref}
       {...props}
       onClick={onClick}

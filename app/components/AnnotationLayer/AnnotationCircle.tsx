@@ -13,6 +13,7 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = (props) => {
   useEdit(ref, selected);
   return (
     <Circle
+      key={props.className}
       ref={ref}
       {...props}
       center={center}

@@ -19,8 +19,9 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
 
   return (
     <Polygon
-      {...props}
+      key={props.className}
       ref={ref}
+      {...props}
       positions={position}
     >
       {!selected && (
