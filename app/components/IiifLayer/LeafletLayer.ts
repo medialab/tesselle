@@ -1,13 +1,6 @@
 import L, { DomEvent, Util } from 'leaflet';
 import db from 'utils/db';
 import 'leaflet-iiif';
-import $ from 'jquery';
-import save from 'save-file';
-
-(window as any).save = save;
-(window as any).$ = $;
-
-export const Iiif2 = (L.TileLayer as any).Iiif;
 
 export const Iiif = L.TileLayer.extend({
   options: {
