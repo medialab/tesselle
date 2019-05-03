@@ -71,7 +71,6 @@ export default class IIIFStatic {
     const ratio = calculateAspectRatioFit(
       width, height, 480, 512,
     );
-    console.log(ratio);
     res.push(await this.generateTile(
       [0, 0, width, height],
       [ratio.width, ratio.height],

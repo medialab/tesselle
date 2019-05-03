@@ -103,7 +103,6 @@
     "leaflet": "^1.4.0",
     "leaflet-draw": "^1.0.4",
     "leaflet-editable": "^1.2.0",
-    "leaflet-iiif": "^2.0.1",
     "leaflet-path-drag": "^1.1.0",
     "loadable-components": "2.2.3",
     "localforage": "^1.7.3",

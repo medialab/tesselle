@@ -93,7 +93,6 @@ const lockFuturShape = (instance?) => {
 };
 const EditorMap: React.SFC<EditorProps> = (props) => {
   const {slideshow, map} = props;
-  const imageUrl: string = 'http://localhost:3000/test-image/info.json';
   const maxBounds: LatLngBounds = useMapLock(map, slideshow.image);
   const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
 
@@ -167,7 +166,7 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
           data={slideshow.annotations}
           selectedAnnotations={props.selectedAnnotations}
         />
-        <IiifLayer url={imageUrl} tileSize={512} />
+        <IiifLayer tileSize={512} />
         <FloatinBar
           onSelectClick={onSelectClick}
           activeButton={tool}

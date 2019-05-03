@@ -1,6 +1,7 @@
 import L, { DomEvent, Util } from 'leaflet';
 import db from 'utils/db';
-import 'leaflet-iiif';
+
+// https://github.com/mejackreed/Leaflet-IIIF/blob/master/leaflet-iiif.js
 
 export const Iiif = L.TileLayer.extend({
   options: {
@@ -12,7 +13,7 @@ export const Iiif = L.TileLayer.extend({
     setMaxBounds: false,
   },
 
-  initialize: function(url, options: any = {}) {
+  initialize: function(options: any = {}) {
     if (options.maxZoom) {
       this._customMaxZoom = true;
     }
@@ -28,7 +29,6 @@ export const Iiif = L.TileLayer.extend({
     }
 
     options = (L as any).setOptions(this, options);
-    this._infoUrl = url;
     this._infoDeferred = this._getInfo();
     this._baseUrl = this._templateUrl();
   },
@@ -73,7 +73,7 @@ export const Iiif = L.TileLayer.extend({
     const yDiff = (maxy - miny);
 
     const size = Math.ceil(xDiff / scale);
-    const preoptions = {
+    const options = {
       format: this.options.tileFormat,
       quality: this.quality,
       region: [minx, miny, xDiff, yDiff].join(','),
@@ -83,7 +83,7 @@ export const Iiif = L.TileLayer.extend({
 
     const path = L.Util.template(
       this._baseUrl,
-      {...preoptions, ...this.options},
+      {...options, ...this.options},
     );
     // debugger;
     return path;
@@ -249,21 +249,7 @@ export const Iiif = L.TileLayer.extend({
     if (typeof(profileToCheck) === 'object') {
       profileToCheck = profileToCheck['@id'];
     }
-
-    // Set the quality based on the IIIF compliance level
-    switch (true) {
-      case /^http:\/\/library.stanford.edu\/iiif\/image-api\/1.1\/compliance.html.*$/.test(profileToCheck):
-        this.options.quality = 'native';
-        break;
-      // Assume later profiles and set to default
-      default:
-        this.options.quality = 'default';
-        break;
-    }
-  },
-
-  _infoToBaseUrl: function() {
-    return this._infoUrl.replace('info.json', '');
+    this.options.quality = 'native';
   },
   _templateUrl: () => {
     return '/{region}/{size}/{rotation}/{quality}.{format}';

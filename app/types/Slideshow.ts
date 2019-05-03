@@ -47,7 +47,6 @@ interface Box {
 const maxX = '1000';
 const maxY = '1000';
 const svgType = 'image/svg+xml';
-// const xmlSerializer = new XMLSerializer();
 
 const createObject = curry((specification, value) => map(f => f(value), specification));
 const parseWidth: () => number = pipe(nth(2), Number);
@@ -114,12 +113,6 @@ export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
         } catch (error) {
           svgElement.setAttribute('width', maxX);
           svgElement.setAttribute('height', maxY);
-          // const newFile: File = new File([
-          //   new Blob(
-          //     [xmlSerializer.serializeToString(svgElement)],
-          //     {type: svgType},
-          //   ),
-          // ], file.name, {type: svgType});
           const box: Box = getSvgSize(svgElement);
           return resolve(new Slideshow({
             image: new Cover({
@@ -142,8 +135,6 @@ export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
         if (img.height === 0) {
           return reject(new Error('Slideshow.image has a height of 0'));
         }
-        console.log('fait ca', img.width, img.height);
-        console.log(url, img, file);
         await db.setItem('info.json', generateInfo(img));
         if (slicing) {
           for (const [url, file] of await slicer(img)) {
