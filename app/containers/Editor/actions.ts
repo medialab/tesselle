@@ -23,8 +23,6 @@ export const addAnnotationAction = createAction(ActionTypes.CREATE_ANNOTATION, a
   return (feature: Feature<Point, any>) => action(feature);
 });
 
-export const setMap = createAction(ActionTypes.SET_MAP, action => (map: L.Map) => action(map));
-
 export const removeAnnotationAction = createAction(
   ActionTypes.REMOVE_ANNOTATION,
   action => (annotation: Annotation) => action(annotation),

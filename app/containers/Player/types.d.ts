@@ -6,7 +6,6 @@ import Annotation from 'types/Annotation';
 /* --- STATE --- */
 interface PlayerState {
   readonly slideshow: any;
-  readonly map: any;
 }
 
 /* --- ACTIONS --- */

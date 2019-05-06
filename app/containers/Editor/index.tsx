@@ -7,20 +7,17 @@
 import React, { useCallback, useState } from 'react';
 import L, { LatLngBounds } from 'leaflet';
 import { connect } from 'react-redux';
-import { RouterProps } from 'react-router';
 import { createStructuredSelector } from 'reselect';
 import { List } from 'immutable';
 import { compose } from 'redux';
-import cx from 'classnames';
-import { Map } from 'react-leaflet';
-import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
+import { Map, withLeaflet } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 import Slideshow from 'types/Slideshow';
 import FloatinBar from 'components/FloatingBar';
-import Sidebar from 'components/Sidebar';
+// import Sidebar from 'components/Sidebar';
 import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
 import { Feature } from 'geojson';
@@ -30,12 +27,10 @@ import AnnotationLayer from 'components/AnnotationLayer';
 import {
   createSlideshowAction,
   addAnnotationAction,
-  setMap,
   changeSelectionAction,
 } from './actions';
 import {
   makeSelectSlideshow,
-  makeMapSelector,
   makeSelectAnnotationSelector,
 } from './selectors';
 import reducer from './reducer';
@@ -44,7 +39,6 @@ import IiifLayer from 'components/IiifLayer';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
-  map: makeMapSelector(),
   selectedAnnotations: makeSelectAnnotationSelector(),
 });
 
@@ -54,7 +48,6 @@ const withConnect = connect(
     createSlideshow: createSlideshowAction.request,
     createAnnotation: addAnnotationAction,
     changeSelection: changeSelectionAction,
-    setMap: setMap,
   },
 );
 
@@ -73,7 +66,11 @@ interface EditorProps {
   readonly map: L.Map;
   readonly createAnnotation: (frame: Feature) => void;
   readonly changeSelection: (annotation?: Annotation | List<Annotation>) => void;
-  readonly setMap: (event) => void;
+}
+
+interface SetToolsProps {
+  setTool: (SupportedShapes) => void;
+  tool: SupportedShapes;
 }
 
 const minZoom = 1;
@@ -90,10 +87,11 @@ const lockFuturShape = (instance?) => {
     instance.enable();
   }
 };
-const EditorMap: React.SFC<EditorProps> = (props) => {
-  const {slideshow, map} = props;
+
+const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = props => {
+  const {slideshow, setTool, tool} = props;
+  const map = props.leaflet.map;
   const maxBounds: LatLngBounds = useMapLock(map, slideshow.image);
-  const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
 
   const onSelectClick = useCallback(() => {
     lockFuturShape();
@@ -118,7 +116,6 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
   useMousetrap('r', onRectangleClick);
   useMousetrap('c', onCircleClick);
   useMousetrap('esc', onSelectClick);
-  // console.log(slideshow.toJS());
 
   const onCreate = useCallback((annotation) => {
     props.createAnnotation(annotation);
@@ -131,27 +128,42 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
     },
     [props.changeSelection, tool],
   );
+
+  return (
+    <React.Fragment>
+      <AnnotationLayer
+        onLayerClick={onLayerClick}
+        onCreated={onCreate}
+        data={slideshow.annotations}
+        selectedAnnotations={props.selectedAnnotations}
+      />
+      <IiifLayer tileSize={512} />
+      <FloatinBar
+        onSelectClick={onSelectClick}
+        activeButton={tool}
+        onCircleClick={onCircleClick}
+        onRectangleClick={onRectangleClick}
+        onPolygonClick={onPolygonClick} />
+    </React.Fragment>
+  );
+};
+
+const EditorMapMap = withLeaflet(EditorMap);
+
+const Editor: React.SFC<EditorProps> = (props) => {
+  const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
   const onMapClick = useCallback((event) => {
     if (tool === SupportedShapes.selector) {
       props.changeSelection();
     }
-  }, [tool]);
-  const reactLeafletDangerousRef = lef => {
-    if (lef && (map !== lef.leafletElement)) {
-      props.setMap(lef.leafletElement);
-    }
-  };
-
+  }, []);
   return (
-    <div className={cx({
-        map: true,
-        creating: tool,
-      })}>
+    <div className="map">
       <Map
-        boxZoom={false}
         onClick={onMapClick}
-        ref={reactLeafletDangerousRef}
+        boxZoom={false}
         dragging={false}
+        setTool={setTool}
         doubleClickZoom={false}
         // zoomControl={false}
         // keyboard={false}
@@ -159,36 +171,11 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
         crs={L.CRS.Simple}
         minZoom={minZoom}
         maxZoom={maxZoom}>
-        <AnnotationLayer
-          onLayerClick={onLayerClick}
-          onCreated={onCreate}
-          data={slideshow.annotations}
-          selectedAnnotations={props.selectedAnnotations}
-        />
-        <IiifLayer tileSize={512} />
-        <FloatinBar
-          onSelectClick={onSelectClick}
-          activeButton={tool}
-          onCircleClick={onCircleClick}
-          onRectangleClick={onRectangleClick}
-          onPolygonClick={onPolygonClick} />
+          <EditorMapMap {...props} />
       </Map>
     </div>
   );
 };
-
-const Editor: React.SFC<EditorProps & RouterProps> = (props) => (
-  <StretchedLayoutContainer
-    isFullHeight
-    isDirection="horizontal">
-    <StretchedLayoutItem isFlex={1} style={{padding: '1rem', overflow: 'auto'}}>
-      <Sidebar annotations={props.slideshow.annotations} selectedAnnotations={props.selectedAnnotations} />
-    </StretchedLayoutItem>
-    <StretchedLayoutItem isFlex={2}>
-      <EditorMap {...props} />
-    </StretchedLayoutItem>
-  </StretchedLayoutContainer>
-);
 
 export default decorator(props => {
   if (props.slideshow) {

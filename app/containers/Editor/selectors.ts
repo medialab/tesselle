@@ -29,12 +29,6 @@ export const makeSelectSlideshow = () =>
     substate => substate && substate.slideshow,
   );
 
-export const makeMapSelector = () =>
-  createSelector(
-    selectEditorDomain,
-    substate => substate && substate.map,
-  );
-
 const privateAnnotationSelector = createSelector(
   selectEditorDomain,
   (domain) => domain.selectedAnnotations,

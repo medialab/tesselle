@@ -13,7 +13,6 @@ import Slideshow from 'types/Slideshow';
 
 export const initialState: ContainerState = {
   slideshow: null,
-  map: null,
 };
 
 export default combineReducers<ContainerState, ContainerActions>({
@@ -28,12 +27,5 @@ export default combineReducers<ContainerState, ContainerActions>({
       default:
         return state;
     }
-  },
-  map: (state = initialState.map, action) => {
-    switch (action.type) {
-      case ActionTypes.SET_MAP:
-        return state;
-    }
-    return state;
   },
 });

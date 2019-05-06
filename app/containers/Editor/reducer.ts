@@ -18,7 +18,6 @@ import { isImmutable, List } from 'immutable';
 export const initialState: ContainerState = {
   slideshow: null,
   selectedAnnotations: List(),
-  map: null,
 };
 
 const replaceAnnotation = action => when(
@@ -52,12 +51,6 @@ export default combineReducers<ContainerState, ContainerActions>({
         return selectedAnnotations.remove(selectedAnnotations.indexOf(action.payload));
     }
     return selectedAnnotations;
-  },
-  map: (map = initialState.map, action) => {
-    if (action.type === ActionTypes.SET_MAP && map !== action.payload) {
-      return action.payload;
-    }
-    return map;
   },
   slideshow: (slideshow = initialState.slideshow, action) => {
     if (slideshow) {
