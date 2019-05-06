@@ -40,7 +40,6 @@ import {
 } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-import './styles.css';
 import IiifLayer from 'components/IiifLayer';
 
 const mapStateToProps = createStructuredSelector({
@@ -119,6 +118,7 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
   useMousetrap('r', onRectangleClick);
   useMousetrap('c', onCircleClick);
   useMousetrap('esc', onSelectClick);
+  // console.log(slideshow.toJS());
 
   const onCreate = useCallback((annotation) => {
     props.createAnnotation(annotation);
@@ -149,7 +149,6 @@ const EditorMap: React.SFC<EditorProps> = (props) => {
       })}>
       <Map
         boxZoom={false}
-        editable
         onClick={onMapClick}
         ref={reactLeafletDangerousRef}
         dragging={false}

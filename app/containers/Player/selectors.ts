@@ -7,7 +7,7 @@ import { initialState } from './reducer';
  */
 
 const selectPlayerDomain = (state: ApplicationRootState) => {
-  return state ? state : initialState;
+  return (state && state.player)  ? state.player : initialState;
 };
 
 /**
@@ -22,7 +22,7 @@ const selectPlayer = () =>
   createSelector(
     selectPlayerDomain,
     substate => {
-      return substate;
+      return substate && substate.slideshow;
     },
   );
 

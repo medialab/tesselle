@@ -3,7 +3,6 @@
  * AnnotationLayer
  *
  */
-import 'leaflet-draw/dist/leaflet.draw.css';
 
 import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps, FeatureGroup } from 'react-leaflet';
 import React, { useCallback, useRef } from 'react';

@@ -12,12 +12,12 @@ import { fromJS } from 'utils/geo';
 import Slideshow from 'types/Slideshow';
 
 export const initialState: ContainerState = {
-  default: null,
+  slideshow: null,
   map: null,
 };
 
 export default combineReducers<ContainerState, ContainerActions>({
-  default: (state = initialState.default, action) => {
+  slideshow: (state = initialState.slideshow, action) => {
     switch (action.type) {
       case ActionTypes.CREATE_SLIDESHOW:
         return new Slideshow({

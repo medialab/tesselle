@@ -1,10 +1,11 @@
 import { ActionType } from 'typesafe-actions';
 import * as actions from './actions';
 import { ApplicationRootState } from 'types';
+import Annotation from 'types/Annotation';
 
 /* --- STATE --- */
 interface PlayerState {
-  readonly default: any;
+  readonly slideshow: any;
   readonly map: any;
 }
 

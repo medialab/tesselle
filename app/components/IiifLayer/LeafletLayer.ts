@@ -38,6 +38,7 @@ export const Iiif = L.TileLayer.extend({
     DomEvent.on(tile, 'load', Util.bind(this._tileOnLoad, this, done, tile));
     DomEvent.on(tile, 'error', Util.bind(this._tileOnError, this, done, tile));
 
+
     if (this.options.crossOrigin || this.options.crossOrigin === '') {
       tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
     }

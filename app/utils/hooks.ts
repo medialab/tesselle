@@ -74,10 +74,10 @@ export const useTools = (defaultTool): [
   ];
 };
 
-export const useFlyTo = (map: L.Map, bounds: LatLngBounds): void =>
+export const useFlyTo = (map?: L.Map, bounds?: LatLngBounds): void =>
   useEffect(() => {
     if (map && bounds) {
-      map.fitBounds(bounds);
+      map.fitBounds(bounds, {animate: true});
     }
   }, [map, bounds]);
 
@@ -87,10 +87,10 @@ export const useUrl = (file: File): string => {
   return url;
 };
 
-export function useMapLock(map: L.Map, image: Cover): LatLngBounds {
+export function useMapLock(map?: L.Map, image?: Cover): LatLngBounds {
   const [maxBounds, setMaxBounds] = useState();
   useLayoutEffect(() => {
-    if (map !== null) {
+    if (map && image) {
       setMaxBounds(
         new LatLngBounds(
           map.unproject([0, image.height * 2], map.getMaxZoom()),
