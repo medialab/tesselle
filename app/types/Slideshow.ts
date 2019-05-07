@@ -1,4 +1,3 @@
-import uuid from 'uuid';
 import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
 import Annotation from 'types/Annotation';
@@ -7,24 +6,21 @@ import db from 'utils/db';
 import Cover from './Cover';
 
 interface SlideshowArgs {
-  id?: string;
+  name?: string;
   annotations?: List<Annotation>;
   image?: Cover;
 }
 
 class Slideshow extends Record({
-  id: uuid(),
+  name: 'Unnamed Slideshow',
   annotations: List(),
   image: {},
 }) {
-  public readonly id!: string;
+  public readonly name!: string;
   public readonly annotations!: List<Annotation>;
   public readonly image!: Cover;
   constructor(params?: SlideshowArgs) {
     if (params) {
-      if (!params.id) {
-        params.id = uuid();
-      }
       if (params.annotations instanceof Array) {
         params.annotations = List<Annotation>(params.annotations);
       }

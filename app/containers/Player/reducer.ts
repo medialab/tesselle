@@ -20,7 +20,7 @@ export default combineReducers<ContainerState, ContainerActions>({
     switch (action.type) {
       case ActionTypes.CREATE_SLIDESHOW:
         return new Slideshow({
-          id: action.payload.id,
+          name: action.payload.name,
           image: action.payload.image,
           annotations: action.payload.annotations.map(fromJS),
         });

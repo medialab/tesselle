@@ -269,7 +269,7 @@ const Sidebar: React.SFC<OwnProps> = props => {
           </Icon>
         </span>
       </div>
-      <Title title={props.slideshow.id} onChange={console.log} />
+      <Title title={props.slideshow.name} onChange={console.log} />
       <div onClick={onClickSidebar} className="sidebar--container">
         {props.slideshow.annotations.size > 0 ?
           <Orderable
