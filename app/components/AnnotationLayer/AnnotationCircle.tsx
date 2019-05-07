@@ -20,7 +20,7 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = (props) => {
       radius={annotation.properties.radius}
     >
       {!selected && (
-        <Tooltip opacity={1} permanent>
+        <Tooltip opacity={1} permanent interactive>
           {annotation.properties.content}
         </Tooltip>
       )}

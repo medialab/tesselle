@@ -1,5 +1,13 @@
 .sidebar {
-  height: 100vh;
+  position: absolute;
+  left: 0;
+  width: 25%;
+  max-width: 450px;
+  z-index: 420;
+  top: 0;
+}
+.sidebar .sidebar--container {
+  background: white;
 }
 .textarea:not([rows]) {
   max-height: initial;
@@ -8,4 +16,40 @@
 .sidebar--item-field--selected {
   background: #3849a2;
   color: white;
+}
+.sidebar--container {
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+}
+.sidebar--menu-item .box {
+  background: white;
+}
+.sidebar--menu-item__selected .box {
+  background: #3849a2;
+}
+textarea.textarea {
+  resize: none;
+}
+
+.sidebar--spacing {
+  padding: 5px 5px;
+}
+
+.sidebar--header-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--rgba-primary-2);
+  color: white;
+}
+
+.sidebar--footer-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--rgba-primary-1);
+  color: white;
+}
+
+.input__invisible {
+  width: 100%;
+  border: none;
 }

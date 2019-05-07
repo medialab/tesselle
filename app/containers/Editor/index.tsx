@@ -10,14 +10,14 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { List } from 'immutable';
 import { compose } from 'redux';
-import { Map, withLeaflet } from 'react-leaflet';
+import { Map, ZoomControl, withLeaflet } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 import Slideshow from 'types/Slideshow';
 import FloatinBar from 'components/FloatingBar';
-// import Sidebar from 'components/Sidebar';
+import Sidebar from 'components/Sidebar';
 import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
 import { Feature } from 'geojson';
@@ -157,21 +157,32 @@ const Editor: React.SFC<EditorProps> = (props) => {
       props.changeSelection();
     }
   }, []);
+  const [sidebarVisible, setSidebarVisible] = useState<boolean>(true);
+
+  const onClose = useCallback(() => setSidebarVisible(false), []);
+  const onOpen = useCallback(() => setSidebarVisible(true), []);
+
   return (
     <div className="map">
+      <Sidebar
+        slideshow={props.slideshow}
+        selectedAnnotations={props.selectedAnnotations}
+        visible={sidebarVisible}
+        onClose={onClose}
+        onOpen={onOpen}
+      />
       <Map
         onClick={onMapClick}
         boxZoom={false}
         dragging={false}
         setTool={setTool}
         doubleClickZoom={false}
-        // zoomControl={false}
-        // keyboard={false}
-        // scrollWheelZoom={false}
+        zoomControl={false}
         crs={L.CRS.Simple}
         minZoom={minZoom}
         maxZoom={maxZoom}>
-          <EditorMapMap {...props} />
+          <ZoomControl position="topright" />
+          <EditorMapMap {...props} setTool={setTool} tool={tool} />
       </Map>
     </div>
   );

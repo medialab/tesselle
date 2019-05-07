@@ -26,7 +26,7 @@ const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
       bounds={position}
     >
       {!selected && (
-        <Tooltip opacity={1} permanent>
+        <Tooltip opacity={1} permanent interactive>
           {annotation.properties.content}
         </Tooltip>
       )}
