@@ -16,8 +16,6 @@ import { ConnectedRouter } from 'connected-react-router';
 import history from 'utils/history';
 import 'sanitize.css/sanitize.css';
 import L from 'leaflet';
-import 'leaflet-editable';
-import 'leaflet-path-drag';
 import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
 

@@ -33,23 +33,16 @@ const ifFileIsImage = (func: () => any) => pipe(
   stopPropagation,
   when(
     propSatisfies(isImage, 'type'),
-    pipe((arg) => {
-      console.log(arg);
-      return arg;
-    }, func),
+    func,
   ),
 );
 
 const HomePage = (props: HomePageProps & RouterProps) => {
   const onDrop = useCallback(
-    ifFileIsImage((...args) => {
-      props.createSlideshow(...args);
-      console.log('go to create slidehsow');
-    }),
+    ifFileIsImage(props.createSlideshow),
     [],
   );
   const onUpload = useCallback((event: ChangeEvent<any>) => {
-    console.log('on input chang');
     onDrop(event.target.files, event);
   }, []);
   return (

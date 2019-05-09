@@ -127,6 +127,16 @@ export const coordsToLatLngs = (
   );
 };
 
+export const boundsToRectangle = (bounds) => {
+  return [
+    bounds.getSouthWest(),
+    bounds.getNorthWest(),
+    bounds.getNorthEast(),
+    bounds.getSouthEast(),
+    bounds.getSouthWest(),
+  ].map(latLngToCoords);
+};
+
 // @function asFeature(geojson: Object): Object
 // Normalize GeoJSON geometries/features into GeoJSON features.
 export function asFeature(geojson: Feature) {

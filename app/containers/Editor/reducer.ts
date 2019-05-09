@@ -11,18 +11,18 @@ import { ContainerState, ContainerActions } from './types';
 import Slideshow from 'types/Slideshow';
 import Annotation from 'types/Annotation';
 
-import { when, equals } from 'ramda';
+import { when } from 'ramda';
 import { fromJS } from 'utils/geo';
-import { isImmutable, Set } from 'immutable';
+import { isImmutable, List } from 'immutable';
 
 export const initialState: ContainerState = {
   slideshow: null,
-  selectedAnnotations: Set(),
+  selectedAnnotations: List(),
   map: null,
 };
 
 const replaceAnnotation = action => when(
-  equals(action.payload.annotation),
+  action.payload.annotation.equals.bind(action.payload.annotation),
   (annotation: Annotation) => annotation.merge(
     isImmutable(action.payload.editedFeature)
     ? action.payload.editedFeature
@@ -34,19 +34,22 @@ export default combineReducers<ContainerState, ContainerActions>({
   selectedAnnotations: (selectedAnnotations = initialState.selectedAnnotations, action: ContainerActions) => {
     switch (action.type) {
       case ActionTypes.CHANGE_SELECTED_ANNOTATION:
-        if (action.payload instanceof Set) {
-          return action.payload as any;
-        } else {
-          const annotation: Annotation = action.payload as Annotation;
-          if (selectedAnnotations.contains(annotation)) {
-            return selectedAnnotations.remove(annotation);
+        if (action.payload) {
+          if (action.payload instanceof List) {
+            return action.payload as any;
+          } else {
+            const annotation = action.payload as Annotation;
+            if (selectedAnnotations.contains(annotation)) {
+              return selectedAnnotations.remove(selectedAnnotations.indexOf(annotation));
+            }
+            return List([annotation]);
           }
-          return Set([annotation]);
         }
+        return initialState.selectedAnnotations;
       case ActionTypes.EDIT_ANNOTATION:
         return selectedAnnotations.map(replaceAnnotation(action));
       case ActionTypes.REMOVE_ANNOTATION:
-        return selectedAnnotations.remove(action.payload);
+        return selectedAnnotations.remove(selectedAnnotations.indexOf(action.payload));
     }
     return selectedAnnotations;
   },
@@ -57,7 +60,6 @@ export default combineReducers<ContainerState, ContainerActions>({
     return map;
   },
   slideshow: (slideshow = initialState.slideshow, action) => {
-    console.log(action);
     if (slideshow) {
       switch (action.type) {
         case ActionTypes.CHANGE_ORDER:
@@ -66,12 +68,10 @@ export default combineReducers<ContainerState, ContainerActions>({
             action.payload,
           );
         case ActionTypes.CREATE_ANNOTATION:
-          const annotation: Annotation = fromJS(action.payload);
-          return slideshow.with({
-            annotations: slideshow.annotations.push(
-              annotation,
-            ),
-          });
+          return slideshow.set(
+            'annotations',
+            slideshow.annotations.push(fromJS(action.payload)),
+          );
         case ActionTypes.EDIT_ANNOTATION:
           return slideshow.set(
             'annotations',

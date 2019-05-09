@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { List, Set } from 'immutable';
+import { List } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
 import { useDispatch } from 'utils/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -13,13 +13,13 @@ import { Formik, Form, FormikValues, FormikErrors, Field } from 'formik';
 import cx from 'classnames';
 import Textarea from 'react-textarea-autosize';
 
-const CustomTextarea = React.memo(({field, form: {touched, errors}, ...props}: any) => (
+const CustomTextarea = ({field, form: {touched, errors}, ...props}: any) => (
   <div>
     <Textarea {...field} {...props} />
     {touched[field.name] &&
       errors[field.name] && <div className="error">{errors[field.name]}</div>}
   </div>
-));
+);
 
 import {
   removeAnnotationAction,
@@ -31,6 +31,7 @@ import Annotation from 'types/Annotation';
 import icons from 'quinoa-design-library/src/themes/millet/icons';
 
 import './styles.css';
+import { DomEvent } from 'leaflet';
 
 interface MenuItemProps {
   data: Annotation;
@@ -50,7 +51,10 @@ const validator = (values: FormikValues) => {
 const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwardedRef) => {
   const dispatch = useDispatch();
   const onRemove = React.useCallback(
-    () => dispatch(removeAnnotationAction(props.data)),
+    (event) => {
+      DomEvent.stopPropagation(event);
+      return dispatch(removeAnnotationAction(props.data));
+    },
     [props.data],
   );
   const changeSelection = React.useCallback((event) => {
@@ -137,7 +141,7 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
 
 interface OwnProps {
   annotations: List<Annotation>;
-  selectedAnnotations: Set<Annotation>;
+  selectedAnnotations: List<Annotation>;
 }
 
 const reorder = (list: List<Annotation>, startIndex: number, endIndex: number) => {
@@ -209,4 +213,4 @@ const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
   return <div onClick={onClickSidebar} className="sidebar"><Orderable {...props} /></div>;
 };
 
-export default React.memo(Sidebar);
+export default Sidebar;

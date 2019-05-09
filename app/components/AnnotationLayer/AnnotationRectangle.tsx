@@ -1,76 +1,28 @@
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Rectangle, Tooltip } from 'react-leaflet';
 
-import { coordsToLatLngs, fromJS } from 'utils/geo';
+import { coordsToLatLngs } from 'utils/geo';
 import { AnnotationShapes } from './types';
-import { noop } from 'ramda';
-import { SupportedShapes } from 'types';
-
-const CustomTypeRectangle: any = Rectangle;
-
-const onEndEvents = [
-  'editable:vertex:dragend',
-  'editable:dragend',
-  'editable:vertex:deleted',
-  'editable:vertex:new',
-].join(' ');
+import 'leaflet-editable';
+import { useEdit } from 'utils/hooks';
 
 const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
-  const {annotation, onEdit, selected, onClick, tool} = props;
+  const {annotation, selected, onClick} = props;
   const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const coords = geometry ? geometry.coordinates : null;
-  const ref = useRef<any>(null);
   const position = useMemo(() => coordsToLatLngs(
     coords,
     geometry.type === 'Polygon' ? 1 : 2,
-  ).toJS(), [selected]);
-
-  useEffect(() => {
-    if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
-      const save = () => {
-        onEdit(
-          annotation,
-          fromJS(ref.current.leafletElement.toGeoJSON()).set(
-            'properties',
-            annotation.properties,
-          ),
-        );
-      };
-      ref.current.leafletElement.on(onEndEvents, save);
-      return () => {
-        ref.current.leafletElement.off(onEndEvents, save);
-      };
-    }
-    return noop;
-  }, [annotation]);
-
-  useEffect((): any => {
-    if (ref.current && ref.current.leafletElement && ref.current.leafletElement.dragging) {
-      if (selected && tool === SupportedShapes.selector) {
-        try {
-          ref.current.leafletElement.enableEdit();
-          ref.current.leafletElement.dragging.enable();
-        } catch (e) {
-          console.log('only on reload');
-        }
-      } else {
-        try {
-          ref.current.leafletElement.disableEdit();
-          ref.current.leafletElement.dragging.disable();
-        } catch (e) {
-          console.log('only on reload');
-        }
-      }
-    }
-  }, [selected, tool]);
+  ).toJS(), [coords]);
+  const ref = useRef<Rectangle & any>(null);
+  useEdit(ref, selected);
 
   return (
-    <CustomTypeRectangle
-      onClick={onClick}
-      color={selected ? 'cyan' : 'purple'}
+    <Rectangle
+      key={props.className}
       ref={ref}
-      draggable
-      edditable
+      {...props}
+      onClick={onClick}
       bounds={position}
     >
       {!selected && (
@@ -78,7 +30,7 @@ const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
           {annotation.properties.content}
         </Tooltip>
       )}
-    </CustomTypeRectangle>
+    </Rectangle>
   );
 };
 

@@ -7,9 +7,44 @@ interface Options {
   left: number;
 }
 
-function calculateAspectRatioFit(srcWidth: number, srcHeight: number, maxWidth: number, maxHeight: number) {
+export function calculateAspectRatioFit(srcWidth: number, srcHeight: number, maxWidth: number, maxHeight: number) {
   const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
   return { width: srcWidth * ratio, height: srcHeight * ratio };
+}
+
+export function resizeImage(img, region, [sizeWidth, sizeHeight], name) {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+    const [x, y, w, h] = region;
+    const drawingWidth = w;
+    const drawingHeight = h;
+
+    img.width = sizeWidth;
+    img.height = sizeHeight;
+    canvas.width = sizeWidth;
+    canvas.height = sizeHeight;
+    context.drawImage(
+      img,
+      x,
+      y,
+      drawingWidth,
+      drawingHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
+    canvas.toBlob((blob: Blob) => {
+      resolve(
+        new File(
+          [blob],
+          `default.jpg`,
+          {type: 'image/jpeg'},
+        ),
+      );
+    });
+  });
 }
 
 function loadImage(file: File, options: Options): Promise<File> {

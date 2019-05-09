@@ -45,6 +45,6 @@ export const editOrderAction = createAction(
 
 export const changeSelectionAction = createAction(
   ActionTypes.CHANGE_SELECTED_ANNOTATION,
-  action => (select?: Annotation | Set<Annotation>, meta?) => action(select, meta),
+  action => (select?: Annotation | List<Annotation>, meta?) => action(select, meta),
 );
 

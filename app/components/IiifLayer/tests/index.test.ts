@@ -2,9 +2,9 @@
 // import { mount } from 'enzyme';
 // import { enzymeFind } from 'styled-components/test-utils';
 
-// import DrawingLayer from '../index';
+// import IiifLayer from '../index';
 
-describe('<DrawingLayer />', () => {
+describe('<IiifLayer />', () => {
   it('Expect to have unit tests specified', () => {
     expect(true).toEqual(false);
   });

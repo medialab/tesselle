@@ -58,4 +58,4 @@ const FloatingBar: React.SFC<FloatingBarProps> = (props: FloatingBarProps) => {
   );
 };
 
-export default React.memo(FloatingBar);
+export default FloatingBar;
