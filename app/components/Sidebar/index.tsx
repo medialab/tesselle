@@ -7,7 +7,7 @@
 import React from 'react';
 import { List } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
-import { useDispatch } from 'utils/hooks';
+import { useDispatch, useAction } from 'utils/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Formik, Form, FormikValues, FormikErrors, Field, FormikActions } from 'formik';
 import cx from 'classnames';
@@ -26,6 +26,7 @@ import {
   editOrderAction,
   changeSelectionAction,
   editAnnotationAction,
+  editSlideshowAction,
 } from 'containers/Editor/actions';
 import Annotation from 'types/Annotation';
 import Slideshow from 'types/Slideshow';
@@ -231,8 +232,6 @@ const Title: React.SFC<TitleProps> = (props) => {
         <Form>
           <Field
             className="input__invisible"
-            minRows={1}
-            maxRows={5}
             onBlur={onBlur}
             name="title"
           />
@@ -240,12 +239,6 @@ const Title: React.SFC<TitleProps> = (props) => {
       );
     }}
     </Formik>
-  );
-  // const [editing, setEditing] = useState<boolean>(false);
-  return (
-    <div>
-      {props.title}
-    </div>
   );
 };
 
@@ -259,6 +252,15 @@ const Sidebar: React.SFC<OwnProps> = props => {
     props.visible ? props.onClose : props.onOpen,
     [props.visible],
   );
+
+  const onNameChange = useAction(values =>
+    editSlideshowAction(
+      props.slideshow.set(
+        'name',
+        values.title,
+      ),
+    ), []);
+
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
       <div className="sidebar--header-container sidebar--spacing">
@@ -269,7 +271,7 @@ const Sidebar: React.SFC<OwnProps> = props => {
           </Icon>
         </span>
       </div>
-      <Title title={props.slideshow.name} onChange={console.log} />
+      <Title title={props.slideshow.name} onChange={onNameChange} />
       <div onClick={onClickSidebar} className="sidebar--container">
         {props.slideshow.annotations.size > 0 ?
           <Orderable

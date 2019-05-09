@@ -1,5 +1,5 @@
 import { ReactReduxContext } from 'react-redux';
-import React, { useContext, useRef, useEffect, useState, useMemo, useLayoutEffect } from 'react';
+import React, { useContext, useRef, useEffect, useState, useMemo, useLayoutEffect, useCallback } from 'react';
 
 import useMousetrap from 'react-hook-mousetrap';
 import { SupportedShapes } from 'types';
@@ -9,6 +9,12 @@ import Cover from 'types/Cover';
 export function useDispatch() {
   return useContext(ReactReduxContext).store.dispatch;
 }
+
+export function useAction(actionCreator, scu) {
+  const dispatch = useDispatch();
+  return useCallback((...args) => dispatch(actionCreator(...args)), scu);
+}
+
 // Hook
 export function useWhyDidYouUpdate(name, props) {
   // Get a mutable ref object where we can store props ...

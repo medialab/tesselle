@@ -58,6 +58,7 @@ export default function* editorSaga() {
   yield takeLatest(ActionTypes.REMOVE_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.EDIT_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.CHANGE_ORDER, saveSlideshow);
+  yield takeLatest(ActionTypes.EDIT_SLIDESHOW, saveSlideshow);
   try {
     const rawSlideshow: Slideshow = yield db.getItem('slideshow');
     if (rawSlideshow) {

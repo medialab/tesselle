@@ -46,3 +46,7 @@ export const changeSelectionAction = createAction(
   action => (select?: Annotation | List<Annotation>, meta?) => action(select, meta),
 );
 
+export const editSlideshowAction = createAction(
+  ActionTypes.EDIT_SLIDESHOW,
+  action => (slideshow: Slideshow) => action(slideshow),
+);

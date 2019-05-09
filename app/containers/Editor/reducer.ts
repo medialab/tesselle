@@ -55,6 +55,8 @@ export default combineReducers<ContainerState, ContainerActions>({
   slideshow: (slideshow = initialState.slideshow, action) => {
     if (slideshow) {
       switch (action.type) {
+        case ActionTypes.EDIT_SLIDESHOW:
+          return action.payload;
         case ActionTypes.CHANGE_ORDER:
           return slideshow.set(
             'annotations',
