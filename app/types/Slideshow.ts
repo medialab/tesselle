@@ -5,6 +5,7 @@ import Annotation from 'types/Annotation';
 import slicer from 'utils/slice';
 import db from 'utils/db';
 import Cover from './Cover';
+import { fromJS } from 'utils/geo';
 
 export interface SlideshowArgs {
   id?: string;
@@ -25,7 +26,8 @@ class Slideshow extends Record({
   constructor(params?: SlideshowArgs) {
     if (params) {
       if (params.annotations instanceof Array) {
-        params.annotations = List<Annotation>(params.annotations);
+        console.log('coucou c toi ?');
+        params.annotations = List<Annotation>(params.annotations.map(fromJS));
       }
       if (!params.id) {
         params.id = uuid();

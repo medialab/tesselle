@@ -8,9 +8,9 @@ import { action, createAsyncAction } from 'typesafe-actions';
 import {} from './types';
 
 import ActionTypes from './constants';
-import Slideshow from 'types/Slideshow';
+import Slideshow, { SlideshowArgs } from 'types/Slideshow';
 
-export const loadSlideshowsAction = (slideshows: Slideshow[]) =>
+export const loadSlideshowsAction = (slideshows: SlideshowArgs[]) =>
   action(ActionTypes.LOAD_SLIDESHOWS, slideshows);
 
 export const createSlideshowAction = createAsyncAction(

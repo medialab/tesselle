@@ -23,6 +23,8 @@ import messages from './messages';
 import './styles.css';
 import { createSlideshowAction } from './actions';
 
+import SlideshowCartouche from 'components/SlideshowCartouche';
+
 const validMimeTypes = ['image/jpeg', 'image/svg+xml'];
 const isImage = includes(__, validMimeTypes);
 
@@ -70,7 +72,7 @@ function HomePage(props: HomePageProps & ContainerState) {
             <ul>
               {props.slideshows.map(slideshow => (
                 <li key={slideshow.id}>
-                  <p>{slideshow.name}</p>
+                  <SlideshowCartouche slideshow={slideshow} />
                 </li>
               ))}
             </ul>
