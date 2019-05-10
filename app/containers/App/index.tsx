@@ -21,7 +21,7 @@ export default function App() {
     <div>
       <Switch>
         <Route exact path="/" component={HomePage} />
-        <Route exact path="/editor" component={Editor} />
+        <Route exact path="/editor/:id" component={Editor} />
         <Route exact path="/player" component={Player} />
         <Route component={NotFoundPage} />
       </Switch>

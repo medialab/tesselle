@@ -2,8 +2,7 @@ import { takeLatest, put, select } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 
 import ActionTypes from './constants';
-import Slideshow, { slideshowCreator } from '../../types/Slideshow';
-import { createSlideshowAction } from './actions';
+import Slideshow from '../../types/Slideshow';
 import db from 'utils/db';
 import { makeSelectSlideshow } from './selectors';
 import { isImmutable } from 'immutable';
@@ -14,34 +13,11 @@ export function* setSlideshow(slideshow: Slideshow) {
   if (isImmutable(slideshow)) {
     yield db.setItem('slideshow', slideshow.toJS());
   }
-  yield put(
-    createSlideshowAction.success(
-      slideshow,
-    ),
-  );
-}
-
-export function* createSlideshow(action: any, slice) {
-  try {
-    const slideshow: Slideshow = yield slideshowCreator(action.payload, slice);
-    // sagas: slideshow initalized
-    // sagas: sending slideshow to reducer
-    yield setSlideshow(slideshow);
-    // sagas: slideshow sent to reducer
-    return slideshow;
-  } catch (e) {
-    console.info('This should not happend');
-    console.error(e);
-  }
-}
-
-export function* createAndRedirect(action) {
-  // sagas: createSlideshow
-  yield db.clear();
-  yield createSlideshow(action, true);
-  // sagas: slidehsow created
-  // sagas: redirect to editor
-  yield put(push('/editor'));
+  // yield put(
+  //   createSlideshowAction.success(
+  //     slideshow,
+  //   ),
+  // );
 }
 
 export function* saveSlideshow() {
@@ -53,7 +29,6 @@ export function* saveSlideshow() {
 
 // Individual exports for testing
 export default function* editorSaga() {
-  yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
   yield takeLatest(ActionTypes.CREATE_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.REMOVE_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.EDIT_ANNOTATION, saveSlideshow);

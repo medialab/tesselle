@@ -23,12 +23,18 @@ import {
 import { SupportedShapes } from 'types';
 
 function propertiesReviver(key, value) {
-  if (value.has('radius')) {
-    return annotationCirclePropertiesCreator(value.toMap());
-  } else if (value.has('type')) {
-    return annotationRectanglePropertiesCreator(value.toMap());
+  try {
+    if (value.has('radius')) {
+      return annotationCirclePropertiesCreator(value.toMap());
+    } else if (value.has('type')) {
+      return annotationRectanglePropertiesCreator(value.toMap());
+    }
+    return annotationPropertiesCreator(value.toMap());
+  } catch (e) {
+    console.error('fromJS error');
+    console.log(key, value);
+    return rawFromJs(value);
   }
-  return annotationPropertiesCreator(value.toMap());
 }
 
 export const fromJS = (value) => {

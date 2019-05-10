@@ -1,17 +1,20 @@
 import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
+import uuid from 'uuid';
 import Annotation from 'types/Annotation';
 import slicer from 'utils/slice';
 import db from 'utils/db';
 import Cover from './Cover';
 
-interface SlideshowArgs {
+export interface SlideshowArgs {
+  id?: string;
   name?: string;
   annotations?: List<Annotation>;
   image?: Cover;
 }
 
 class Slideshow extends Record({
+  id: '',
   name: 'Unnamed Slideshow',
   annotations: List(),
   image: {},
@@ -24,9 +27,15 @@ class Slideshow extends Record({
       if (params.annotations instanceof Array) {
         params.annotations = List<Annotation>(params.annotations);
       }
+      if (!params.id) {
+        params.id = uuid();
+      }
       super(params);
     } else {
-      super();
+      const defaultParams = {
+        id: uuid() as string,
+      };
+      super(defaultParams);
     }
   }
   public with(values: SlideshowArgs) {

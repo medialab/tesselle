@@ -4,7 +4,7 @@
  *
  */
 
-import { createAsyncAction, createAction } from 'typesafe-actions';
+import { createAction } from 'typesafe-actions';
 import {} from './types';
 
 import ActionTypes from './constants';
@@ -12,12 +12,6 @@ import Slideshow from 'types/Slideshow';
 import Annotation from 'types/Annotation';
 import { List } from 'immutable';
 import { Feature, Point } from 'geojson';
-
-export const createSlideshowAction = createAsyncAction(
-    ActionTypes.CREATE_SLIDESHOW,
-    ActionTypes.CREATE_SLIDESHOW_SUCCESS,
-    ActionTypes.CREATE_SLIDESHOW_FAILURE,
-  )<File, Slideshow, Error>();
 
 export const addAnnotationAction = createAction(ActionTypes.CREATE_ANNOTATION, action => {
   return (feature: Feature<Point, any>) => action(feature);

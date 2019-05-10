@@ -25,7 +25,6 @@ import { useFlyTo, useMapLock } from 'utils/hooks';
 import AnnotationLayer from 'components/AnnotationLayer';
 
 import {
-  createSlideshowAction,
   addAnnotationAction,
   changeSelectionAction,
 } from './actions';
@@ -45,7 +44,6 @@ const mapStateToProps = createStructuredSelector({
 const withConnect = connect(
   mapStateToProps,
   {
-    createSlideshow: createSlideshowAction.request,
     createAnnotation: addAnnotationAction,
     changeSelection: changeSelectionAction,
   },
@@ -189,6 +187,7 @@ const Editor: React.SFC<EditorProps> = (props) => {
 };
 
 export default decorator(props => {
+  console.log(props.slideshow);
   if (props.slideshow) {
     return <Editor {...props} />;
   }

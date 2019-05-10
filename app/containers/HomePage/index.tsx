@@ -1,21 +1,27 @@
-/*
+/**
+ *
  * HomePage
  *
- * This is the first thing users see of our App, at the '/' route
- *
- * NOTE: while this component should technically be a stateless functional
- * component (SFC), hot reloading does not currently support SFCs. If hot
- * reloading is not a necessity for you then you can refactor it and remove
- * the linting exception.
  */
 
-import React, { useCallback, ChangeEvent } from 'react';
-import { Container, Hero, HeroHeader, HeroFooter, Title } from 'quinoa-design-library/components/';
-import FileDrop from 'react-file-drop';
-import { propSatisfies, pipe, when, __ } from 'ramda';
-import { RouterProps } from 'react-router';
-import { decorator } from '../Editor';
-import includes from 'ramda/es/includes';
+import React, { useCallback } from 'react';
+import { Columns, Column, Content, Container, DropZone } from 'quinoa-design-library';
+import { connect } from 'react-redux';
+import { Helmet } from 'react-helmet';
+import { FormattedMessage } from 'react-intl';
+import { createStructuredSelector } from 'reselect';
+import { compose } from 'redux';
+import { propSatisfies, pipe, when, __, includes, head } from 'ramda';
+import { ContainerState } from './types';
+
+import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
+import makeSelectSlideshows from './selectors';
+import reducer from './reducer';
+import saga from './saga';
+import messages from './messages';
+import './styles.css';
+import { createSlideshowAction } from './actions';
 
 const validMimeTypes = ['image/jpeg', 'image/svg+xml'];
 const isImage = includes(__, validMimeTypes);
@@ -24,46 +30,71 @@ interface HomePageProps {
   createSlideshow: () => void;
 }
 
-const stopPropagation = (files: FileList, event: any) => {
-  event.preventDefault();
-  return files[0];
-};
-
 const ifFileIsImage = (func: () => any) => pipe(
-  stopPropagation,
+  head,
   when(
     propSatisfies(isImage, 'type'),
     func,
   ),
 );
 
-const HomePage = (props: HomePageProps & RouterProps) => {
+function HomePage(props: HomePageProps & ContainerState) {
   const onDrop = useCallback(
     ifFileIsImage(props.createSlideshow),
     [],
   );
-  const onUpload = useCallback((event: ChangeEvent<any>) => {
-    onDrop(event.target.files, event);
-  }, []);
   return (
-    <section>
-      <FileDrop onDrop={onDrop}>
-        <Hero
-          isColor="success"
-          isSize="large">
-          <HeroHeader>
-            <Title>Bienvenue sur Glisse-montre!</Title>
-          </HeroHeader>
-          <HeroFooter>
-            <h2>Start a new project by droping an image in this green area or by using the file input.</h2>
-          </HeroFooter>
-        </Hero>
-      </FileDrop>
-      <Container>
-        <input type="file" onChange={onUpload} />
-      </Container>
-    </section>
+    <Container className="home-container">
+      <Helmet>
+        <title>Welcome to le paradis de la glisse</title>
+        <meta name="description" content="Description of HomePage" />
+      </Helmet>
+      <Columns>
+        <Column isSize={'1/3'}>
+          <Content>
+            <h1 className="title is-2">Glissemontre</h1>
+            <p><FormattedMessage {...messages.chapo} /></p>
+          </Content>
+          <DropZone
+            accept={'image/jpeg'}
+            onDrop={onDrop}
+          >
+            Drop a file
+          </DropZone>
+        </Column>
+        <Column isSize={'2/3'}>
+          <div className="list-projects__container">
+            <h4 className="list-projects__title title is-3">
+              Slideshows on device:
+            </h4>
+            <ul>
+              {props.slideshows.map(slideshow => (
+                <li key={slideshow.id}>
+                  <p>{slideshow.name}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Column>
+      </Columns>
+    </Container>
   );
-};
+}
 
-export default decorator(HomePage);
+const mapStateToProps = createStructuredSelector({
+  slideshows: makeSelectSlideshows(),
+});
+
+const withConnect = connect(
+  mapStateToProps,
+  {createSlideshow: createSlideshowAction.request},
+);
+
+const withReducer = injectReducer({ key: 'homePage', reducer: reducer });
+const withSaga = injectSaga({ key: 'homePage', saga: saga });
+
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(HomePage);

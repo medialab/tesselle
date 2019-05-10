@@ -8,7 +8,6 @@ import { combineReducers } from 'redux';
 
 import ActionTypes from './constants';
 import { ContainerState, ContainerActions } from './types';
-import Slideshow from 'types/Slideshow';
 import Annotation from 'types/Annotation';
 
 import { when } from 'ramda';
@@ -82,14 +81,14 @@ export default combineReducers<ContainerState, ContainerActions>({
       }
       return slideshow;
     }
-    switch (action.type) {
-      case ActionTypes.CREATE_SLIDESHOW_SUCCESS:
-        return new Slideshow({
-          name: action.payload.name,
-          image: action.payload.image,
-          annotations: action.payload.annotations.map(fromJS),
-        });
-    }
+    // switch (action.type) {
+    //   case ActionTypes.CREATE_SLIDESHOW_SUCCESS:
+    //     return new Slideshow({
+    //       name: action.payload.name,
+    //       image: action.payload.image,
+    //       annotations: action.payload.annotations.map(fromJS),
+    //     });
+    // }
     return slideshow;
   },
 });

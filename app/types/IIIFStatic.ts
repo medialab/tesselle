@@ -59,7 +59,7 @@ export default class IIIFStatic {
     }
     const res: any[] = [];
     const now = new Date();
-    console.log('start', now);
+    console.log('start', now, 'scaleFactors', scaleFactors);
     for (const [region, size] of staticPartialTileSizes(width, height, this.tilesize, scaleFactors)) {
       res.push(
         await this.generateTile(
