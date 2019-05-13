@@ -26,7 +26,6 @@ class Slideshow extends Record({
   constructor(params?: SlideshowArgs) {
     if (params) {
       if (params.annotations instanceof Array) {
-        console.log('coucou c toi ?');
         params.annotations = List<Annotation>(params.annotations.map(fromJS));
       }
       if (!params.id) {
@@ -142,19 +141,20 @@ export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
         if (img.height === 0) {
           return reject(new Error('Slideshow.image has a height of 0'));
         }
-        await db.setItem('info.json', generateInfo(img));
-        if (slicing) {
-          for (const [url, file] of await slicer(img)) {
-            await db.setItem(url, file);
-          }
-        }
-        return resolve(new Slideshow({
+        const slideshow = new Slideshow({
           image: new Cover({
             file: slicing,
             width: img.width,
             height: img.height,
           }),
-        }));
+        });
+        await db.setItem('/' + slideshow.id + '/info.json', generateInfo(img));
+        if (slicing) {
+          for (const [url, file] of await slicer(img)) {
+            await db.setItem('/' + slideshow.id + url, file);
+          }
+        }
+        return resolve(slideshow);
       };
       img.onerror = (error) => {
         console.error(error);

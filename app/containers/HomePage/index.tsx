@@ -21,9 +21,11 @@ import reducer from './reducer';
 import saga from './saga';
 import messages from './messages';
 import './styles.css';
-import { createSlideshowAction } from './actions';
+import { createSlideshowAction, removeSlideshowAction } from './actions';
 
 import SlideshowCartouche from 'components/SlideshowCartouche';
+
+import { useAction } from 'utils/hooks';
 
 const validMimeTypes = ['image/jpeg', 'image/svg+xml'];
 const isImage = includes(__, validMimeTypes);
@@ -45,6 +47,7 @@ function HomePage(props: HomePageProps & ContainerState) {
     ifFileIsImage(props.createSlideshow),
     [],
   );
+  const onDelete = useAction(removeSlideshowAction, [props.slideshows]);
   return (
     <Container className="home-container">
       <Helmet>
@@ -72,7 +75,7 @@ function HomePage(props: HomePageProps & ContainerState) {
             <ul>
               {props.slideshows.map(slideshow => (
                 <li key={slideshow.id}>
-                  <SlideshowCartouche slideshow={slideshow} />
+                  <SlideshowCartouche onDelete={onDelete} slideshow={slideshow} />
                 </li>
               ))}
             </ul>

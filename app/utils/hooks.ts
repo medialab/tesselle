@@ -10,7 +10,7 @@ export function useDispatch() {
   return useContext(ReactReduxContext).store.dispatch;
 }
 
-export function useAction(actionCreator, scu) {
+export function useAction(actionCreator: (...args: any) => any, scu) {
   const dispatch = useDispatch();
   return useCallback((...args) => dispatch(actionCreator(...args)), scu);
 }

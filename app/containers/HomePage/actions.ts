@@ -18,3 +18,5 @@ export const createSlideshowAction = createAsyncAction(
   ActionTypes.CREATE_SLIDESHOW_SUCCESS,
   ActionTypes.CREATE_SLIDESHOW_FAILURE,
 )<File, Slideshow, Error>();
+
+export const removeSlideshowAction = (slideshow: Slideshow) => action(ActionTypes.REMOVE_SLIDESHOW, slideshow);

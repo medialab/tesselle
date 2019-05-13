@@ -13,6 +13,7 @@ import Annotation from 'types/Annotation';
 import { when } from 'ramda';
 import { fromJS } from 'utils/geo';
 import { isImmutable, List } from 'immutable';
+import Slideshow from 'types/Slideshow';
 
 export const initialState: ContainerState = {
   slideshow: null,
@@ -52,10 +53,9 @@ export default combineReducers<ContainerState, ContainerActions>({
     return selectedAnnotations;
   },
   slideshow: (slideshow = initialState.slideshow, action) => {
+    console.log(action.type);
     if (slideshow) {
       switch (action.type) {
-        case ActionTypes.EDIT_SLIDESHOW:
-          return action.payload;
         case ActionTypes.CHANGE_ORDER:
           return slideshow.set(
             'annotations',
@@ -79,16 +79,17 @@ export default combineReducers<ContainerState, ContainerActions>({
               ),
             );
       }
-      return slideshow;
     }
-    // switch (action.type) {
-    //   case ActionTypes.CREATE_SLIDESHOW_SUCCESS:
-    //     return new Slideshow({
-    //       name: action.payload.name,
-    //       image: action.payload.image,
-    //       annotations: action.payload.annotations.map(fromJS),
-    //     });
-    // }
+    switch (action.type) {
+      case ActionTypes.EDIT_SLIDESHOW:
+        console.log(ActionTypes.EDIT_SLIDESHOW, action);
+        return new Slideshow({
+          id: action.payload.id,
+          name: action.payload.name,
+          image: action.payload.image,
+          annotations: action.payload.annotations.map(fromJS),
+        });
+    }
     return slideshow;
   },
 });

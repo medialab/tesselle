@@ -8,6 +8,8 @@ import { List, isImmutable } from 'immutable';
 
 import makeSelectSlideshows from './selectors';
 
+const selectSlideshows = makeSelectSlideshows();
+
 export function* setSlideshows(slideshows: any) {
   if (isImmutable(slideshows)) {
     yield db.setItem('slideshows', slideshows.toJS());
@@ -18,7 +20,7 @@ export function* setSlideshows(slideshows: any) {
 export function* createSlideshow(action, slice) {
   try {
     const slideshow: Slideshow = yield slideshowCreator(action.payload, slice);
-    const slideshows: List<Slideshow> = yield select(makeSelectSlideshows());
+    const slideshows: List<Slideshow> = yield select(selectSlideshows);
     yield setSlideshows(slideshows.push(slideshow));
     return slideshow;
   } catch (e) {
@@ -35,14 +37,28 @@ export function* createAndRedirect(action) {
   yield put(push('/editor/' + slideshow.id));
 }
 
-console.log(ActionTypes);
+export function* removeSlideshow(action) {
+  const slideshows: List<Slideshow> = yield select(selectSlideshows);
+  yield db.setItem('slideshows', slideshows.toJS());
+  const allKeys = yield db.keys();
+  const id = action.payload.id;
+  const myKeys = allKeys.filter((key: string) => key.startsWith(id));
+  // We could yield to wait for all items to be removed, but I don't see the point ATM.
+  myKeys.forEach((key: string) =>
+    db.removeItem(key),
+  );
+}
 
 // Individual exports for testing
 export default function* homePageSaga() {
   // See example in containers/HomePage/saga.js
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
+  yield takeLatest(ActionTypes.REMOVE_SLIDESHOW, removeSlideshow);
   try {
-    const rawSlideshows = yield db.getItem('slideshows') || [];
+    let rawSlideshows = yield db.getItem('slideshows');
+    if (rawSlideshows === null) {
+      rawSlideshows = [];
+    }
     yield setSlideshows(rawSlideshows);
   } catch (e) {
     console.error('Could not retrive slideshows');

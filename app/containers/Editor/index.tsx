@@ -135,7 +135,7 @@ const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = p
         data={slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations}
       />
-      <IiifLayer tileSize={512} />
+      <IiifLayer tileSize={512} id={props.slideshow.id} />
       <FloatinBar
         onSelectClick={onSelectClick}
         activeButton={tool}
@@ -187,7 +187,6 @@ const Editor: React.SFC<EditorProps> = (props) => {
 };
 
 export default decorator(props => {
-  console.log(props.slideshow);
   if (props.slideshow) {
     return <Editor {...props} />;
   }

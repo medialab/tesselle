@@ -15,6 +15,8 @@ import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 import Slideshow from 'types/Slideshow';
 import { Link } from 'react-router-dom';
+import { useAction } from 'utils/hooks';
+import { push } from 'connected-react-router';
 
 const InlineIcon = ({children}) => (
   <span style={{marginLeft: '.5rem', marginRight: '1rem'}}>
@@ -24,19 +26,32 @@ const InlineIcon = ({children}) => (
 
 interface OwnProps {
   slideshow: Slideshow;
+  onDelete: (toDelete) => void;
 }
 
 const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
-  console.log(props.slideshow);
+
+  const goTo = useAction(() => push(`/editor/${props.slideshow.id}`), []);
+
+  const onAction = React.useCallback((id, event) => {
+    switch (id) {
+      case 'delete':
+        return props.onDelete(props.slideshow);
+      case 'open':
+        return goTo();
+    }
+    console.log(id);
+  }, [props.slideshow]);
   return (
     <Level>
       <Column>
         <Card
+          onAction={onAction}
           title={
             <Columns>
               <Column isSize="3/4">
                 <Link
-                  to={`story/${props.slideshow.id}`}
+                  to={`/editor/${props.slideshow.id}`}
                 >
                   <b>{props.slideshow.name}</b>
                 </Link>

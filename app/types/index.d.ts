@@ -9,7 +9,7 @@ import Annotation from './Annotation';
 export interface LifeStore extends Store<{}> {
   injectedReducers?: any;
   injectedSagas?: any;
-  runSaga(saga: () => IterableIterator<any>, args: any): any;
+  runSaga(saga: (props?: any) => IterableIterator<any>, args: any): any;
 }
 
 interface WithAnnotationProps {
@@ -32,7 +32,7 @@ export interface InjectReducerParams {
 
 export interface InjectSagaParams {
   key: keyof ApplicationRootState;
-  saga: () => IterableIterator<any>;
+  saga: (props?: any) => IterableIterator<any>;
   mode?: string | undefined;
 }
 
