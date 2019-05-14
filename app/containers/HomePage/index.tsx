@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Columns, Column, Content, Container, DropZone } from 'quinoa-design-library';
 import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
@@ -43,11 +43,15 @@ const ifFileIsImage = (func: () => any) => pipe(
 );
 
 function HomePage(props: HomePageProps & ContainerState) {
+  const [loading, setLoading] = useState<boolean>(false);
   const onDrop = useCallback(
-    ifFileIsImage(props.createSlideshow),
+    ifFileIsImage((...args) => {
+      props.createSlideshow(...args);
+      setLoading(true);
+    }),
     [],
   );
-  const onDelete = useAction(removeSlideshowAction, [props.slideshows]);
+  const onDelete = useAction(removeSlideshowAction);
   return (
     <Container className="home-container">
       <Helmet>
@@ -64,7 +68,7 @@ function HomePage(props: HomePageProps & ContainerState) {
             accept={'image/jpeg'}
             onDrop={onDrop}
           >
-            Drop a file
+            {loading ? <img src="https://i.imgur.com/FEDTpyE.gif" /> : <span>Drop a file</span>}
           </DropZone>
         </Column>
         <Column isSize={'2/3'}>

@@ -3,6 +3,12 @@ import db from 'utils/db';
 
 // https://github.com/mejackreed/Leaflet-IIIF/blob/master/leaflet-iiif.js
 
+function ceilLog2(x) {
+  return Math.ceil(Math.log(x) / Math.LN2);
+}
+
+const urls = new Map();
+
 export const Iiif = L.TileLayer.extend({
   options: {
     continuousWorld: true,
@@ -44,11 +50,12 @@ export const Iiif = L.TileLayer.extend({
     tile.alt = '';
     tile.setAttribute('role', 'presentation');
     const inMemory = this.getTileUrl(coords);
-    console.log('createTiles');
     db.getItem(inMemory).then((file: File) => {
-      console.log(this._tiles);
       if (file) {
-        tile.src = window.URL.createObjectURL(file);
+        if (!urls.has(inMemory)) {
+          urls.set(inMemory, window.URL.createObjectURL(file));
+        }
+        tile.src = urls.get(inMemory);
         tile.onload = () => {
           done(null, tile);
         };
@@ -93,7 +100,7 @@ export const Iiif = L.TileLayer.extend({
   onAdd: function(map) {
     // Wait for deferred to complete
     this._infoDeferred.then(() => {
-      console.log('_imageSizes', this._imageSizes);
+
       // Store unmutated imageSizes
       this._imageSizesOriginal = this._imageSizes.slice(0);
 
@@ -147,7 +154,8 @@ export const Iiif = L.TileLayer.extend({
     });
   },
   onRemove: function(map) {
-    console.log(this);
+    urls.forEach(window.URL.revokeObjectURL);
+    urls.clear();
     map._layersMinZoom = this._prev_map_layersMinZoom;
     this._imageSizes = this._imageSizesOriginal;
 
@@ -184,9 +192,11 @@ export const Iiif = L.TileLayer.extend({
   _getInfo: async function() {
     try {
       const data: any = await db.getItem('/' + this.options.id + '/info.json');
+      // console.log(this.options.id);
       if (data === null) {
         throw new Error('info.json is null');
       }
+
       this.y = data.height;
       this.x = data.width;
 
@@ -216,10 +226,6 @@ export const Iiif = L.TileLayer.extend({
         }
       }
 
-      function ceilLog2(x) {
-        return Math.ceil(Math.log(x) / Math.LN2);
-      }
-
       // Calculates maximum native zoom for the layer
       this.maxNativeZoom = Math.max(ceilLog2(this.x / this.options.tileSize),
         ceilLog2(this.y / this.options.tileSize));
@@ -242,6 +248,13 @@ export const Iiif = L.TileLayer.extend({
 
       this._tierSizes = tierSizes;
       this._imageSizes = imageSizes;
+      const map = this._map || this._mapToAdd;
+      // console.log(this.maxNativeZoom, data.scale_factors);
+      if (map) {
+        map.setMaxZoom(data.scale_factors.length + 1);
+      } else {
+        console.log('je sias pas l autre pe');
+      }
     } catch (error) {
       console.error(error);
     }

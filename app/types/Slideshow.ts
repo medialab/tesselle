@@ -2,10 +2,11 @@ import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
 import uuid from 'uuid';
 import Annotation from 'types/Annotation';
-import slicer from 'utils/slice';
+
 import db from 'utils/db';
 import Cover from './Cover';
 import { fromJS } from 'utils/geo';
+import { generate, scaleFactorsCreator } from './IIIFStatic';
 
 export interface SlideshowArgs {
   id?: string;
@@ -79,19 +80,17 @@ const getSvgSize = (svgElement: Element): Box | never => {
   throw new Error('No width / height nor viewBox');
 };
 
-const generateInfo = img => {
+const BASE_TILESIZE = 512;
+
+const generateInfo = (img, scaleFactors, id) => {
   return {
     '@context': 'http://library.stanford.edu/iiif/image-api/1.1/context.json',
-    '@id': 'test-image',
+    '@id': id,
     'formats': ['jpg'],
     'height': img.height,
     'profile': 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0',
-    'qualities': ['native'],
-    'scale_factors': [
-      1,
-      2,
-      4,
-    ],
+    'qualities': ['default'],
+    'scale_factors': scaleFactors,
     'tile_height': 512,
     'tile_width': 512,
     'width': img.width,
@@ -148,12 +147,28 @@ export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
             height: img.height,
           }),
         });
-        await db.setItem('/' + slideshow.id + '/info.json', generateInfo(img));
+
+        const scaleFactors = scaleFactorsCreator(
+          BASE_TILESIZE,
+          img.width,
+          BASE_TILESIZE,
+          img.height,
+        );
+
+        await db.setItem('/' + slideshow.id + '/info.json', generateInfo(img, scaleFactors, slideshow.id));
+
         if (slicing) {
-          for (const [url, file] of await slicer(img)) {
-            await db.setItem('/' + slideshow.id + url, file);
+          const first = new Date();
+          for (const [url, filePromise] of generate(
+            img,
+            {tileSize: 512, scaleFactors: scaleFactors},
+          )) {
+            (filePromise as Promise<File>).then(file => db.setItem('/' + slideshow.id + url, file));
           }
+          const last = new Date();
+          console.log(first, last, (last as any) - (first as any));
         }
+        window.URL.revokeObjectURL(url);
         return resolve(slideshow);
       };
       img.onerror = (error) => {

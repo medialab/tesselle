@@ -7,6 +7,7 @@
 import { combineReducers } from 'redux';
 
 import ActionTypes from './constants';
+import HomePageActionTypes from 'Containers/HomePage/constants';
 import { ContainerState, ContainerActions } from './types';
 import Annotation from 'types/Annotation';
 
@@ -53,9 +54,10 @@ export default combineReducers<ContainerState, ContainerActions>({
     return selectedAnnotations;
   },
   slideshow: (slideshow = initialState.slideshow, action) => {
-    console.log(action.type);
-    if (slideshow) {
+      if (slideshow) {
       switch (action.type) {
+        case HomePageActionTypes.LOAD_SLIDESHOWS as any:
+          return initialState.slideshow;
         case ActionTypes.CHANGE_ORDER:
           return slideshow.set(
             'annotations',
@@ -80,16 +82,15 @@ export default combineReducers<ContainerState, ContainerActions>({
             );
       }
     }
-    switch (action.type) {
-      case ActionTypes.EDIT_SLIDESHOW:
-        console.log(ActionTypes.EDIT_SLIDESHOW, action);
-        return new Slideshow({
-          id: action.payload.id,
-          name: action.payload.name,
-          image: action.payload.image,
-          annotations: action.payload.annotations.map(fromJS),
-        });
-    }
-    return slideshow;
+      switch (action.type) {
+        case ActionTypes.EDIT_SLIDESHOW:
+          return new Slideshow({
+            id: action.payload.id,
+            name: action.payload.name,
+            image: action.payload.image,
+            annotations: action.payload.annotations.map(fromJS),
+          });
+        }
+      return slideshow;
   },
 });

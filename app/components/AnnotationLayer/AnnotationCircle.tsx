@@ -18,6 +18,9 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = (props) => {
       {...props}
       center={center}
       radius={annotation.properties.radius}
+      editing
+      original
+      properties={annotation.properties}
     >
       {!selected && (
         <Tooltip opacity={1} permanent interactive>

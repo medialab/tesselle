@@ -4,8 +4,8 @@
  *
  */
 
-import React, { useCallback, useState } from 'react';
-import L, { LatLngBounds } from 'leaflet';
+import React, { useCallback, useState, memo } from 'react';
+import L from 'leaflet';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { List } from 'immutable';
@@ -21,7 +21,6 @@ import Sidebar from 'components/Sidebar';
 import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
 import { Feature } from 'geojson';
-import { useFlyTo, useMapLock } from 'utils/hooks';
 import AnnotationLayer from 'components/AnnotationLayer';
 
 import {
@@ -35,6 +34,7 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import IiifLayer from 'components/IiifLayer';
+import { useLockEffect } from 'utils/hooks';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -71,8 +71,8 @@ interface SetToolsProps {
   tool: SupportedShapes;
 }
 
-const minZoom = 1;
-const maxZoom = 20;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 20;
 
 // Hack to allow only 1 futur shape to be drawn.
 let FUTUR_SHAPE;
@@ -89,7 +89,8 @@ const lockFuturShape = (instance?) => {
 const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = props => {
   const {slideshow, setTool, tool} = props;
   const map = props.leaflet.map;
-  const maxBounds: LatLngBounds = useMapLock(map, slideshow.image);
+
+  useLockEffect(map, props.slideshow.image);
 
   const onSelectClick = useCallback(() => {
     lockFuturShape();
@@ -107,8 +108,6 @@ const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = p
     lockFuturShape(new L.Draw.Polygon(map));
     setTool(SupportedShapes.polygon);
   }, [map]);
-
-  useFlyTo(map, maxBounds);
 
   useMousetrap('p', onPolygonClick);
   useMousetrap('r', onRectangleClick);
@@ -150,7 +149,7 @@ const EditorMapMap = withLeaflet(EditorMap);
 
 const Editor: React.SFC<EditorProps> = (props) => {
   const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
-  const onMapClick = useCallback((event) => {
+  const onMapClick = useCallback(() => {
     if (tool === SupportedShapes.selector) {
       props.changeSelection();
     }
@@ -177,8 +176,8 @@ const Editor: React.SFC<EditorProps> = (props) => {
         doubleClickZoom={false}
         zoomControl={false}
         crs={L.CRS.Simple}
-        minZoom={minZoom}
-        maxZoom={maxZoom}>
+        minZoom={MIN_ZOOM}
+        maxZoom={MAX_ZOOM}>
           <ZoomControl position="topright" />
           <EditorMapMap {...props} setTool={setTool} tool={tool} />
       </Map>
@@ -186,9 +185,11 @@ const Editor: React.SFC<EditorProps> = (props) => {
   );
 };
 
+const Meditor = memo(Editor);
+
 export default decorator(props => {
   if (props.slideshow) {
-    return <Editor {...props} />;
+    return <Meditor {...props} />;
   }
   return 'loading';
 });

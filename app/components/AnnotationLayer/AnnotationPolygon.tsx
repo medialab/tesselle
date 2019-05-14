@@ -23,6 +23,9 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
       ref={ref}
       {...props}
       positions={position}
+      editing
+      original
+      properties={annotation.properties}
     >
       {!selected && (
         <Tooltip opacity={1} permanent interactive>

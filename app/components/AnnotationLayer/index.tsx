@@ -55,35 +55,39 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
 
   const dispatch = useDispatch();
 
-  const onEdit = useCallback(() => {
+  const onEdit = useCallback((event) => {
     if (props.selectedAnnotations && containerRef.current && props.onCreated) {
-      const featuresCollection = List(containerRef.current.leafletElement.getLayers());
-      props.selectedAnnotations.zip(featuresCollection).forEach(([annotation, layer]) => {
-        const feature = (layer as any).toGeoJSON();
-        if (annotation.properties.type === SupportedShapes.circle) {
-          dispatch(
-            editAnnotationAction(
-              annotation,
-              annotation.set(
-                'geometry',
-                fromJS(feature.geometry),
-              ).setIn(
-                ['properties', 'radius'],
-                (layer as L.CircleMarker).getRadius(),
+      containerRef.current.leafletElement.getLayers().forEach((layer: any) => {
+        const annotation = props.selectedAnnotations.find(
+          (annotation) => annotation.properties.id === layer.options.properties.id,
+        );
+        if (annotation) {
+          const feature = layer.toGeoJSON();
+          if (annotation.properties.type === SupportedShapes.circle) {
+            dispatch(
+              editAnnotationAction(
+                annotation,
+                annotation.set(
+                  'geometry',
+                  fromJS(feature.geometry),
+                ).setIn(
+                  ['properties', 'radius'],
+                  (layer as L.CircleMarker).getRadius(),
+                ),
+              ));
+          } else {
+            dispatch(
+              editAnnotationAction(
+                annotation,
+                fromJS(feature).set('properties', annotation.properties),
               ),
-            ));
-        } else {
-          dispatch(
-            editAnnotationAction(
-              annotation,
-              fromJS(feature).set('properties', annotation.properties),
-            ),
-          );
+            );
+          }
         }
       });
       return;
     }
-  }, [props.selectedAnnotations, props.onCreated]);
+  }, [props.selectedAnnotations]);
   const onCreate = useCallback((event) => {
     if (event.layerType === SupportedShapes.circle) {
       const feature = event.layer.toGeoJSON();

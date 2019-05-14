@@ -12,29 +12,30 @@ export function calculateAspectRatioFit(srcWidth: number, srcHeight: number, max
   return { width: srcWidth * ratio, height: srcHeight * ratio };
 }
 
-export function resizeImage(img, region, [sizeWidth, sizeHeight], name) {
-  return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
-    const [x, y, w, h] = region;
-    const drawingWidth = w;
-    const drawingHeight = h;
+const canvas = document.createElement('canvas');
+const context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-    img.width = sizeWidth;
-    img.height = sizeHeight;
-    canvas.width = sizeWidth;
-    canvas.height = sizeHeight;
-    context.drawImage(
-      img,
-      x,
-      y,
-      drawingWidth,
-      drawingHeight,
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    );
+export function resizeImage(img: HTMLImageElement, region, [sizeWidth, sizeHeight]: [number, number]): Promise<File> {
+  const [x, y, w, h] = region;
+  const drawingWidth = w;
+  const drawingHeight = h;
+
+  img.width = sizeWidth;
+  img.height = sizeHeight;
+  canvas.width = sizeWidth;
+  canvas.height = sizeHeight;
+  context.drawImage(
+    img,
+    x,
+    y,
+    drawingWidth,
+    drawingHeight,
+    0,
+    0,
+    canvas.width,
+    canvas.height,
+  );
+  return new Promise((resolve, reject) => {
     canvas.toBlob((blob: Blob) => {
       resolve(
         new File(

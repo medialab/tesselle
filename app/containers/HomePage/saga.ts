@@ -22,6 +22,7 @@ export function* createSlideshow(action, slice) {
     const slideshow: Slideshow = yield slideshowCreator(action.payload, slice);
     const slideshows: List<Slideshow> = yield select(selectSlideshows);
     yield setSlideshows(slideshows.push(slideshow));
+    window.alert('Oui c bon chef');
     return slideshow;
   } catch (e) {
     console.info('This should not happend');
@@ -39,10 +40,9 @@ export function* createAndRedirect(action) {
 
 export function* removeSlideshow(action) {
   const slideshows: List<Slideshow> = yield select(selectSlideshows);
-  yield db.setItem('slideshows', slideshows.toJS());
+  db.setItem('slideshows', slideshows.toJS());
   const allKeys = yield db.keys();
-  const id = action.payload.id;
-  const myKeys = allKeys.filter((key: string) => key.startsWith(id));
+  const myKeys = allKeys.filter((key: string) => key.startsWith(action.payload.idid));
   // We could yield to wait for all items to be removed, but I don't see the point ATM.
   myKeys.forEach((key: string) =>
     db.removeItem(key),
