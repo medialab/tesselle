@@ -7,7 +7,7 @@
 import * as React from 'react';
 import Control from 'react-leaflet-control';
 import { Button, Icon } from 'quinoa-design-library';
-import icons from 'quinoa-design-library/src/themes/millet/icons';
+import icons from '../../images/icons/';
 import { SupportedShapes } from 'types';
 import './styles.css';
 
@@ -22,7 +22,7 @@ interface FloatingBarProps {
 const FloatingBar: React.SFC<FloatingBarProps> = (props: FloatingBarProps) => {
 
   const buttons = [{
-    icon: icons.move,
+    icon: icons.select,
     tool: SupportedShapes.selector,
     event: props.onSelectClick,
   }, {
@@ -49,7 +49,7 @@ const FloatingBar: React.SFC<FloatingBarProps> = (props: FloatingBarProps) => {
               isColor={tool === props.activeButton ? 'primary' : ''}
               style={{marginBottom: '.5rem'}} isRounded>
               <Icon isSize="medium" isAlign="left">
-                <img src={icon[tool === props.activeButton ? 'white' : 'black'].svg} />
+                <img src={icon[tool === props.activeButton ? 'white' : 'black']} />
               </Icon>
             </Button>
         ))}
