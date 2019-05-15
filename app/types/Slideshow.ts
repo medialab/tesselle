@@ -163,7 +163,9 @@ export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
             img,
             {tileSize: 512, scaleFactors: scaleFactors},
           )) {
-            (filePromise as Promise<File>).then(file => db.setItem('/' + slideshow.id + url, file));
+            const file = await filePromise;
+            await db.setItem('/' + slideshow.id + url, file);
+            // const allP = (filePromise as Promise<File>).then(file => db.setItem('/' + slideshow.id + url, file));
           }
           const last = new Date();
           console.log(first, last, (last as any) - (first as any));

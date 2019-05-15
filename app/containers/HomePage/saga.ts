@@ -22,7 +22,6 @@ export function* createSlideshow(action, slice) {
     const slideshow: Slideshow = yield slideshowCreator(action.payload, slice);
     const slideshows: List<Slideshow> = yield select(selectSlideshows);
     yield setSlideshows(slideshows.push(slideshow));
-    window.alert('Oui c bon chef');
     return slideshow;
   } catch (e) {
     console.info('This should not happend');

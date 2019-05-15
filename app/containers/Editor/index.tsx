@@ -12,6 +12,7 @@ import { List } from 'immutable';
 import { compose } from 'redux';
 import { Map, ZoomControl, withLeaflet } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
+import { Feature } from 'geojson';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -20,7 +21,6 @@ import FloatinBar from 'components/FloatingBar';
 import Sidebar from 'components/Sidebar';
 import Annotation from 'types/Annotation';
 import { SupportedShapes } from 'types';
-import { Feature } from 'geojson';
 import AnnotationLayer from 'components/AnnotationLayer';
 
 import {
