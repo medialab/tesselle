@@ -8,11 +8,8 @@ import * as React from 'react';
 import Control from 'react-leaflet-control';
 import { Button, Icon } from 'quinoa-design-library';
 import icons from '../../images/icons/';
-// import icons from 'quinoa-design-library/src/themes/millet/icons';
 import { SupportedShapes } from 'types';
 import './styles.css';
-// import anchorEllipse from '../../images/icons/anchor-ellipse-white.svg';
-console.log(icons);
 
 interface FloatingBarProps {
   onRectangleClick: (event: any) => any;
