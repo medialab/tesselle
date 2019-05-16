@@ -71,7 +71,7 @@ interface SetToolsProps {
   tool: SupportedShapes;
 }
 
-const MIN_ZOOM = 1;
+const MIN_ZOOM = 0;
 const MAX_ZOOM = 20;
 
 // Hack to allow only 1 futur shape to be drawn.
