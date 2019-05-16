@@ -7,7 +7,7 @@
 import React, { useCallback, useState } from 'react';
 import { Columns, Column, Content, Container, DropZone } from 'quinoa-design-library';
 import { connect } from 'react-redux';
-import { Helmet } from 'react-helmet';
+// import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
@@ -54,10 +54,10 @@ function HomePage(props: HomePageProps & ContainerState) {
   const onDelete = useAction(removeSlideshowAction);
   return (
     <Container className="home-container">
-      <Helmet>
+      {/* <Helmet>
         <title>Welcome to le paradis de la glisse</title>
         <meta name="description" content="Description of HomePage" />
-      </Helmet>
+      </Helmet> */}
       <Columns>
         <Column isSize={'1/3'}>
           <Content>

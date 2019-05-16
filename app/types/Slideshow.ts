@@ -3,10 +3,8 @@ import { split, nth, curry, map, pipe } from 'ramda';
 import uuid from 'uuid';
 import Annotation from 'types/Annotation';
 
-import db from 'utils/db';
 import Cover from './Cover';
 import { fromJS } from 'utils/geo';
-import { generate, scaleFactorsCreator } from './IIIFStatic';
 
 export interface SlideshowArgs {
   id?: string;
@@ -80,52 +78,40 @@ const getSvgSize = (svgElement: Element): Box | never => {
   throw new Error('No width / height nor viewBox');
 };
 
-const BASE_TILESIZE = 512;
-
-const generateInfo = (img, scaleFactors, id) => {
-  return {
-    '@context': 'http://library.stanford.edu/iiif/image-api/1.1/context.json',
-    '@id': id,
-    'formats': ['jpg'],
-    'height': img.height,
-    'profile': 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0',
-    'qualities': ['default'],
-    'scale_factors': scaleFactors,
-    'tile_height': 512,
-    'tile_width': 512,
-    'width': img.width,
-  };
-};
-
-export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
+export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
   new Promise((resolve, reject) => {
     if (file.type === svgType) {
       const reader = new FileReader();
       reader.onload = () => {
         const container = document.createElement('div');
         container.innerHTML = reader.result as string;
-        const svgElement = container.getElementsByTagName('svg')[0] as Element;
+        const svgElement = container.getElementsByTagName('svg')[0] as SVGElement;
         try {
           const box: Box = getSvgSize(svgElement);
-          return resolve(
+          return resolve([
             new Slideshow({
               image: new Cover({
                 file: false,
                 width: box.width,
                 height: box.height,
               }),
-            }));
+            }),
+            svgElement,
+          ]);
         } catch (error) {
           svgElement.setAttribute('width', maxX);
           svgElement.setAttribute('height', maxY);
           const box: Box = getSvgSize(svgElement);
-          return resolve(new Slideshow({
-            image: new Cover({
-              file: false,
-              width: box.width,
-              height: box.height,
+          return resolve([
+            new Slideshow({
+              image: new Cover({
+                file: false,
+                width: box.width,
+                height: box.height,
+              }),
             }),
-          }));
+            svgElement,
+          ]);
         }
       };
       reader.readAsText(file);
@@ -147,31 +133,8 @@ export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
             height: img.height,
           }),
         });
-
-        const scaleFactors = scaleFactorsCreator(
-          BASE_TILESIZE,
-          img.width,
-          BASE_TILESIZE,
-          img.height,
-        );
-
-        await db.setItem('/' + slideshow.id + '/info.json', generateInfo(img, scaleFactors, slideshow.id));
-
-        if (slicing) {
-          const first = new Date();
-          for (const [url, filePromise] of generate(
-            img,
-            {tileSize: 512, scaleFactors: scaleFactors},
-          )) {
-            const file = await filePromise;
-            await db.setItem('/' + slideshow.id + url, file);
-            // const allP = (filePromise as Promise<File>).then(file => db.setItem('/' + slideshow.id + url, file));
-          }
-          const last = new Date();
-          console.log(first, last, (last as any) - (first as any));
-        }
         window.URL.revokeObjectURL(url);
-        return resolve(slideshow);
+        return resolve([slideshow, img]);
       };
       img.onerror = (error) => {
         console.error(error);
