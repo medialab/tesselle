@@ -7,7 +7,7 @@
 import React, { useCallback, useState } from 'react';
 import { Columns, Column, Content, Container, DropZone } from 'quinoa-design-library';
 import { connect } from 'react-redux';
-// import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
@@ -16,7 +16,7 @@ import { ContainerState } from './types';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import makeSelectSlideshows from './selectors';
+import makeSelectSlideshows, { selectSlicing } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import messages from './messages';
@@ -26,6 +26,7 @@ import { createSlideshowAction, removeSlideshowAction } from './actions';
 import SlideshowCartouche from 'components/SlideshowCartouche';
 
 import { useAction } from 'utils/hooks';
+import LoadingModal from 'components/LoadingModal';
 
 const validMimeTypes = ['image/jpeg', 'image/svg+xml'];
 const isImage = includes(__, validMimeTypes);
@@ -54,10 +55,21 @@ function HomePage(props: HomePageProps & ContainerState) {
   const onDelete = useAction(removeSlideshowAction);
   return (
     <Container className="home-container">
-      {/* <Helmet>
+      {loading &&
+        <LoadingModal
+          isActive
+          headerContent="Nice content"
+          footerContent={[<button key="coucou">Coucou</button>]}>
+            <progress
+              className="progress is-primary"
+              value={`${(props.slicing.present / props.slicing.total) * 100}`}
+              max="100">{Math.floor(props.slicing.present / props.slicing.total) * 100}</progress>
+        </LoadingModal>
+      }
+      <Helmet>
         <title>Welcome to le paradis de la glisse</title>
         <meta name="description" content="Description of HomePage" />
-      </Helmet> */}
+      </Helmet>
       <Columns>
         <Column isSize={'1/3'}>
           <Content>
@@ -68,7 +80,7 @@ function HomePage(props: HomePageProps & ContainerState) {
             accept={'image/jpeg'}
             onDrop={onDrop}
           >
-            {loading ? <img src="https://i.imgur.com/FEDTpyE.gif" /> : <span>Drop a file</span>}
+            {loading ? 'LoadingModal...' : 'Drop a file'}
           </DropZone>
         </Column>
         <Column isSize={'2/3'}>
@@ -92,6 +104,7 @@ function HomePage(props: HomePageProps & ContainerState) {
 
 const mapStateToProps = createStructuredSelector({
   slideshows: makeSelectSlideshows(),
+  slicing: selectSlicing(),
 });
 
 const withConnect = connect(

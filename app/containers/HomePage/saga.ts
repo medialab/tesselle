@@ -1,14 +1,15 @@
 import { call, put, takeLatest, select } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import db from 'utils/db';
-import { loadSlideshowsAction } from './actions';
+import { loadSlideshowsAction, setProgress } from './actions';
 import Slideshow, { slideshowCreator } from 'types/Slideshow';
 import ActionTypes from 'containers/HomePage/constants';
 import { List, isImmutable } from 'immutable';
 import { generate, scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
-import { last } from 'ramda';
+import { splitAt } from 'ramda';
 
 import makeSelectSlideshows from './selectors';
+import { SliceState } from './reducer';
 
 const selectSlideshows = makeSelectSlideshows();
 const BASE_TILESIZE = 512;
@@ -31,44 +32,30 @@ function* slice(img, slidehsowId: string, slicing) {
     img.height,
   );
 
-  console.log('set info.json');
   yield db.setItem('/' + slidehsowId + '/info.json', generateInfo(img, scaleFactors, slidehsowId));
-  console.log('setted info.json');
   if (slicing) {
     try {
-      const first = new Date();
-      // const queue: FuturImageParsing[] = [];
-      console.log('start boucle');
       const parsedImage = Array.from(generate(
         img,
-        {tileSize: 512, scaleFactors: scaleFactors},
+        {tileSize: 512, scaleFactors: [1]},
       ));
+      const nbImages = parsedImage.length;
+      const sliceState = new SliceState({total: nbImages});
 
-      const levels = scaleFactors.reduce((prev: any[], scale, index) => {
-        const lastMatrice = last(prev);
-        if (!lastMatrice) {
-          return [[0]];
-        }
-        const start = last(lastMatrice);
-        return [...prev, Array(scale * scale).fill(0).map((_, i) => i + (start + 1))];
-      }, []);
-      const mapedImages = levels.map(zoomMatrice => zoomMatrice.map(index => parsedImage[index]));
-      console.log(levels, mapedImages);
-      console.log('hebé');
+      const [canWait, cantWait] = splitAt(Math.floor(nbImages / 2), parsedImage);
 
-      // for (const [url, launchFileParsing] of ) {
-      //   i++;
-      //   // Commencer par la fin du tableau
-      //   if (okimages.includes(i)) {
-      //     console.log(i, 'parse and wait', url);
-      //     yield call([db, db.setItem], '/' + slidehsowId + url, launchFileParsing());
-      //   } else {
-      //     console.log(i, 'oui c bon gogo', url);
-      //     db.setItem('/' + slidehsowId + url, launchFileParsing());
-      //   }
-      // }
-      const nd = new Date();
-      console.log(first, nd, (nd as any) - (first as any));
+      console.log(scaleFactors, nbImages);
+
+      for (let index = 0; index < cantWait.length; index++) {
+        const [url, launchFileParsing]  = cantWait[index];
+        yield put(setProgress(sliceState.set('present', index + 1)));
+        yield call([db, db.setItem], '/' + slidehsowId + url, launchFileParsing());
+      }
+      Promise.all(
+        canWait.map(([url, launchFileParsing]) =>
+          db.setItem('/' + slidehsowId + url, launchFileParsing())))
+          .then(() => console.log('wolo c oké'),
+      );
     } catch (e) {
       console.error(e);
     }

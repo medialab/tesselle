@@ -9,4 +9,6 @@ localforage.config({
   description : 'some description',
 });
 
+(window as any).db = localforage;
+
 export default localforage;
