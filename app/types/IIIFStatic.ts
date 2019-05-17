@@ -1,4 +1,5 @@
 import { resizeImage, calculateAspectRatioFit } from 'utils/imageManipulation';
+import { last } from 'ramda';
 
 export const generateInfo = (img, scaleFactors, id) => {
   return {
@@ -40,7 +41,7 @@ function* staticPartialTileSizes(width: number, height: number, tilesize: number
         const rh = rye - ry;
         const sh = Math.floor(((rh + sf) - 1) / sf);
         // debugger
-        yield [[rx, ry, rw, rh], [sw, sh]] as [[number, number, number, number], [number, number]];
+        yield [[rx, ry, rw, rh], [sw, sh], sf] as [[number, number, number, number], [number, number], number];
       }
     }
   }
@@ -69,8 +70,12 @@ interface GenerateImageOptions {
 }
 
 export type FuturImageParsing = () => Promise<File>;
+type ScaleFactor = number;
 
-export function* generate(img, options: GenerateImageOptions): IterableIterator<[string, FuturImageParsing]> {
+export function* generate(
+  img,
+  options: GenerateImageOptions,
+): IterableIterator<[string, FuturImageParsing, ScaleFactor]> {
   const { width, height } = img;
   const { tileSize } = options;
   const scaleFactors: number[] = options.scaleFactors ? options.scaleFactors : scaleFactorsCreator(
@@ -79,10 +84,11 @@ export function* generate(img, options: GenerateImageOptions): IterableIterator<
     tileSize,
     height,
   );
-  for (const [region, size] of staticPartialTileSizes(width, height, tileSize, scaleFactors)) {
+  for (const [region, size, sf] of staticPartialTileSizes(width, height, tileSize, scaleFactors)) {
     yield [
       path(region, size),
       () => resizeImage(img, region, size),
+      sf,
     ];
   }
   const ratio = calculateAspectRatioFit(
@@ -97,5 +103,6 @@ export function* generate(img, options: GenerateImageOptions): IterableIterator<
       lastRegion,
       lastSize,
     ),
+    last(scaleFactors) * 2,
   ];
 }

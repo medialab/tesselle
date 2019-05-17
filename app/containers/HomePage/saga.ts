@@ -1,4 +1,4 @@
-import { call, put, takeLatest, select } from 'redux-saga/effects';
+import { call, put, takeLatest, select, spawn, fork } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import db from 'utils/db';
 import { loadSlideshowsAction, setProgress } from './actions';
@@ -6,12 +6,12 @@ import Slideshow, { slideshowCreator } from 'types/Slideshow';
 import ActionTypes from 'containers/HomePage/constants';
 import { List, isImmutable } from 'immutable';
 import { generate, scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
-import { splitAt } from 'ramda';
-
-import makeSelectSlideshows from './selectors';
-import { SliceState } from './reducer';
+import { last, groupBy, pipe, values, sort, splitAt } from 'ramda';
+import makeSelectSlideshows, { makeSelectSlicing } from './selectors';
 
 const selectSlideshows = makeSelectSlideshows();
+const selectSlicing = makeSelectSlicing();
+
 const BASE_TILESIZE = 512;
 
 export function* setSlideshows(slideshows: any) {
@@ -20,10 +20,21 @@ export function* setSlideshows(slideshows: any) {
   }
   yield put(loadSlideshowsAction(slideshows));
 }
-// const okimages = [61, 62, 63, 64];
-function* slice(img, slidehsowId: string, slicing) {
-  // yield 'direct';
-  console.log('fork started');
+
+function* rawSlice(images, sliceState, slideshowId) {
+  for (const imagesByScaleFactor of images) {
+    for (const [url, launchFileParsing] of imagesByScaleFactor) {
+      sliceState = sliceState.set('present', sliceState.present + 1);
+      yield put(setProgress(sliceState));
+      yield call([db, db.setItem], '/' + slideshowId + url, launchFileParsing());
+    }
+    const sf = last(last(imagesByScaleFactor));
+    console.log(sf, imagesByScaleFactor);
+  }
+  return sliceState;
+}
+
+function* slice(img, slideshowId: string, slicing) {
 
   const scaleFactors = scaleFactorsCreator(
     BASE_TILESIZE,
@@ -32,30 +43,24 @@ function* slice(img, slidehsowId: string, slicing) {
     img.height,
   );
 
-  yield db.setItem('/' + slidehsowId + '/info.json', generateInfo(img, scaleFactors, slidehsowId));
+  yield db.setItem('/' + slideshowId + '/info.json', generateInfo(img, scaleFactors, slideshowId));
+
   if (slicing) {
     try {
       const parsedImage = Array.from(generate(
         img,
-        {tileSize: 512, scaleFactors: [1]},
+        {tileSize: 512, scaleFactors: scaleFactors},
       ));
       const nbImages = parsedImage.length;
-      const sliceState = new SliceState({total: nbImages});
-
-      const [canWait, cantWait] = splitAt(Math.floor(nbImages / 2), parsedImage);
-
-      console.log(scaleFactors, nbImages);
-
-      for (let index = 0; index < cantWait.length; index++) {
-        const [url, launchFileParsing]  = cantWait[index];
-        yield put(setProgress(sliceState.set('present', index + 1)));
-        yield call([db, db.setItem], '/' + slidehsowId + url, launchFileParsing());
-      }
-      Promise.all(
-        canWait.map(([url, launchFileParsing]) =>
-          db.setItem('/' + slidehsowId + url, launchFileParsing())))
-          .then(() => console.log('wolo c oké'),
-      );
+      yield put(setProgress((yield select(selectSlicing)).set('total', nbImages)));
+      const [futurImages, backgroundImages] = pipe(
+        groupBy(last),
+        values,
+        sort(matrice => -last(last(matrice))),
+        splitAt(2),
+      )(parsedImage);
+      yield fork(rawSlice, futurImages, yield select(selectSlicing), slideshowId);
+      yield spawn(rawSlice, backgroundImages, yield select(selectSlicing), slideshowId);
     } catch (e) {
       console.error(e);
     }
@@ -65,8 +70,6 @@ function* slice(img, slidehsowId: string, slicing) {
 export function* createSlideshow(action, sliceing) {
   try {
     const [slideshow, img] = yield slideshowCreator(action.payload, sliceing);
-    console.log('slideshow created');
-    console.log('launch fork');
     // const koi = yield* slice(img, slideshow, sliceing);
     const koi = yield call(slice, img, slideshow.id, sliceing);
     console.log('done slicing', koi);
@@ -81,12 +84,9 @@ export function* createSlideshow(action, sliceing) {
 
 export function* createAndRedirect(action) {
   // sagas: createSlideshow
-  console.log('start create slideshow');
   const slideshow = yield createSlideshow(action, true);
-  console.log('end create slideshow');
   // sagas: slidehsow created
   // sagas: redirect to editor
-  console.log('redirect now');
   yield put(push('/editor/' + slideshow.id));
 }
 

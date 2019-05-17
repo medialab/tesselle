@@ -16,7 +16,7 @@ import { ContainerState } from './types';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import makeSelectSlideshows, { selectSlicing } from './selectors';
+import makeSelectSlideshows, { makeSelectSlicing } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import messages from './messages';
@@ -104,7 +104,7 @@ function HomePage(props: HomePageProps & ContainerState) {
 
 const mapStateToProps = createStructuredSelector({
   slideshows: makeSelectSlideshows(),
-  slicing: selectSlicing(),
+  slicing: makeSelectSlicing(),
 });
 
 const withConnect = connect(
