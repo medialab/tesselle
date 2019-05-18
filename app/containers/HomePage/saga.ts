@@ -1,18 +1,18 @@
-import { call, put, takeLatest, select, spawn, fork } from 'redux-saga/effects';
-import { push } from 'connected-react-router';
+import { put, takeLatest, select } from 'redux-saga/effects';
+// import { push } from 'connected-react-router';
 import db from 'utils/db';
-import { loadSlideshowsAction, setProgress } from './actions';
+import { loadSlideshowsAction } from './actions';
 import Slideshow, { slideshowCreator } from 'types/Slideshow';
 import ActionTypes from 'containers/HomePage/constants';
 import { List, isImmutable } from 'immutable';
-import { generate, scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
-import { last, groupBy, pipe, values, sort, splitAt } from 'ramda';
-import makeSelectSlideshows, { makeSelectSlicing } from './selectors';
+import makeSelectSlideshows from './selectors';
+import { slice } from 'containers/Slicer/saga';
+import { push } from 'connected-react-router';
+import { setProgress } from 'containers/Slicer/actions';
+import makeSelectSlicer from 'containers/Slicer/selectors';
 
 const selectSlideshows = makeSelectSlideshows();
-const selectSlicing = makeSelectSlicing();
-
-const BASE_TILESIZE = 512;
+const selectSlicer = makeSelectSlicer();
 
 export function* setSlideshows(slideshows: any) {
   if (isImmutable(slideshows)) {
@@ -21,58 +21,10 @@ export function* setSlideshows(slideshows: any) {
   yield put(loadSlideshowsAction(slideshows));
 }
 
-function* rawSlice(images, sliceState, slideshowId) {
-  for (const imagesByScaleFactor of images) {
-    for (const [url, launchFileParsing] of imagesByScaleFactor) {
-      sliceState = sliceState.set('present', sliceState.present + 1);
-      yield put(setProgress(sliceState));
-      yield call([db, db.setItem], '/' + slideshowId + url, launchFileParsing());
-    }
-    const sf = last(last(imagesByScaleFactor));
-    console.log(sf, imagesByScaleFactor);
-  }
-  return sliceState;
-}
-
-function* slice(img, slideshowId: string, slicing) {
-
-  const scaleFactors = scaleFactorsCreator(
-    BASE_TILESIZE,
-    img.width,
-    BASE_TILESIZE,
-    img.height,
-  );
-
-  yield db.setItem('/' + slideshowId + '/info.json', generateInfo(img, scaleFactors, slideshowId));
-
-  if (slicing) {
-    try {
-      const parsedImage = Array.from(generate(
-        img,
-        {tileSize: 512, scaleFactors: scaleFactors},
-      ));
-      const nbImages = parsedImage.length;
-      yield put(setProgress((yield select(selectSlicing)).set('total', nbImages)));
-      const [futurImages, backgroundImages] = pipe(
-        groupBy(last),
-        values,
-        sort(matrice => -last(last(matrice))),
-        splitAt(2),
-      )(parsedImage);
-      yield fork(rawSlice, futurImages, yield select(selectSlicing), slideshowId);
-      yield spawn(rawSlice, backgroundImages, yield select(selectSlicing), slideshowId);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-}
-
 export function* createSlideshow(action, sliceing) {
   try {
     const [slideshow, img] = yield slideshowCreator(action.payload, sliceing);
-    // const koi = yield* slice(img, slideshow, sliceing);
-    const koi = yield call(slice, img, slideshow.id, sliceing);
-    console.log('done slicing', koi);
+    yield* slice(img, slideshow.id, sliceing);
     const slideshows: List<Slideshow> = yield select(selectSlideshows);
     yield setSlideshows(slideshows.push(slideshow));
     return slideshow;
@@ -84,6 +36,10 @@ export function* createSlideshow(action, sliceing) {
 
 export function* createAndRedirect(action) {
   // sagas: createSlideshow
+  const sliceState = yield select(selectSlicer);
+  console.log('azzae', sliceState);
+  const nexd = sliceState.set('total', 500);
+  yield put(setProgress(nexd));
   const slideshow = yield createSlideshow(action, true);
   // sagas: slidehsow created
   // sagas: redirect to editor

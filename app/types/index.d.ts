@@ -3,7 +3,8 @@ import { RouterState } from 'connected-react-router';
 import { ILanguageProviderProps } from 'containers/LanguageProvider';
 import { ContainerState as EditorState } from '../containers/Editor/types';
 import { ContainerState as PlayerState } from '../containers/Player/types';
-import { ContainerState as HomePageState } from '../containers/homePage/types';
+import { ContainerState as HomePageState } from '../containers/HomePage/types';
+import { ContainerState as SlicerState } from '../containers/Slicer/types';
 import Annotation from './Annotation';
 
 export interface LifeStore extends Store<{}> {
@@ -43,6 +44,7 @@ export interface ApplicationRootState {
   readonly editor: EditorState;
   readonly player: PlayerState;
   readonly homePage: HomePageState;
+  readonly slicer: SlicerState;
   // for testing purposes
   readonly test: any;
 }

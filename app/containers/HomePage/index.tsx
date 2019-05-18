@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { Columns, Column, Content, Container, DropZone } from 'quinoa-design-library';
 import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
@@ -16,7 +16,7 @@ import { ContainerState } from './types';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import makeSelectSlideshows, { makeSelectSlicing } from './selectors';
+import makeSelectSlideshows from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import messages from './messages';
@@ -26,10 +26,7 @@ import { createSlideshowAction, removeSlideshowAction } from './actions';
 import SlideshowCartouche from 'components/SlideshowCartouche';
 
 import { useAction } from 'utils/hooks';
-import LoadingModal from 'components/LoadingModal';
-
-const validMimeTypes = ['image/jpeg', 'image/svg+xml'];
-const isImage = includes(__, validMimeTypes);
+import { slicerContainer } from 'containers/Slicer';
 
 interface HomePageProps {
   createSlideshow: () => void;
@@ -38,34 +35,16 @@ interface HomePageProps {
 const ifFileIsImage = (func: () => any) => pipe(
   head,
   when(
-    propSatisfies(isImage, 'type'),
+    propSatisfies(includes(__, ['image/jpeg', 'image/svg+xml']), 'type'),
     func,
   ),
 );
 
-function HomePage(props: HomePageProps & ContainerState) {
-  const [loading, setLoading] = useState<boolean>(false);
-  const onDrop = useCallback(
-    ifFileIsImage((...args) => {
-      props.createSlideshow(...args);
-      setLoading(true);
-    }),
-    [],
-  );
+function HomePage(props: HomePageProps & ContainerState & any) {
+  const onDrop = useCallback(ifFileIsImage(props.createSlideshow), [props.createSlideshow]);
   const onDelete = useAction(removeSlideshowAction);
   return (
     <Container className="home-container">
-      {loading &&
-        <LoadingModal
-          isActive
-          headerContent="Nice content"
-          footerContent={[<button key="coucou">Coucou</button>]}>
-            <progress
-              className="progress is-primary"
-              value={`${(props.slicing.present / props.slicing.total) * 100}`}
-              max="100">{Math.floor(props.slicing.present / props.slicing.total) * 100}</progress>
-        </LoadingModal>
-      }
       <Helmet>
         <title>Welcome to le paradis de la glisse</title>
         <meta name="description" content="Description of HomePage" />
@@ -76,12 +55,18 @@ function HomePage(props: HomePageProps & ContainerState) {
             <h1 className="title is-2">Glissemontre</h1>
             <p><FormattedMessage {...messages.chapo} /></p>
           </Content>
-          <DropZone
-            accept={'image/jpeg'}
-            onDrop={onDrop}
-          >
-            {loading ? 'LoadingModal...' : 'Drop a file'}
-          </DropZone>
+          {props.slicer.total === 0
+            ? <DropZone
+                accept={'image/jpeg'}
+                onDrop={onDrop}
+              >
+                {(props as any).loading ? 'LoadingModal...' : 'Drop a file'}
+              </DropZone>
+            : <progress
+                className="progress is-primary"
+                value={`${(props.slicer.present / props.slicer.total) * 100}`}
+                max="100">{Math.floor(props.slicer.present / props.slicer.total) * 100}</progress>
+            }
         </Column>
         <Column isSize={'2/3'}>
           <div className="list-projects__container">
@@ -104,7 +89,6 @@ function HomePage(props: HomePageProps & ContainerState) {
 
 const mapStateToProps = createStructuredSelector({
   slideshows: makeSelectSlideshows(),
-  slicing: makeSelectSlicing(),
 });
 
 const withConnect = connect(
@@ -116,6 +100,7 @@ const withReducer = injectReducer({ key: 'homePage', reducer: reducer });
 const withSaga = injectSaga({ key: 'homePage', saga: saga });
 
 export default compose(
+  slicerContainer,
   withReducer,
   withSaga,
   withConnect,

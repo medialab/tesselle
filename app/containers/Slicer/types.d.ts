@@ -1,21 +1,19 @@
 import { ActionType } from 'typesafe-actions';
 import * as actions from './actions';
 import { ApplicationRootState } from 'types';
-import Slideshow from 'types/Slideshow';
-import { List, Map } from 'immutable';
 
 /* --- STATE --- */
-interface HomePageState {
-  readonly slideshows: List<Slideshow>;
+interface SlicerState {
+  readonly default: any;
 }
 
 /* --- ACTIONS --- */
-type HomePageActions = ActionType<typeof actions>;
+type SlicerActions = ActionType<typeof actions>;
 
 /* --- EXPORTS --- */
 
 type RootState = ApplicationRootState;
-type ContainerState = HomePageState;
-type ContainerActions = HomePageActions;
+type ContainerState = SlicerState;
+type ContainerActions = SlicerActions;
 
 export { RootState, ContainerState, ContainerActions };

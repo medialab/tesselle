@@ -26,11 +26,5 @@ const selectHomePage = () =>
     },
   );
 
-const makeSelectSlicing = () =>
-  createSelector(
-    selectHomePageDomain,
-    substate => substate.slicing,
-  );
-
 export default selectHomePage;
-export { selectHomePageDomain, makeSelectSlicing };
+export { selectHomePageDomain };

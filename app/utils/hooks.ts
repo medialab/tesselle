@@ -10,9 +10,14 @@ export function useDispatch() {
   return useContext(ReactReduxContext).store.dispatch;
 }
 
-export function useAction(actionCreator: (...args: any) => any, scu = []) {
+export function useAction(actionCreator: (...args: any) => any, scu: any[] = []) {
   const dispatch = useDispatch();
-  return useCallback((...args) => dispatch(actionCreator(...args)), scu);
+  return useCallback((...args) => {
+    const action = actionCreator(...args);
+    if (action) {
+      dispatch(action);
+    }
+  }, scu);
 }
 
 // Hook

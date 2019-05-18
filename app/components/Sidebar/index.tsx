@@ -7,11 +7,12 @@
 import React from 'react';
 import { List } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
-import { useDispatch, useAction } from 'utils/hooks';
+import { useAction } from 'utils/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Formik, Form, FormikValues, FormikErrors, Field, FormikActions } from 'formik';
 import cx from 'classnames';
 import Textarea from 'react-textarea-autosize';
+import { when } from 'ramda';
 
 const CustomTextarea = ({field, form: {touched, errors}, ...props}: any) => (
   <div>
@@ -35,6 +36,7 @@ import icons from 'quinoa-design-library/src/themes/millet/icons';
 import './styles.css';
 import { DomEvent } from 'leaflet';
 import { Link } from 'react-router-dom';
+import { slicerContainer } from 'containers/Slicer';
 
 interface MenuItemProps {
   data: Annotation;
@@ -51,34 +53,47 @@ const validator = (values: FormikValues) => {
   return errors;
 };
 
+const Loader = slicerContainer(props => {
+  if (props.slicer.total === 0) {
+    return <div>nn</div>;
+  }
+  return (
+    <div>
+      <progress
+        className="progress is-primary"
+        value={`${(props.slicer.present / props.slicer.total) * 100}`}
+        max="100">{Math.floor(props.slicer.present / props.slicer.total) * 100}</progress>
+    </div>
+  );
+});
+
 const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwardedRef) => {
-  const dispatch = useDispatch();
-  const onRemove = React.useCallback(
+  const onRemove = useAction(
     (event) => {
       DomEvent.stopPropagation(event);
-      return dispatch(removeAnnotationAction(props.data));
+      return removeAnnotationAction(props.data);
     },
     [props.data],
   );
   const changeSelection = React.useCallback((event) => {
     event.stopPropagation();
     if (!props.selected) {
-      dispatch(changeSelectionAction(props.data));
+      return changeSelectionAction(props.data);
     }
+    return;
   }, [props.data, props.selected]);
-  const onSubmit = React.useCallback((values) => {
-    if (values.content !== props.data.properties.content) {
-      dispatch(
-        editAnnotationAction(
-          props.data,
-          props.data.set(
-            'properties',
-            props.data.properties.set('content', values.content),
-          ),
-        ),
-      );
-    }
-  }, [props.data]);
+
+  const onSubmit = useAction(when(
+    values => values.content !== props.data.properties.content,
+    values => editAnnotationAction(
+      props.data,
+      props.data.set(
+        'properties',
+        props.data.properties.set('content', values.content),
+      ),
+    ),
+  ));
+
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
@@ -167,19 +182,15 @@ interface OrderableProps {
 }
 
 const Orderable: React.SFC<OrderableProps> = props => {
-  const dispatch = useDispatch();
-  const onDragEnd = React.useCallback((result) => {
+  const onDragEnd = useAction((result) => {
     if (!result.destination) {
       return;
     }
-
-    dispatch(
-      editOrderAction(
-        reorder(
-          props.annotations,
-          result.source.index,
-          result.destination.index,
-        ),
+    return editOrderAction(
+      reorder(
+        props.annotations,
+        result.source.index,
+        result.destination.index,
       ),
     );
   }, [props.annotations]);
@@ -243,10 +254,9 @@ const Title: React.SFC<TitleProps> = (props) => {
 };
 
 const Sidebar: React.SFC<OwnProps> = props => {
-  const dispatch = useDispatch();
-  const onClickSidebar = React.useCallback((event: React.SyntheticEvent) => {
+  const onClickSidebar = useAction((event: React.SyntheticEvent) => {
     event.stopPropagation();
-    dispatch(changeSelectionAction());
+    return changeSelectionAction();
   }, []);
   const onClickToggle = React.useCallback(
     props.visible ? props.onClose : props.onOpen,
@@ -272,6 +282,7 @@ const Sidebar: React.SFC<OwnProps> = props => {
         </span>
       </div>
       <Title title={props.slideshow.name} onChange={onNameChange} />
+      <Loader />
       <div onClick={onClickSidebar} className="sidebar--container">
         {props.slideshow.annotations.size > 0 ?
           <Orderable

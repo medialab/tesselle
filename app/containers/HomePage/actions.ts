@@ -9,7 +9,6 @@ import {} from './types';
 
 import ActionTypes from './constants';
 import Slideshow, { SlideshowArgs } from 'types/Slideshow';
-import { SliceState } from './reducer';
 
 export const loadSlideshowsAction = (slideshows: SlideshowArgs[]) =>
   action(ActionTypes.LOAD_SLIDESHOWS, slideshows);
@@ -22,4 +21,3 @@ export const createSlideshowAction = createAsyncAction(
 
 export const removeSlideshowAction = (slideshow: Slideshow) => action(ActionTypes.REMOVE_SLIDESHOW, slideshow);
 
-export const setProgress = (sliceState: SliceState) => action(ActionTypes.SET_PROGRESS, sliceState);

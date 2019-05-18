@@ -103,6 +103,6 @@ export function* generate(
       lastRegion,
       lastSize,
     ),
-    last(scaleFactors) * 2,
+    last(scaleFactors),
   ];
 }
