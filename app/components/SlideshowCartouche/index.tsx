@@ -31,7 +31,9 @@ interface OwnProps {
 
 const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
 
-  const goTo = useAction(() => push(`/editor/${props.slideshow.id}`), []);
+  const goToEditor = useAction(() => push(`/editor/${props.slideshow.id}`), []);
+  const goToPlayer = useAction(() => push(`/player/${props.slideshow.id}`), []);
+
   const [removing, setRemoving] = React.useState<boolean>(false);
 
   const onAction = React.useCallback((id, event) => {
@@ -40,7 +42,9 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
         setRemoving(true);
         return props.onDelete(props.slideshow);
       case 'open':
-        return goTo();
+        return goToEditor();
+      case 'read':
+        return goToPlayer();
     }
   }, [props.slideshow]);
   return (
@@ -66,9 +70,13 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
             isColor: 'primary',
             id: 'open',
           }, {
-            label: <span><InlineIcon><FontAwesomeIcon icon={faCopy} /></InlineIcon>duplicate</span>,
+            label: <span><InlineIcon><FontAwesomeIcon icon={faCopy} /></InlineIcon>read</span>,
             isDisabled: removing,
             id: 'read',
+          }, {
+            label: <span><InlineIcon><FontAwesomeIcon icon={faCopy} /></InlineIcon>duplicate</span>,
+            isDisabled: removing,
+            id: 'duplicate',
           }, {
             label: <span><InlineIcon><FontAwesomeIcon icon={faTrash} /></InlineIcon>delete</span>,
             isDisabled: removing,

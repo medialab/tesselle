@@ -22,7 +22,7 @@ export default function App() {
       <Switch>
         <Route exact path="/" component={HomePage} />
         <Route exact path="/editor/:id" component={Editor} />
-        <Route exact path="/player" component={Player} />
+        <Route exact path="/player/:id" component={Player} />
         <Route component={NotFoundPage} />
       </Switch>
       <GlobalStyle />
