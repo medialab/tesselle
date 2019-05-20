@@ -37,7 +37,6 @@ export function* createSlideshow(action, sliceing) {
 export function* createAndRedirect(action) {
   // sagas: createSlideshow
   const sliceState = yield select(selectSlicer);
-  console.log('azzae', sliceState);
   const nexd = sliceState.set('total', 500);
   yield put(setProgress(nexd));
   const slideshow = yield createSlideshow(action, true);

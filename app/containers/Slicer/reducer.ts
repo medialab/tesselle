@@ -29,7 +29,7 @@ export default combineReducers<ContainerState, ContainerActions>({
   default: (state = initialState.default, action) => {
     switch (action.type) {
       case ActionTypes.SET_PROGRESS:
-        return action.payload;
+        return action.payload ? action.payload : initialState.default;
       default:
         return state;
     }

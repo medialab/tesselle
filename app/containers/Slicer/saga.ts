@@ -13,14 +13,11 @@ const BASE_TILESIZE = 512;
 function* rawSlice(images, sliceState, slideshowId) {
   for (const imagesByScaleFactor of images) {
     const sf = last(last(imagesByScaleFactor));
-    console.group();
     yield all(imagesByScaleFactor.map(function*([url, launchFileParsing], index) {
       sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
-      console.log(index % sf, index, sf);
-      yield put(setProgress(sliceState));
       yield call([db, db.setItem], '/' + slideshowId + url, launchFileParsing());
+      yield put(setProgress(sliceState));
     }));
-    console.groupEnd();
     // for (const [url, launchFileParsing] of imagesByScaleFactor) {
     //   sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
     //   yield put(setProgress(sliceState));
@@ -54,9 +51,11 @@ export function* slice(img, slideshowId: string, slicing = true) {
         sort(matrice => last(last(matrice))),
         splitAt(2),
       )(parsedImage);
-      console.log(futurImages, backgroundImages);
       yield* rawSlice(futurImages, yield select(selectSlicer), slideshowId);
-      yield spawn(rawSlice, backgroundImages, yield select(selectSlicer), slideshowId);
+      yield spawn(function*(images, sliceState, slideshowId) {
+        yield* rawSlice(images, sliceState, slideshowId);
+        yield put(setProgress());
+      }, backgroundImages, yield select(selectSlicer), slideshowId);
     } catch (e) {
       console.error(e);
     }

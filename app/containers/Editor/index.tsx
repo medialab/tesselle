@@ -89,7 +89,6 @@ const lockFuturShape = (instance?) => {
 const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = props => {
   const {slideshow, setTool, tool} = props;
   const map = props.leaflet.map;
-  console.log((props as any).slicing);
 
   useLockEffect(map, props.slideshow.image);
 
