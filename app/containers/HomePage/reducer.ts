@@ -21,7 +21,7 @@ export default combineReducers<ContainerState, ContainerActions>({
     switch (action.type) {
       case ActionTypes.LOAD_SLIDESHOWS:
         return List(action.payload.map((params) => new Slideshow(params)));
-      case ActionTypes.REMOVE_SLIDESHOW:
+      case ActionTypes.REMOVE_SLIDESHOW_SUCCESS:
         return state.remove(state.indexOf(action.payload));
       default:
         return state;

@@ -42,7 +42,7 @@ const ifFileIsImage = (func: () => any) => pipe(
 
 function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
   const onDrop = useCallback(ifFileIsImage(props.createSlideshow), [props.createSlideshow]);
-  const onDelete = useAction(removeSlideshowAction);
+  const onDelete = useAction(removeSlideshowAction.request);
   return (
     <Container className="home-container">
       <Helmet>

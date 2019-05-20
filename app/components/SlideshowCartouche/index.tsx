@@ -32,15 +32,16 @@ interface OwnProps {
 const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
 
   const goTo = useAction(() => push(`/editor/${props.slideshow.id}`), []);
+  const [removing, setRemoving] = React.useState<boolean>(false);
 
   const onAction = React.useCallback((id, event) => {
     switch (id) {
       case 'delete':
+        setRemoving(true);
         return props.onDelete(props.slideshow);
       case 'open':
         return goTo();
     }
-    console.log(id);
   }, [props.slideshow]);
   return (
     <Level>
@@ -61,13 +62,16 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
           }
         asideActions={[{
             label: <span><InlineIcon><FontAwesomeIcon icon={faPencilAlt} /></InlineIcon>edit</span>,
+            isDisabled: removing,
             isColor: 'primary',
             id: 'open',
           }, {
             label: <span><InlineIcon><FontAwesomeIcon icon={faCopy} /></InlineIcon>duplicate</span>,
+            isDisabled: removing,
             id: 'read',
           }, {
             label: <span><InlineIcon><FontAwesomeIcon icon={faTrash} /></InlineIcon>delete</span>,
+            isDisabled: removing,
             isColor: 'warning',
             id: 'delete',
           }]}
