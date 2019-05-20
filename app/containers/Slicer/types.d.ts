@@ -1,11 +1,7 @@
 import { ActionType } from 'typesafe-actions';
 import * as actions from './actions';
 import { ApplicationRootState } from 'types';
-
-/* --- STATE --- */
-interface SlicerState {
-  readonly default: any;
-}
+import SlicerState from './SliceArgs';
 
 /* --- ACTIONS --- */
 type SlicerActions = ActionType<typeof actions>;

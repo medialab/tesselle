@@ -15,12 +15,22 @@ import makeSelectSlicer from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
+import { ContainerState } from './types';
 
-function Slicer(props) {
-  console.log(props.slicer.total, props.slicer.present);
+export interface LoaderProps {
+  slicer: ContainerState;
+}
+
+export function Loader(props: LoaderProps) {
+  if (props.slicer && props.slicer.total === 0) {
+    return <div>nn</div>;
+  }
   return (
     <div>
-      {props.children}
+      <progress
+        className="progress is-primary"
+        value={`${(props.slicer.present / props.slicer.total) * 100}`}
+        max="100">{Math.floor(props.slicer.present / props.slicer.total) * 100}</progress>
     </div>
   );
 }
@@ -49,4 +59,4 @@ export const slicerContainer = compose(
   withConnect,
 );
 
-export default slicerContainer(Slicer);
+export default slicerContainer(Loader);

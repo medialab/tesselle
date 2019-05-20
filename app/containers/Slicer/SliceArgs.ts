@@ -33,7 +33,7 @@ interface SliceArgs {
 }
 
 // tslint:disable-next-line: max-classes-per-file
-export class SliceState extends Record<SliceArgs>({
+export default class SliceState extends Record<SliceArgs>({
   total: 0,
   present: 0,
   level: 1,

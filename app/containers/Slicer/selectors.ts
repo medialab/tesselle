@@ -21,9 +21,7 @@ const selectSlicerDomain = (state: ApplicationRootState) => {
 const selectSlicer = () =>
   createSelector(
     selectSlicerDomain,
-    substate => {
-      return substate && substate.default;
-    },
+    substate => substate,
   );
 
 export default selectSlicer;

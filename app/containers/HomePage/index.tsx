@@ -26,7 +26,7 @@ import { createSlideshowAction, removeSlideshowAction } from './actions';
 import SlideshowCartouche from 'components/SlideshowCartouche';
 
 import { useAction } from 'utils/hooks';
-import { slicerContainer } from 'containers/Slicer';
+import { slicerContainer, Loader, LoaderProps } from 'containers/Slicer';
 
 interface HomePageProps {
   createSlideshow: () => void;
@@ -40,7 +40,7 @@ const ifFileIsImage = (func: () => any) => pipe(
   ),
 );
 
-function HomePage(props: HomePageProps & ContainerState & any) {
+function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
   const onDrop = useCallback(ifFileIsImage(props.createSlideshow), [props.createSlideshow]);
   const onDelete = useAction(removeSlideshowAction);
   return (
@@ -62,10 +62,7 @@ function HomePage(props: HomePageProps & ContainerState & any) {
               >
                 {(props as any).loading ? 'LoadingModal...' : 'Drop a file'}
               </DropZone>
-            : <progress
-                className="progress is-primary"
-                value={`${(props.slicer.present / props.slicer.total) * 100}`}
-                max="100">{Math.floor(props.slicer.present / props.slicer.total) * 100}</progress>
+            : <Loader {...props} />
             }
         </Column>
         <Column isSize={'2/3'}>

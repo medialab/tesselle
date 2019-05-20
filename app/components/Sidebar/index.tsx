@@ -36,7 +36,7 @@ import icons from 'quinoa-design-library/src/themes/millet/icons';
 import './styles.css';
 import { DomEvent } from 'leaflet';
 import { Link } from 'react-router-dom';
-import { slicerContainer } from 'containers/Slicer';
+import Loader from 'containers/Slicer';
 
 interface MenuItemProps {
   data: Annotation;
@@ -52,20 +52,6 @@ const validator = (values: FormikValues) => {
   }
   return errors;
 };
-
-const Loader = slicerContainer(props => {
-  if (props.slicer.total === 0) {
-    return <div>nn</div>;
-  }
-  return (
-    <div>
-      <progress
-        className="progress is-primary"
-        value={`${(props.slicer.present / props.slicer.total) * 100}`}
-        max="100">{Math.floor(props.slicer.present / props.slicer.total) * 100}</progress>
-    </div>
-  );
-});
 
 const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwardedRef) => {
   const onRemove = useAction(
