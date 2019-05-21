@@ -1,4 +1,4 @@
-import { call, put, select, spawn, all } from 'redux-saga/effects';
+import { call, put, select, spawn } from 'redux-saga/effects';
 import { last, groupBy, pipe, values, sort, splitAt } from 'ramda';
 
 import { generate, scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
@@ -13,17 +13,17 @@ const BASE_TILESIZE = 512;
 function* rawSlice(images, sliceState, slideshowId) {
   for (const imagesByScaleFactor of images) {
     const sf = last(last(imagesByScaleFactor));
-    yield all(imagesByScaleFactor.map(function*([url, launchFileParsing], index) {
-      sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
-      yield call([db, db.setItem], '/' + slideshowId + url, launchFileParsing());
-      yield put(setProgress(sliceState));
-    }));
-    // for (const [url, launchFileParsing] of imagesByScaleFactor) {
+    // yield all(imagesByScaleFactor.map(function*([url, launchFileParsing], index) {
     //   sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
-    //   yield put(setProgress(sliceState));
     //   yield call([db, db.setItem], '/' + slideshowId + url, launchFileParsing());
-    // }
-    // yield put(setProgress(sliceState));
+    //   yield put(setProgress(sliceState));
+    // }));
+    for (const [url, launchFileParsing] of imagesByScaleFactor) {
+      sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
+      yield put(setProgress(sliceState));
+      yield call([db, db.setItem], '/' + slideshowId + url, launchFileParsing());
+    }
+    yield put(setProgress(sliceState));
   }
 }
 

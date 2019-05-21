@@ -52,13 +52,13 @@ const withConnect = connect(
 const withReducer = injectReducer({ key: 'editor', reducer: reducer });
 const withSaga = injectSaga({ key: 'editor', saga: saga });
 
-export const decorator = compose(
+export const enhancer = compose(
   withReducer,
   withSaga,
   withConnect,
 );
 
-interface EditorProps {
+export interface EditorProps {
   readonly slideshow: Slideshow;
   readonly selectedAnnotations: List<Annotation>;
   readonly map: L.Map;
@@ -187,7 +187,7 @@ const Editor: React.SFC<EditorProps> = (props) => {
 
 const Meditor = memo(Editor);
 
-export default decorator(props => {
+export default enhancer(props => {
   if (props.slideshow) {
     return <Meditor {...props} />;
   }

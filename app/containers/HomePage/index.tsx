@@ -96,9 +96,11 @@ const withConnect = connect(
 const withReducer = injectReducer({ key: 'homePage', reducer: reducer });
 const withSaga = injectSaga({ key: 'homePage', saga: saga });
 
-export default compose(
+export const enhancer = compose(
   slicerContainer,
   withReducer,
   withSaga,
   withConnect,
-)(HomePage);
+);
+
+export default enhancer(HomePage);
