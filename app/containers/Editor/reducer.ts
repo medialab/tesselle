@@ -84,6 +84,9 @@ export default combineReducers<ContainerState, ContainerActions>({
     }
       switch (action.type) {
         case ActionTypes.EDIT_SLIDESHOW:
+          if (isImmutable(action.payload)) {
+            return action.payload;
+          }
           return new Slideshow({
             id: action.payload.id,
             name: action.payload.name,

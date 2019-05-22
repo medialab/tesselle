@@ -4,17 +4,14 @@
  *
  */
 
-import React, { useState } from 'react';
-import { Map, withLeaflet } from 'react-leaflet';
+import React, { useState, useEffect } from 'react';
+import { Map, withLeaflet, ZoomControl } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
 
-import cx from 'classnames';
 
-import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
 import L from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
 import IiifLayer from 'components/IiifLayer';
-import { SupportedShapes } from 'types';
 import { useLockEffect } from 'utils/hooks';
 import Annotation from 'types/Annotation';
 import { enhancer, EditorProps } from 'containers/Editor';
@@ -24,14 +21,14 @@ const minZoom = 1;
 const maxZoom = 20;
 
 const PlayerMap = withLeaflet((props: Pick<EditorProps, any>) => {
-  const {slideshow} = props;
-  console.log(slideshow);
   const [selected, setSelected] = useState<Annotation>();
   useMousetrap('k', () => {
     if (selected) {
       const index = props.slideshow.annotations.indexOf(selected);
-      if (index <= props.slideshow.annotations.size) {
+      if (index + 1 < props.slideshow.annotations.size) {
         setSelected(props.slideshow.annotations.get(index + 1));
+      } else {
+        setSelected(props.slideshow.annotations.first());
       }
     } else {
       setSelected(props.slideshow.annotations.first());
@@ -42,9 +39,11 @@ const PlayerMap = withLeaflet((props: Pick<EditorProps, any>) => {
       const index = props.slideshow.annotations.indexOf(selected);
       if (index > 0) {
         setSelected(props.slideshow.annotations.get(index - 1));
+      } else {
+        setSelected(props.slideshow.annotations.last());
       }
     } else {
-      setSelected(props.slideshow.annotations.first());
+      setSelected(props.slideshow.annotations.last());
     }
   });
 
@@ -62,35 +61,33 @@ const PlayerMap = withLeaflet((props: Pick<EditorProps, any>) => {
 
 function Player(props) {
   return (
-    <div className={cx({
-      map: true,
-      creating: SupportedShapes.selector,
-    })}>
+    <div className="map">
       <Map
         boxZoom={false}
-        dragging
+        dragging={false}
         doubleClickZoom={false}
+        zoomControl={false}
         crs={L.CRS.Simple}
         center={[0, 0]}
         minZoom={minZoom}
         maxZoom={maxZoom}>
-        <PlayerMap slideshow={props.slideshow} />
+          <ZoomControl position="topright" />
+          <PlayerMap slideshow={props.slideshow} />
       </Map>
     </div>
   );
 }
 
 export default enhancer(props => {
-  console.log(props);
+  useEffect(() => {
+    console.log('Editor component did mount');
+    return () => {
+      console.log('Editor component will unmount');
+    };
+  }, []);
   if (props.slideshow) {
     return (
-      <StretchedLayoutContainer
-        isFullHeight
-        isDirection="horizontal">
-          <StretchedLayoutItem isFlex={2}>
-            <Player {...props} />
-          </StretchedLayoutItem>
-      </StretchedLayoutContainer>
+      <Player {...props} />
     );
   }
   return <div />;
