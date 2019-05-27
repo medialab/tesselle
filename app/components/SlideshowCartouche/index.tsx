@@ -31,8 +31,8 @@ interface OwnProps {
 
 const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
 
-  const goToEditor = useAction(() => push(`/editor/${props.slideshow.id}`), []);
-  const goToPlayer = useAction(() => push(`/player/${props.slideshow.id}`), []);
+  const goToEditor = useAction(() => push(`/editor/${props.slideshow.id}`), [props.slideshow.id]);
+  const goToPlayer = useAction(() => push(`/player/${props.slideshow.id}`), [props.slideshow.id]);
 
   const [removing, setRemoving] = React.useState<boolean>(false);
 

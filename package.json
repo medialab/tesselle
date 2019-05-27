@@ -78,6 +78,7 @@
     "@types/react-beautiful-dnd": "^10.1.0",
     "@types/react-leaflet": "^2.2.1",
     "@types/react-redux": "^7.0.3",
+    "@types/react-textarea-autosize": "^4.3.4",
     "@types/sat": "0.0.30",
     "blueimp-load-image": "^2.20.1",
     "chalk": "^2.4.2",

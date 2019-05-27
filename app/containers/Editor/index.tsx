@@ -26,6 +26,10 @@ import AnnotationLayer from 'components/AnnotationLayer';
 import {
   addAnnotationAction,
   changeSelectionAction,
+  removeAnnotationAction,
+  editSlideshowAction,
+  editAnnotationAction,
+  editOrderAction,
 } from './actions';
 import {
   makeSelectSlideshow,
@@ -34,7 +38,7 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import IiifLayer from 'components/IiifLayer';
-import { useLockEffect } from 'utils/hooks';
+import { useLockEffect, useAction } from 'utils/hooks';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -160,15 +164,29 @@ const Editor: React.SFC<EditorProps> = (props) => {
   const [sidebarVisible, setSidebarVisible] = useState<boolean>(true);
   const onClose = useCallback(() => setSidebarVisible(false), []);
   const onOpen = useCallback(() => setSidebarVisible(true), []);
-
+  const onNameChange = useAction(editSlideshowAction, []);
+  const onRemove = useAction(removeAnnotationAction, []);
+  const onAnnotationClick = useCallback((annotation) => {
+    if (!props.selectedAnnotations.includes(annotation)) {
+      return props.changeSelection(annotation);
+    }
+    return;
+  }, [props.selectedAnnotations]);
+  const onAnnotationChange = useAction(editAnnotationAction, []);
+  const onOrderChange = useAction(editOrderAction, []);
   return (
     <div className="map">
       <Sidebar
+        onAnnotationClick={onAnnotationClick}
+        onAnnotationChange={onAnnotationChange}
+        onOrderChange={onOrderChange}
         slideshow={props.slideshow}
         selectedAnnotations={props.selectedAnnotations}
         visible={sidebarVisible}
         onClose={onClose}
+        onRemove={onRemove}
         onOpen={onOpen}
+        onNameChange={onNameChange}
       />
       <Map
         onClick={onMapClick}

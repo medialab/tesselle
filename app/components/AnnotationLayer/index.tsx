@@ -128,23 +128,21 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
               polygon: false,
             }}
           />}
-        <mask id="mask">
-          {props.data.map((annotation) => {
-            const selected = props.selectedAnnotations.contains(annotation);
-            return (
-              <GuessComponent
-                className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
-                key={annotation.properties.id}
-                color={selected ? 'black' : 'white'}
-                weight={1.5}
-                editable={props.editable}
-                lineCap="butt"
-                onClick={props.onLayerClick}
-                annotation={annotation}
-                selected={selected} />
-            );
-          })}
-        </mask>
+        {props.data.map((annotation) => {
+          const selected = props.selectedAnnotations.contains(annotation);
+          return (
+            <GuessComponent
+              className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
+              key={annotation.properties.id}
+              color={selected ? 'black' : 'white'}
+              weight={1.5}
+              editable={props.editable}
+              lineCap="butt"
+              onClick={props.onLayerClick}
+              annotation={annotation}
+              selected={selected} />
+          );
+        })}
       </FeatureGroup>
     </LeafletLayerGroup>
   );
