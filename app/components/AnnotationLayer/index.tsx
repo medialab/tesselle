@@ -28,6 +28,7 @@ interface AnnotationLayerProps extends MapLayerProps {
   leaflet;
   onLayerClick?: (annotation: Annotation) => any;
   onCreated?: any;
+  editable?: boolean;
 }
 
 const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
@@ -106,40 +107,44 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
   return (
     <LeafletLayerGroup>
       <FeatureGroup ref={containerRef}>
-        <EditControl
-          position="topright"
-          onEdited={onEdit}
-          onCreated={onCreate}
-          onEditMove={onEdit}
-          onEditResize={onEdit}
-          onEditVertex={onEdit}
-          edit={{
-            edit: false,
-            remove: false,
-          }}
-          draw={{
-            circlemarker: false,
-            marker: false,
-            polyline: false,
-            circle: false,
-            rectangle: false,
-            polygon: false,
-          }}
-        />
-        {props.data.map((annotation) => {
-          const selected = props.selectedAnnotations.contains(annotation);
-          return (
-            <GuessComponent
-              className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
-              key={annotation.properties.id}
-              color={selected ? 'cyan' : '#aaa'}
-              weight={1.5}
-              lineCap="butt"
-              onClick={props.onLayerClick}
-              annotation={annotation}
-              selected={selected} />
-          );
-        })}
+        {props.editable &&
+          <EditControl
+            position="topright"
+            onEdited={onEdit}
+            onCreated={onCreate}
+            onEditMove={onEdit}
+            onEditResize={onEdit}
+            onEditVertex={onEdit}
+            edit={{
+              edit: false,
+              remove: false,
+            }}
+            draw={{
+              circlemarker: false,
+              marker: false,
+              polyline: false,
+              circle: false,
+              rectangle: false,
+              polygon: false,
+            }}
+          />}
+        <mask id="mask">
+          {props.data.map((annotation) => {
+            const selected = props.selectedAnnotations.contains(annotation);
+            return (
+              <GuessComponent
+                className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
+                key={annotation.properties.id}
+                color={selected ? 'black' : 'white'}
+                weight={1.5}
+                editable={props.editable}
+                lineCap="butt"
+                onClick={props.onLayerClick}
+                annotation={annotation}
+                selected={selected} />
+            );
+          })}
+        </mask>
       </FeatureGroup>
     </LeafletLayerGroup>
   );

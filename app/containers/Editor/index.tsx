@@ -58,12 +58,14 @@ export const enhancer = compose(
   withConnect,
 );
 
+export type changeSelection = (annotation?: Annotation | List<Annotation>) => void;
+
 export interface EditorProps {
   readonly slideshow: Slideshow;
   readonly selectedAnnotations: List<Annotation>;
   readonly map: L.Map;
   readonly createAnnotation: (frame: Feature) => void;
-  readonly changeSelection: (annotation?: Annotation | List<Annotation>) => void;
+  readonly changeSelection: changeSelection;
 }
 
 interface SetToolsProps {
@@ -129,6 +131,7 @@ const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = p
   return (
     <React.Fragment>
       <AnnotationLayer
+        editable
         onLayerClick={onLayerClick}
         onCreated={onCreate}
         data={slideshow.annotations}
@@ -155,7 +158,6 @@ const Editor: React.SFC<EditorProps> = (props) => {
     }
   }, []);
   const [sidebarVisible, setSidebarVisible] = useState<boolean>(true);
-
   const onClose = useCallback(() => setSidebarVisible(false), []);
   const onOpen = useCallback(() => setSidebarVisible(true), []);
 

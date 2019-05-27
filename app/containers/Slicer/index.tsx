@@ -23,7 +23,7 @@ export interface LoaderProps {
 
 export function Loader(props: LoaderProps) {
   if (props.slicer && props.slicer.total === 0) {
-    return <div>nn</div>;
+    return <React.Fragment />;
   }
   return (
     <div>

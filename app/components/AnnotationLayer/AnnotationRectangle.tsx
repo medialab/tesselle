@@ -15,7 +15,7 @@ const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
     geometry.type === 'Polygon' ? 1 : 2,
   ).toJS(), [coords]);
   const ref = useRef<Rectangle & any>(null);
-  useEdit(ref, selected);
+  useEdit(ref, props.editable && selected);
 
   return (
     <Rectangle
@@ -28,7 +28,7 @@ const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
       original
       properties={annotation.properties}
     >
-      {!selected && (
+      {(!selected || !props.editable) && (
         <Tooltip opacity={1} permanent interactive>
           {annotation.properties.content}
         </Tooltip>

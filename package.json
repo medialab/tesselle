@@ -81,6 +81,7 @@
     "@types/sat": "0.0.30",
     "blueimp-load-image": "^2.20.1",
     "chalk": "^2.4.2",
+    "circle-to-polygon": "^1.0.2",
     "classnames": "^2.2.6",
     "compression": "1.7.3",
     "connected-react-router": "6.3.2",

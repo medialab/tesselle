@@ -2,6 +2,7 @@ import L from 'leaflet';
 import { Feature } from 'geojson';
 import { map, pipe, max } from 'ramda';
 import SAT, { Vector } from 'sat';
+import circleToPolygon from 'circle-to-polygon';
 
 import {
   Feature as ImmutableFeature,
@@ -15,7 +16,7 @@ import {
   MultiPolygon,
 } from 'immutable-geojson';
 import { fromJS as rawFromJs, Map } from 'immutable';
-import {
+import Annotation, {
   annotationPropertiesCreator,
   annotationCirclePropertiesCreator,
   annotationRectanglePropertiesCreator,
@@ -201,6 +202,23 @@ export function collision(selectionPolygon: Feature, annotations: Feature[]) {
       ),
     ),
   );
+}
+
+export function annotationToBounds(annotation: Annotation | any) {
+  switch (annotation.properties.type) {
+    case SupportedShapes.circle:
+      return coordsToLatLngs(
+        circleToPolygon(annotation.geometry.coordinates.toJS(), annotation.properties.radius, 5).coordinates,
+        1,
+      );
+    case SupportedShapes.rectangle:
+    case SupportedShapes.polygon:
+      return coordsToLatLngs(
+        annotation.geometry.coordinates,
+        annotation.geometry.type === 'Polygon' ? 1 : 2,
+      ).toJS();
+  }
+  throw new Error('Unsupportd shape:' + annotation.properties.type);
 }
 
 export const allEvents = [

@@ -15,7 +15,7 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
     geometry.type === 'Polygon' ? 1 : 2,
   ).toJS(), [selected]);
 
-  useEdit(ref, selected);
+  useEdit(ref, props.editable && selected);
 
   return (
     <Polygon
@@ -27,7 +27,7 @@ const AnnotationPolygon: React.SFC<AnnotationShapes> = (props) => {
       original
       properties={annotation.properties}
     >
-      {!selected && (
+      {(!selected || !props.editable) && (
         <Tooltip opacity={1} permanent interactive>
           {annotation.properties.content}
         </Tooltip>

@@ -25,7 +25,9 @@ const GlobalStyle = createGlobalStyle`
     font-family: Georgia, Times, 'Times New Roman', serif;
     line-height: 1.5em;
   }
-
+  .utils__space-between {
+    justify-content: space-between;
+  }
 `;
 
 export default GlobalStyle;

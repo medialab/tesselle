@@ -282,11 +282,11 @@ const Sidebar: React.SFC<OwnProps> = props => {
         }
       </div>
       <footer className="sidebar--footer-container sidebar--spacing">
-          <Link to={`/player/${props.slideshow.id}`} className="button">Viewer</Link>
-          <div className="buttons has-addons">
-            <Button disabled={!props.slideshow.annotations.size} >Download ↓</Button>
-            <Button>?</Button>
-          </div>
+        <Link to={`/player/${props.slideshow.id}`} className="button">Viewer</Link>
+        <div className="buttons has-addons">
+          <Button disabled={!props.slideshow.annotations.size} >Download ↓</Button>
+          <Button>?</Button>
+        </div>
       </footer>
     </div>
   );

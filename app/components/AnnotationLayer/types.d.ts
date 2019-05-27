@@ -7,6 +7,7 @@ interface AnnotationShapesProps {
   annotation: Annotation;
   selected: boolean;
   onClick?: (annotation: Annotation) => any;
+  editable?: boolean;
 }
 
 type AnnotationShapes = AnnotationShapesProps & PathProps;
