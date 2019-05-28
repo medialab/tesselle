@@ -4,22 +4,18 @@ import { Record, Map } from 'immutable';
 import { pipe } from 'ramda';
 import { SupportedShapes } from 'types';
 
-interface IAnnotationProperties {
+interface AnnotationProperties extends Record<AnnotationProperties> {
   id: string;
   content: string;
   type: SupportedShapes;
 }
 
-interface IAnnotationCircleProperties extends IAnnotationProperties {
+export interface AnnotationCircleProperties extends Record<AnnotationProperties> {
   radius: number;
   type: SupportedShapes.circle;
 }
 
-interface AnnotationProperties extends Record<IAnnotationProperties>, IAnnotationProperties {}
-
-export interface AnnotationCircleProperties extends Record<IAnnotationCircleProperties>, IAnnotationCircleProperties {}
-
-const makeAnnotationProperties = Record<IAnnotationProperties>({
+const makeAnnotationProperties = Record({
   id: 'emptyId',
   content: 'Empty annotation',
   type: SupportedShapes.rectangle,
@@ -40,7 +36,7 @@ const isIdededed = (properties: Map<string, any>): Map<string, any> => {
   return properties;
 };
 
-export const annotationPropertiesCreator: Record.Factory<IAnnotationProperties> = pipe(
+export const annotationPropertiesCreator: Record.Factory<AnnotationProperties> = pipe(
   isIdededed,
   makeAnnotationProperties,
 );
