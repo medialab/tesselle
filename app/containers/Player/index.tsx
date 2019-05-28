@@ -12,15 +12,25 @@ import L from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
 import IiifLayer from 'components/IiifLayer';
 import { useLockEffect, useToggleBoolean } from 'utils/hooks';
-import { enhancer, EditorProps } from 'containers/Editor';
-import 'components/Sidebar/styles.css';
+import { enhancer } from 'containers/Editor';
 import ReactDOM from 'react-dom';
-import { Sidebar } from './Sidebar';
+import Sidebar from './Sidebar';
+import Slideshow from 'types/Slideshow';
+import { List } from 'immutable';
+import Annotation from 'types/Annotation';
+import { SureContextProps, changeSelection } from 'types';
 
 const minZoom = 1;
 const maxZoom = 20;
 
-const PlayerMap = withLeaflet((props: Pick<EditorProps, any>) => {
+interface PlayerProps {
+  readonly playing: boolean;
+  readonly slideshow: Slideshow;
+  readonly selectedAnnotations: List<Annotation>;
+  readonly changeSelection: changeSelection;
+}
+
+const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
   const selected = props.selectedAnnotations.first();
   useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image);
   return (
@@ -45,7 +55,7 @@ export const selectNext = (selected, annotations) => {
   }
 };
 
-function Player(props) {
+const Player: React.SFC<PlayerProps> = (props) => {
   const selected = props.selectedAnnotations.first();
 
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
@@ -97,11 +107,12 @@ function Player(props) {
           <PlayerMap
             playing={!sidebarVisible}
             slideshow={props.slideshow}
+            changeSelection={props.changeSelection}
             selectedAnnotations={props.selectedAnnotations} />
       </Map>
     </div>
   );
-}
+};
 
 export default enhancer(props => {
   if (props.slideshow) {

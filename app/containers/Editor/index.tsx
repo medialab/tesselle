@@ -8,7 +8,6 @@ import React, { useCallback, useState, memo } from 'react';
 import L from 'leaflet';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { List } from 'immutable';
 import { compose } from 'redux';
 import { Map, ZoomControl, withLeaflet } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
@@ -19,8 +18,7 @@ import injectReducer from 'utils/injectReducer';
 import Slideshow from 'types/Slideshow';
 import FloatinBar from 'components/FloatingBar';
 import Sidebar from 'components/Sidebar';
-import Annotation from 'types/Annotation';
-import { SupportedShapes } from 'types';
+import { SupportedShapes, changeSelection, Annotations, SureContextProps } from 'types';
 import AnnotationLayer from 'components/AnnotationLayer';
 
 import {
@@ -62,12 +60,9 @@ export const enhancer = compose(
   withConnect,
 );
 
-export type changeSelection = (annotation?: Annotation | List<Annotation>) => void;
-
-export interface EditorProps {
+interface EditorProps {
   readonly slideshow: Slideshow;
-  readonly selectedAnnotations: List<Annotation>;
-  readonly map: L.Map;
+  readonly selectedAnnotations: Annotations;
   readonly createAnnotation: (frame: Feature) => void;
   readonly changeSelection: changeSelection;
 }
@@ -92,7 +87,7 @@ const lockFuturShape = (instance?) => {
   }
 };
 
-const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = props => {
+const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(props => {
   const {slideshow, setTool, tool} = props;
   const map = props.leaflet.map;
 
@@ -150,11 +145,9 @@ const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = p
         onPolygonClick={onPolygonClick} />
     </React.Fragment>
   );
-};
+});
 
-const EditorMapMap = withLeaflet(EditorMap);
-
-const Editor: React.SFC<EditorProps> = (props) => {
+const Editor: React.SFC<EditorProps> = memo((props) => {
   const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
   const onMapClick = useCallback(() => {
     if (tool === SupportedShapes.selector) {
@@ -199,17 +192,15 @@ const Editor: React.SFC<EditorProps> = (props) => {
         minZoom={MIN_ZOOM}
         maxZoom={MAX_ZOOM}>
           <ZoomControl position="topright" />
-          <EditorMapMap {...props} setTool={setTool} tool={tool} />
+          <EditorMap {...props} setTool={setTool} tool={tool} />
       </Map>
     </div>
   );
-};
+});
 
-const Meditor = memo(Editor);
-
-export default enhancer(props => {
+export default enhancer((props: EditorProps) => {
   if (props.slideshow) {
-    return <Meditor {...props} />;
+    return <Editor {...props} />;
   }
   return 'loading';
 });
