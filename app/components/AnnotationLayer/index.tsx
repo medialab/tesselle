@@ -6,14 +6,12 @@
 
 import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps, FeatureGroup } from 'react-leaflet';
 import React, { useCallback, useRef } from 'react';
-import { SupportedShapes } from 'types';
+import { SupportedShapes, Annotations } from 'types';
 import { DomEvent } from 'leaflet';
 import EditControl from './EditControl';
 import './styles.css';
-// import useDebouncedCallback from 'use-debounce/lib/callback';
 
 import Annotation from 'types/Annotation';
-import { List } from 'immutable';
 import AnnotationPolygon from './AnnotationPolygon';
 import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
@@ -23,8 +21,8 @@ import AnnotationRectangle from './AnnotationRectangle';
 import { fromJS } from 'utils/geo';
 
 interface AnnotationLayerProps extends MapLayerProps {
-  data: List<Annotation>;
-  selectedAnnotations: List<Annotation>;
+  data: Annotations;
+  selectedAnnotations: Annotations;
   leaflet;
   onLayerClick?: (annotation: Annotation) => any;
   onCreated?: any;
@@ -33,12 +31,11 @@ interface AnnotationLayerProps extends MapLayerProps {
 
 const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
   const {annotation, onClick} = props;
-  const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const onLayerClick = useCallback((event) => {
     DomEvent.stopPropagation(event);
     return onClick && onClick(annotation);
   }, [onClick, annotation]);
-  switch (geometry.type) {
+  switch (annotation.geometry.type) {
     case 'Point':
       return <AnnotationCircle {...props} onClick={onLayerClick} />;
     case 'Polygon':
@@ -53,9 +50,7 @@ const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
 
 const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
   const map = props.leaflet.map;
-
   const dispatch = useDispatch();
-
   const onEdit = useCallback((event) => {
     if (props.selectedAnnotations && containerRef.current && props.onCreated) {
       containerRef.current.leafletElement.getLayers().forEach((layer: any) => {

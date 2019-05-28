@@ -1,5 +1,5 @@
 import uuid from 'uuid';
-import { Feature } from 'geojson';
+import { Feature, Polygon, Point, MultiPolygon } from 'geojson';
 import { Record, Map } from 'immutable';
 import { pipe } from 'ramda';
 import { SupportedShapes } from 'types';
@@ -7,6 +7,7 @@ import { SupportedShapes } from 'types';
 interface IAnnotationProperties {
   id: string;
   content: string;
+  type: SupportedShapes;
 }
 
 interface IAnnotationCircleProperties extends IAnnotationProperties {
@@ -14,19 +15,14 @@ interface IAnnotationCircleProperties extends IAnnotationProperties {
   type: SupportedShapes.circle;
 }
 
-interface IAnnotationRectangleProperties extends IAnnotationProperties {
-  type: SupportedShapes.rectangle;
-}
-
 interface AnnotationProperties extends Record<IAnnotationProperties>, IAnnotationProperties {}
 
-interface AnnotationCircleProperties extends Record<IAnnotationCircleProperties>, IAnnotationCircleProperties {}
-interface AnnotationRectangleProperties extends Record<IAnnotationRectangleProperties>,
-  IAnnotationRectangleProperties {}
+export interface AnnotationCircleProperties extends Record<IAnnotationCircleProperties>, IAnnotationCircleProperties {}
 
 const makeAnnotationProperties = Record<IAnnotationProperties>({
   id: 'emptyId',
   content: 'Empty annotation',
+  type: SupportedShapes.rectangle,
 }, 'AnnotationProperties');
 
 const makeAnnotationCircleProperties = Record({
@@ -35,12 +31,6 @@ const makeAnnotationCircleProperties = Record({
   radius: 0,
   type: SupportedShapes.circle,
 }, 'AnnotationCircleProperties');
-
-const makeAnnotationRectangleProperties = Record<IAnnotationRectangleProperties>({
-  id: 'emptyId',
-  content: 'Empty annotation',
-  type: SupportedShapes.rectangle,
-}, 'AnnotationRectangleProperties');
 
 const isIdededed = (properties: Map<string, any>): Map<string, any> => {
   const id = properties.get('id');
@@ -58,11 +48,13 @@ export const annotationCirclePropertiesCreator: Record.Factory<AnnotationCircleP
   isIdededed,
   makeAnnotationCircleProperties,
 );
-export const annotationRectanglePropertiesCreator: Record.Factory<AnnotationRectangleProperties> = pipe(
-  isIdededed,
-  makeAnnotationRectangleProperties,
-);
 
-export default interface Annotation extends Feature, Record<Annotation> {
-  properties: AnnotationProperties & AnnotationCircleProperties & AnnotationRectangleProperties;
+export type AcceptedGeojsonGeometries = Point | Polygon | MultiPolygon;
+export type AcceptedGeojsonProperties = AnnotationProperties | AnnotationCircleProperties;
+
+export default interface Annotation<
+    G extends AcceptedGeojsonGeometries | null = Polygon,
+    P extends AcceptedGeojsonProperties | null = AnnotationProperties
+  > extends Feature<G, P>, Record<Annotation> {
+
 }
