@@ -4,9 +4,9 @@
  *
  */
 
-import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps, FeatureGroup } from 'react-leaflet';
+import { LayerGroup as LeafletLayerGroup, withLeaflet, FeatureGroup } from 'react-leaflet';
 import React, { useCallback, useRef } from 'react';
-import { SupportedShapes, Annotations } from 'types';
+import { SupportedShapes, Annotations, SureContextProps } from 'types';
 import { DomEvent } from 'leaflet';
 import EditControl from './EditControl';
 import './styles.css';
@@ -15,12 +15,12 @@ import Annotation from 'types/Annotation';
 import AnnotationPolygon from './AnnotationPolygon';
 import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
-import { useDispatch } from 'utils/hooks';
+import { useAction } from 'utils/hooks';
 import { editAnnotationAction } from 'containers/Editor/actions';
 import AnnotationRectangle from './AnnotationRectangle';
 import { fromJS } from 'utils/geo';
 
-interface AnnotationLayerProps extends MapLayerProps {
+interface AnnotationLayerProps {
   data: Annotations;
   selectedAnnotations: Annotations;
   leaflet;
@@ -48,10 +48,9 @@ const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
   return <React.Fragment />;
 };
 
-const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
+const AnnotationLayer = withLeaflet<AnnotationLayerProps & SureContextProps>((props) => {
   const map = props.leaflet.map;
-  const dispatch = useDispatch();
-  const onEdit = useCallback((event) => {
+  const onEdit = useAction(() => {
     if (props.selectedAnnotations && containerRef.current && props.onCreated) {
       containerRef.current.leafletElement.getLayers().forEach((layer: any) => {
         const annotation = props.selectedAnnotations.find(
@@ -60,8 +59,7 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
         if (annotation) {
           const feature = layer.toGeoJSON();
           if (annotation.properties.type === SupportedShapes.circle) {
-            dispatch(
-              editAnnotationAction(
+              return editAnnotationAction(
                 annotation,
                 annotation.set(
                   'geometry',
@@ -70,16 +68,14 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
                   ['properties', 'radius'],
                   (layer as L.CircleMarker).getRadius(),
                 ),
-              ));
-          } else {
-            dispatch(
-              editAnnotationAction(
-                annotation,
-                fromJS(feature).set('properties', annotation.properties),
-              ),
-            );
+              );
           }
+          return editAnnotationAction(
+            annotation,
+            fromJS(feature).set('properties', annotation.properties),
+          );
         }
+        return;
       });
       return;
     }
@@ -141,6 +137,6 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
       </FeatureGroup>
     </LeafletLayerGroup>
   );
-};
+});
 
-export default withLeaflet(AnnotationLayer);
+export default AnnotationLayer;
