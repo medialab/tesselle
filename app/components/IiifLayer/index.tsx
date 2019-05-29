@@ -9,7 +9,7 @@ import Iiif from './LeafletLayer';
 
 class IiifLayer extends GridLayer<any, Iiif> {
   public createLeafletElement(props) {
-    return new Iiif(this.getOptions(props));
+    return new (Iiif as any)(this.getOptions(props));
   }
 
   public updateLeafletElement(fromProps, toProps) {
