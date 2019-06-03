@@ -57,6 +57,7 @@ const Iiif = L.TileLayer.extend({
 
   initialize: function(options: any = {}) {
     this._levels = {};
+    this._tiles = {};
     if (options.maxZoom) {
       this._customMaxZoom = true;
     }
