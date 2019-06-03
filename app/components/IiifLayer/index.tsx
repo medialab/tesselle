@@ -4,10 +4,10 @@
  *
  */
 
-import { withLeaflet, GridLayer } from 'react-leaflet';
+import { withLeaflet, MapLayer } from 'react-leaflet';
 import Iiif from './LeafletLayer';
 
-class IiifLayer extends GridLayer<any, Iiif> {
+class IiifLayer extends MapLayer<any, Iiif> {
   public createLeafletElement(props) {
     return new (Iiif as any)(this.getOptions(props));
   }
