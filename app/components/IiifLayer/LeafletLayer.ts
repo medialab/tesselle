@@ -8,17 +8,15 @@ function ceilLog2(x: number) {
   return Math.ceil(Math.log(x) / Math.LN2);
 }
 
-const urls = new Map();
-
 interface IiifLayerOptions extends TileLayerOptions {
   readonly continuousWorld: boolean;
   readonly updateWhenIdle: boolean;
   readonly tileFormat: string;
   readonly fitBounds: boolean;
   readonly setMaxBounds: boolean;
-  tileSize: number;
-  quality: string;
-  id?: string;
+  readonly tileSize: number;
+  readonly quality: string;
+  readonly id: string;
 }
 
 interface Iiif extends L.TileLayer {
@@ -31,18 +29,10 @@ interface Iiif extends L.TileLayer {
   quality?: string;
 
   new (options?: IiifLayerOptions);
-  _setQuality(): void;
-  _getInfo(): Promise<null>;
 
   getTileUrl(coords: { x: number; y: number; }): string;
-
   onAdd(map: L.Map): this;
   onRemove(map: L.Map): this;
-  _fitBounds();
-  _setMaxBounds();
-  _templateUrl(): string;
-  _isValidTile(coords: { x: number; y: number; }): boolean;
-  _getInitialZoom(mapSize: { x: number; y: number; }): number;
 }
 
 const Iiif = L.TileLayer.extend({
@@ -58,6 +48,7 @@ const Iiif = L.TileLayer.extend({
   initialize: function(options: any = {}) {
     this._levels = {};
     this._tiles = {};
+    this.urls = new Map();
     if (options.maxZoom) {
       this._customMaxZoom = true;
     }
@@ -74,7 +65,7 @@ const Iiif = L.TileLayer.extend({
 
     options = (L as any).setOptions(this, options);
     this._infoDeferred = this._getInfo();
-    this._baseUrl = this._templateUrl();
+    this._baseUrl = '/{id}/{region}/{size}/{rotation}/{quality}.{format}';
   },
 
   createTile: function(coords, done) {
@@ -90,10 +81,10 @@ const Iiif = L.TileLayer.extend({
     const inMemory = this.getTileUrl(coords);
     db.getItem(inMemory).then((file: File) => {
       if (file) {
-        if (!urls.has(inMemory)) {
-          urls.set(inMemory, window.URL.createObjectURL(file));
+        if (!this.urls.has(inMemory)) {
+          this.urls.set(inMemory, window.URL.createObjectURL(file));
         }
-        tile.src = urls.get(inMemory);
+        tile.src = this.urls.get(inMemory);
         tile.onload = () => {
           done(null, tile);
         };
@@ -192,8 +183,8 @@ const Iiif = L.TileLayer.extend({
     });
   },
   onRemove: function(map) {
-    urls.forEach(window.URL.revokeObjectURL);
-    urls.clear();
+    this.urls.forEach(window.URL.revokeObjectURL);
+    this.urls.clear();
     map._layersMinZoom = this._prev_map_layersMinZoom;
     this._imageSizes = this._imageSizesOriginal;
 
@@ -230,7 +221,6 @@ const Iiif = L.TileLayer.extend({
   _getInfo: async function() {
     try {
       const data: any = await db.getItem('/' + this.options.id + '/info.json');
-      // console.log(this.options.id);
       if (data === null) {
         throw new Error('info.json is null');
       }
@@ -287,8 +277,9 @@ const Iiif = L.TileLayer.extend({
       this._tierSizes = tierSizes;
       this._imageSizes = imageSizes;
       const map = this._map || this._mapToAdd;
-      // console.log(this.maxNativeZoom, data.scale_factors);
       if (map) {
+        // This shall not be there.
+        // A child component should not change it's parents properties.
         map.setMaxZoom(data.scale_factors.length + 1);
       } else {
         console.log('je sias pas l autre pe');
@@ -310,9 +301,6 @@ const Iiif = L.TileLayer.extend({
       profileToCheck = profileToCheck['@id'];
     }
     this.options.quality = 'native';
-  },
-  _templateUrl: () => {
-    return '/{id}/{region}/{size}/{rotation}/{quality}.{format}';
   },
   _isValidTile: function(coords) {
     const zoom = this._getZoomForUrl();
