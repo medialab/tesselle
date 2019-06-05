@@ -5,6 +5,7 @@ import Annotation from 'types/Annotation';
 
 import Cover from './Cover';
 import { fromJS } from 'utils/geo';
+import loadImage from 'utils/imageManipulation';
 
 export interface SlideshowArgs {
   id?: string;
@@ -91,7 +92,7 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
           return resolve([
             new Slideshow({
               image: new Cover({
-                file: false,
+                file: {} as any,
                 width: box.width,
                 height: box.height,
               }),
@@ -105,7 +106,7 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
           return resolve([
             new Slideshow({
               image: new Cover({
-                file: false,
+                file: {} as any,
                 width: box.width,
                 height: box.height,
               }),
@@ -126,9 +127,21 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
         if (img.height === 0) {
           return reject(new Error('Slideshow.image has a height of 0'));
         }
+        const MAX_DIMENSION = 100;
+        const thumbnailWidth = img.width > img.height ? MAX_DIMENSION : (img.width / img.height) * MAX_DIMENSION;
+        const thumbnailHeight = img.height > img.height ? MAX_DIMENSION : (img.height / img.width) * MAX_DIMENSION;
+        const thumbnail = await loadImage(file, {
+          maxWidth: thumbnailWidth,
+          maxHeight: thumbnailHeight,
+          left: 0,
+          top: 0,
+          bottom: img.height,
+          right: img.width,
+        });
+
         const slideshow = new Slideshow({
           image: new Cover({
-            file: slicing,
+            file: thumbnail,
             width: img.width,
             height: img.height,
           }),
