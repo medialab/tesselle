@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { Card, Content, Level, Column, Columns, Icon } from 'quinoa-design-library';
+import { Card, Content, Level, Column, Columns, Icon, Title } from 'quinoa-design-library';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt } from '@fortawesome/free-solid-svg-icons/faPencilAlt';
 import { faCopy } from '@fortawesome/free-solid-svg-icons/faCopy';
@@ -15,8 +15,10 @@ import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 import Slideshow from 'types/Slideshow';
 import { Link } from 'react-router-dom';
-import { useAction } from 'utils/hooks';
+import { useAction, useUrl } from 'utils/hooks';
 import { push } from 'connected-react-router';
+
+import './style.css';
 
 const InlineIcon = ({children}) => (
   <span style={{marginLeft: '.5rem', marginRight: '1rem'}}>
@@ -47,47 +49,55 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
         return goToPlayer();
     }
   }, [props.slideshow]);
+
+  const thumbnail = useUrl(props.slideshow.image.file);
   return (
-    <Level>
+    <Level className="SlideshowCartouche">
       <Column>
         <Card
           onAction={onAction}
-          title={
+          asideActions={[{
+              label: <span><InlineIcon><FontAwesomeIcon icon={faPencilAlt} /></InlineIcon>edit</span>,
+              isDisabled: removing,
+              isColor: 'primary',
+              id: 'open',
+            }, {
+              label: <span><InlineIcon><FontAwesomeIcon icon={faCopy} /></InlineIcon>read</span>,
+              isDisabled: removing,
+              id: 'read',
+            }, {
+              label: <span><InlineIcon><FontAwesomeIcon icon={faCopy} /></InlineIcon>duplicate</span>,
+              isDisabled: removing,
+              id: 'duplicate',
+            }, {
+              label: <span><InlineIcon><FontAwesomeIcon icon={faTrash} /></InlineIcon>delete</span>,
+              isDisabled: removing,
+              isColor: 'warning',
+              id: 'delete',
+            }]}
+          bodyContent={
+            <Link
+              to={`/editor/${props.slideshow.id}`}
+            >
             <Columns>
-              <Column isSize="3/4">
-                <Link
-                  to={`/editor/${props.slideshow.id}`}
-                >
-                  <b>{props.slideshow.name}</b>
-                </Link>
-              </Column>
-              <Column isSize="1/4" />
-            </Columns>
-          }
-        asideActions={[{
-            label: <span><InlineIcon><FontAwesomeIcon icon={faPencilAlt} /></InlineIcon>edit</span>,
-            isDisabled: removing,
-            isColor: 'primary',
-            id: 'open',
-          }, {
-            label: <span><InlineIcon><FontAwesomeIcon icon={faCopy} /></InlineIcon>read</span>,
-            isDisabled: removing,
-            id: 'read',
-          }, {
-            label: <span><InlineIcon><FontAwesomeIcon icon={faCopy} /></InlineIcon>duplicate</span>,
-            isDisabled: removing,
-            id: 'duplicate',
-          }, {
-            label: <span><InlineIcon><FontAwesomeIcon icon={faTrash} /></InlineIcon>delete</span>,
-            isDisabled: removing,
-            isColor: 'warning',
-            id: 'delete',
-          }]}
-        bodyContent={
-          <Content>
-            <p>Has {props.slideshow.annotations.size} annotations.</p>
-          </Content>
-        }>
+                <Column isSize={'1/4'} className="thumbnail-container" style={{marginRight: '1rem'}}>
+                  <img src={thumbnail} style={{width: 'auto', height: 'auto'}} />
+                </Column>
+                <Column isSize="3/4">
+                    <Title>
+                    <b>{props.slideshow.name}</b>
+                    </Title>
+                  <Content>
+                    <p className="annotations-container">
+                      <span className="annotations-number">
+                        {props.slideshow.annotations.size}
+                      </span> annotation{props.slideshow.annotations.size === 1 ? '' : 's'}
+                    </p>
+                  </Content>
+                </Column>
+              </Columns>
+              </Link>
+          }>
           <Columns>
             <Column>
               <FormattedMessage {...messages.header} />
