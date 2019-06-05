@@ -111,7 +111,7 @@
     "minimist": "1.2.0",
     "pica": "^5.0.0",
     "prop-types": "15.7.2",
-    "quinoa-design-library": "0.1.8",
+    "quinoa-design-library": "^0.1.9",
     "ramda": "^0.26.1",
     "react": "16.8.6",
     "react-beautiful-dnd": "^11.0.2",
