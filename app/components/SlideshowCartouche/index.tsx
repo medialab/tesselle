@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt } from '@fortawesome/free-solid-svg-icons/faPencilAlt';
 import { faCopy } from '@fortawesome/free-solid-svg-icons/faCopy';
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash';
+import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
 
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
@@ -62,7 +63,7 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
               isColor: 'primary',
               id: 'open',
             }, {
-              label: <span><InlineIcon><FontAwesomeIcon icon={faCopy} /></InlineIcon>read</span>,
+              label: <span><InlineIcon><FontAwesomeIcon icon={faEye} /></InlineIcon>read</span>,
               isDisabled: removing,
               id: 'read',
             }, {
