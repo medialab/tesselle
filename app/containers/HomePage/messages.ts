@@ -16,6 +16,6 @@ export default defineMessages({
   chapo: {
     id: `${scope}.chapo`,
 // tslint:disable-next-line: max-line-length
-    defaultMessage: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem similique reprehenderit nesciunt quos aut? Officiis corporis amet nam saepe error. Animi facere obcaecati cupiditate dignissimos labore, adipisci molestias reiciendis eveniet?',
+    defaultMessage: 'Glissemontre is an image annotation & publication tool. It allows to comment on specific parts of photographs, maps, visualizations, etc. to make precise visual analysis. It also embeds a tiling feature which allows to seamlessly display and navigate very large images on the web. Eventually, Glissemontre allows to export your work as a simple folder to upload anywhere on the web.',
   },
 });
