@@ -42,3 +42,8 @@ body {
 .rectangle {
   pointer-events: none;
 }
+
+
+.button{
+  text-transform: none;
+}
