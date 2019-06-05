@@ -1,28 +1,24 @@
 import React, { useMemo, useRef } from 'react';
-import { Rectangle, Tooltip } from 'react-leaflet';
+import { Rectangle, Tooltip, RectangleProps } from 'react-leaflet';
 
 import { coordsToLatLngs } from 'utils/geo';
-import { AnnotationShapes } from './types';
+import { AnnotationShapes, AddedProperties } from './types';
 import 'leaflet-editable';
 import { useEdit } from 'utils/hooks';
 
 const AnnotationRectangle: React.SFC<AnnotationShapes> = (props) => {
-  const {annotation, selected, onClick} = props;
-  const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
-  const coords = geometry ? geometry.coordinates : null;
+  const {annotation, selected} = props;
   const position = useMemo(() => coordsToLatLngs(
-    coords,
-    geometry.type === 'Polygon' ? 1 : 2,
-  ).toJS(), [coords]);
-  const ref = useRef<Rectangle & any>(null);
+    annotation.geometry.coordinates,
+    1,
+  ).toJS(), [annotation.geometry.coordinates]);
+  const ref = useRef<Rectangle<AddedProperties & RectangleProps>>(null);
   useEdit(ref, props.editable && selected);
-
   return (
     <Rectangle
       key={props.className}
       ref={ref}
       {...props}
-      onClick={onClick}
       bounds={position}
       editing
       original

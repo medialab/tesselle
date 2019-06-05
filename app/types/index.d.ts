@@ -6,15 +6,13 @@ import { ContainerState as PlayerState } from '../containers/Player/types';
 import { ContainerState as HomePageState } from '../containers/HomePage/types';
 import { ContainerState as SlicerState } from '../containers/Slicer/types';
 import Annotation from './Annotation';
+import { LeafletContext, ContextProps } from 'react-leaflet';
+import { List } from 'immutable';
 
 export interface LifeStore extends Store<{}> {
   injectedReducers?: any;
   injectedSagas?: any;
   runSaga(saga: (props?: any) => IterableIterator<any>, args: any): any;
-}
-
-interface WithAnnotationProps {
-  readonly annotation: Annotation;
 }
 
 export declare const enum SupportedShapes {
@@ -48,3 +46,15 @@ export interface ApplicationRootState {
   // for testing purposes
   readonly test: any;
 }
+
+export type changeSelection = (annotation?: Annotation | List<Annotation>) => void;
+
+export interface SureLeafletContext extends LeafletContext {
+  map: L.Map;
+}
+
+export interface SureContextProps extends ContextProps {
+  leaflet: SureLeafletContext;
+}
+
+export type Annotations = List<Annotation>;

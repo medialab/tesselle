@@ -7,7 +7,7 @@
 import { combineReducers } from 'redux';
 
 import ActionTypes from './constants';
-import HomePageActionTypes from 'Containers/HomePage/constants';
+import HomePageActionTypes from 'containers/HomePage/constants';
 import { ContainerState, ContainerActions } from './types';
 import Annotation from 'types/Annotation';
 

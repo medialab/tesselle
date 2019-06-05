@@ -19,7 +19,6 @@ import { fromJS as rawFromJs, Map } from 'immutable';
 import Annotation, {
   annotationPropertiesCreator,
   annotationCirclePropertiesCreator,
-  annotationRectanglePropertiesCreator,
 } from 'types/Annotation';
 import { SupportedShapes } from 'types';
 
@@ -27,8 +26,6 @@ function propertiesReviver(key, value) {
   try {
     if (value.has('radius')) {
       return annotationCirclePropertiesCreator(value.toMap());
-    } else if (value.has('type')) {
-      return annotationRectanglePropertiesCreator(value.toMap());
     }
     return annotationPropertiesCreator(value.toMap());
   } catch (e) {
@@ -110,7 +107,7 @@ export function latLngsToCoords(latlngs: [], levelsDeep?: number, closed?: boole
 // @function coordsToLatLng(coords: Array): LatLng
 // Creates a `LatLng` object from an array of 2 numbers (longitude, latitude)
 // or 3 numbers (longitude, latitude, altitude) used in GeoJSON for points.
-export const coordsToLatLng = (coords: [number, number, number]): L.LatLng => new L.LatLng(
+export const coordsToLatLng = (coords: [number, number, number] | number[]): L.LatLng => new L.LatLng(
   coords[1],
   coords[0],
   coords[2],
