@@ -15,7 +15,7 @@ import Annotation from 'types/Annotation';
 import AnnotationPolygon from './AnnotationPolygon';
 import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
-import { useAction } from 'utils/hooks';
+import { useDispatch } from 'utils/hooks';
 import { editAnnotationAction } from 'containers/Editor/actions';
 import AnnotationRectangle from './AnnotationRectangle';
 import { fromJS } from 'utils/geo';
@@ -50,7 +50,9 @@ const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
 
 const AnnotationLayer = withLeaflet<AnnotationLayerProps & SureContextProps>((props) => {
   const map = props.leaflet.map;
-  const onEdit = useAction(() => {
+  const dispatch = useDispatch();
+  const containerRef = useRef<FeatureGroup>(null);
+  const onEdit = useCallback(() => {
     if (props.selectedAnnotations && containerRef.current && props.onCreated) {
       containerRef.current.leafletElement.getLayers().forEach((layer: any) => {
         const annotation = props.selectedAnnotations.find(
@@ -59,27 +61,27 @@ const AnnotationLayer = withLeaflet<AnnotationLayerProps & SureContextProps>((pr
         if (annotation) {
           const feature = layer.toGeoJSON();
           if (annotation.properties.type === SupportedShapes.circle) {
-              return editAnnotationAction(
-                annotation,
-                annotation.set(
-                  'geometry',
-                  fromJS(feature.geometry),
-                ).setIn(
-                  ['properties', 'radius'],
-                  (layer as L.CircleMarker).getRadius(),
-                ),
-              );
+            dispatch(editAnnotationAction(
+              annotation,
+              annotation.set(
+                'geometry',
+                fromJS(feature.geometry),
+              ).setIn(
+                ['properties', 'radius'],
+                (layer as L.CircleMarker).getRadius(),
+              ),
+            ));
           }
-          return editAnnotationAction(
+          return dispatch(editAnnotationAction(
             annotation,
             fromJS(feature).set('properties', annotation.properties),
-          );
+          ));
         }
         return;
       });
       return;
     }
-  }, [props.selectedAnnotations]);
+  }, [props.selectedAnnotations, props.onCreated, containerRef.current]);
   const onCreate = useCallback((event) => {
     if (event.layerType === SupportedShapes.circle) {
       const feature = event.layer.toGeoJSON();
@@ -92,8 +94,6 @@ const AnnotationLayer = withLeaflet<AnnotationLayerProps & SureContextProps>((pr
     event.layer.remove(map);
     return props.onCreated(feature);
   }, []);
-
-  const containerRef = useRef<FeatureGroup>(null);
 
   return (
     <LeafletLayerGroup>

@@ -4,14 +4,13 @@
  *
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { List } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Formik, Form, FormikValues, FormikErrors, Field, FormikActions, FieldProps } from 'formik';
 import cx from 'classnames';
 import Textarea from 'react-textarea-autosize';
-import { when } from 'ramda';
 
 import Annotation from 'types/Annotation';
 import Slideshow from 'types/Slideshow';
@@ -54,16 +53,17 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
     props.onClick(props.data);
   }, [props.onClick, props.data]);
 
-  const onSubmit = useCallback(when(
-    values => values.content !== props.data.properties.content,
-    values => props.onChange(
-      props.data,
-      props.data.set(
-        'properties',
-        props.data.properties.set('content', values.content),
-      ),
-    ),
-  ), [props.data, props.onChange]);
+  const onSubmit = useCallback((values) => {
+    if (values.content !== props.data.properties.content) {
+      props.onChange(
+        props.data,
+        props.data.set(
+          'properties',
+          props.data.properties.set('content', values.content),
+        ),
+      );
+    }
+  }, [props.data, props.onChange]);
 
   const onRemove = useCallback(event => {
     DomEvent.preventDefault(event);
@@ -83,7 +83,7 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
             }}
             isFlex={1}>
             <Formik
-              initialValues={props.data.properties}
+              initialValues={useMemo(() => props.data.properties.toJS(), [props.data.properties])}
               onSubmit={onSubmit}
               validate={validator}
             >{(innerProps) => {
