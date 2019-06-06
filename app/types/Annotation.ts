@@ -17,13 +17,13 @@ export interface AnnotationCircleProperties extends Record<AnnotationProperties>
 
 const makeAnnotationProperties = Record({
   id: 'emptyId',
-  content: 'Empty annotation',
+  content: '',
   type: SupportedShapes.rectangle,
 }, 'AnnotationProperties');
 
 const makeAnnotationCircleProperties = Record({
   id: 'emptyId',
-  content: 'Empty annotation',
+  content: '',
   radius: 0,
   type: SupportedShapes.circle,
 }, 'AnnotationCircleProperties');
