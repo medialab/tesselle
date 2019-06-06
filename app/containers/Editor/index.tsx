@@ -119,7 +119,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
           return lockFuturShape(new L.Draw.Polygon(map));
       }
     }
-  }, []);
+  });
 
   useMousetrap('p', onPolygonClick);
   useMousetrap('r', onRectangleClick);

@@ -20,6 +20,8 @@ import './styles.css';
 import { DomEvent } from 'leaflet';
 import { Link } from 'react-router-dom';
 import Loader from 'containers/Slicer';
+import { FormattedMessage } from 'react-intl';
+import messages from './messages';
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -32,9 +34,15 @@ const CustomTextarea: React.SFC<FieldProps & {
   }, [props.selected]);
   return (
     <div>
-      <Textarea inputRef={ref} autoFocus={props.selected} {...field} {...props} placeholder="coucou" />
-      {touched[field.name] &&
-        errors[field.name] && <div className="error">{errors[field.name]}</div>}
+      <FormattedMessage {...messages.annotationPlaceholder}>{
+        msg => (
+          <>
+            <Textarea inputRef={ref} autoFocus={props.selected} {...field} {...props} placeholder={msg as string} />
+            {touched[field.name] &&
+              errors[field.name] && <div className="error">{errors[field.name]}</div>}
+          </>
+        )
+      }</FormattedMessage>
     </div>
   );
 };
