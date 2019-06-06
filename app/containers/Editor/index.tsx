@@ -21,6 +21,8 @@ import Sidebar from 'components/Sidebar';
 import { SupportedShapes, changeSelection, Annotations, SureContextProps } from 'types';
 import AnnotationLayer from 'components/AnnotationLayer';
 
+import './style.css';
+
 import {
   addAnnotationAction,
   changeSelectionAction,
