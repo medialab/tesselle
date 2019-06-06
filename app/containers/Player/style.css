@@ -1,0 +1,32 @@
+
+
+.player-map .sidebar--header-container{
+    padding: .5rem;
+    padding-right: 1rem;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: stretch;
+}
+
+.player-map .player-sidebar{
+    min-height: 300px;
+}
+
+.player-map .play-sidebar--container{
+    height: 100%;
+    padding: 1rem;
+}
+.player-map .sidebar--header-container .title{
+    color: white;
+    flex: 1;
+}
+
+.player-map .sidebar--menu-item.sidebar--spacing .content{
+    padding: 1rem;
+}
+
+.sidebar.player-sidebar .sidebar--item-field--selected.sidebar--item-field--minified {
+    background: white;
+    color: #363636;
+    padding: 0;
+}

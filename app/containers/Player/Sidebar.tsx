@@ -7,7 +7,10 @@ import {
   Box,
   StretchedLayoutItem,
   StretchedLayoutContainer,
+  Content,
   Button,
+  Icon,
+  Title,
  } from 'quinoa-design-library';
 import Slideshow from 'types/Slideshow';
 import { List } from 'immutable';
@@ -15,11 +18,30 @@ import { annotationToBounds } from 'utils/geo';
 import 'components/Sidebar/styles.css';
 import { changeSelection, SureContextProps } from 'types';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
+import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
+import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
+import { faCaretLeft } from '@fortawesome/free-solid-svg-icons/faCaretLeft';
+import { faCaretRight } from '@fortawesome/free-solid-svg-icons/faCaretRight';
+
 const Header: React.SFC<{
   onButtonClick: () => void;
+  title: string;
+  minified: boolean;
 }> = props => (
   <div className="sidebar--header-container sidebar--spacing">
-    <div onClick={props.onButtonClick}>Play ></div>
+    <Title isSize={5}>{props.title}</Title>
+    <Button isRounded onClick={props.onButtonClick} style={{ marginBottom: '.5rem', marginRight: '.8rem' }}>
+      <Icon>
+        {
+          props.minified ?
+          <FontAwesomeIcon icon={faTimes} />
+          :
+          <FontAwesomeIcon icon={faPlay} />
+        }
+      </Icon>
+    </Button>
   </div>
 );
 
@@ -32,7 +54,12 @@ interface MenuItemProps {
 }
 
 const MenuItem: React.SFC<MenuItemProps> = props => {
-  const onGoTo = useCallback(() => props.onGoTo(props.annotation), [props.annotation]);
+  const onGoTo = useCallback((e) => {
+    if (props.selected) {
+      e.stopPropagation();
+    }
+    props.onGoTo(props.annotation);
+  }, [props.annotation]);
   const onClick = useCallback(() => props.onClick(props.annotation), [props.annotation]);
   return (
     <div className={cx({
@@ -42,15 +69,17 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
       <Box onClick={onClick}>
         <StretchedLayoutContainer isDirection="horizontal">
           <StretchedLayoutItem style={{ paddingRight: '1rem' }} isFlex={1}>
-            <h1 className={cx('sidebar--item-field', props.selected && 'sidebar--item-field--selected')}>
+            <Content className={cx('sidebar--item-field', {
+              'sidebar--item-field--selected': props.selected,
+            })}>
               {props.children}
-            </h1>
+            </Content>
           </StretchedLayoutItem>
           <StretchedLayoutItem>
             <StretchedLayoutContainer isDirection="horizontal">
               <div>
-                <Button onClick={onGoTo} style={{ marginBottom: '.5rem' }}>
-                  Goto
+                <Button isRounded onClick={onGoTo} style={{ margin: '.3rem' }}>
+                  <Icon><FontAwesomeIcon icon={faEye} /></Icon>
                 </Button>
               </div>
             </StretchedLayoutContainer>
@@ -69,26 +98,35 @@ const Control: React.SFC<{
   <div className={cx({
     'sidebar--menu-item sidebar--spacing': true,
     'sidebar--menu-item__selected': props.selected,
+    'sidebar--menu-item__minified': true,
   })}>
-    <Box>
+    <>
       <StretchedLayoutContainer isDirection="horizontal" className="utils__space-between">
         <StretchedLayoutItem>
-          <Button onClick={props.onPrev} style={{ marginBottom: '.5rem' }}>
-            Prev
+          <Button  isRounded onClick={props.onPrev} style={{ margin: '.3rem', marginRight: '1rem' }}>
+            <Icon>
+              <FontAwesomeIcon icon={faCaretLeft} />
+            </Icon>
           </Button>
         </StretchedLayoutItem>
-        <StretchedLayoutItem>
-          <h1 className={cx('sidebar--item-field', props.selected && 'sidebar--item-field--selected')}>
+        <StretchedLayoutItem isFlex={1}>
+          <Content className={cx('sidebar--item-field', {
+            'sidebar--item-field--selected': props.selected,
+            'sidebar--item-field--minified': true,
+
+          })}>
             {props.children}
-          </h1>
+          </Content>
         </StretchedLayoutItem>
         <StretchedLayoutItem>
-          <Button onClick={props.onNext} style={{ marginBottom: '.5rem' }}>
-            Next
+          <Button isRounded onClick={props.onNext} style={{ margin: '.3rem', marginLeft: '1rem' }}>
+            <Icon>
+              <FontAwesomeIcon icon={faCaretRight} />
+            </Icon>
           </Button>
         </StretchedLayoutItem>
       </StretchedLayoutContainer>
-    </Box>
+    </>
   </div>
 );
 
@@ -115,13 +153,18 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
     props.leaflet.map.fitBounds(annotationToBounds(annotation), { animate: true });
   }, [props.leaflet && props.leaflet.map]);
   return (
-    <div className={cx({ sidebar: true, visible: props.visible, hidden: !props.visible })}>
+    <div className={cx({
+      'sidebar': true,
+      'player-sidebar': true,
+      'visible': props.visible,
+      'hidden': !props.visible,
+      })}>
       <StretchedLayoutContainer style={{height: '100%'}}>
         <StretchedLayoutItem>
-          <Header onButtonClick={onClickToggle} />
+          <Header minified={!props.visible} title={props.slideshow.name} onButtonClick={onClickToggle} />
         </StretchedLayoutItem>
-        <StretchedLayoutItem isFlex={1}>
-          <div className="sidebar--container">
+        <StretchedLayoutItem isFlex={1} style={{overflow: 'hidden'}}>
+          <div className="sidebar--container play-sidebar--container">
               {props.visible ?
                 props.slideshow.annotations.map((annotation: Annotation) =>
                   <MenuItem

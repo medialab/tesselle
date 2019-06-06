@@ -20,6 +20,8 @@ import { List } from 'immutable';
 import Annotation from 'types/Annotation';
 import { SureContextProps, changeSelection } from 'types';
 
+import './style.css';
+
 const minZoom = 1;
 const maxZoom = 20;
 
@@ -78,11 +80,11 @@ const Player: React.SFC<PlayerProps> = (props) => {
   };
 
   return (
-    <div className="map">
+    <div className="map player-map">
       <div ref={sidebarReady} />
       <Map
         boxZoom={false}
-        dragging={false}
+        dragging={true}
         doubleClickZoom={false}
         zoomControl={false}
         crs={L.CRS.Simple}

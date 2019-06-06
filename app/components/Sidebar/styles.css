@@ -29,12 +29,12 @@ textarea.textarea {
   max-height: initial;
   min-height: initial;
 }
-.sidebar--item-field--selected:not(.sidebar--item-field--minified) {
+.sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) {
   background: #3849a2;
   color: white;
 }
 
-.sidebar--item-field--selected:not(.sidebar--item-field--minified)::placeholder{
+.sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified)::placeholder{
   color: white;
 }
 
