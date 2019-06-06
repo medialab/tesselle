@@ -1,8 +1,14 @@
 import React, { useCallback } from 'react';
+import {Link} from 'react-router-dom';
 import { withLeaflet } from 'react-leaflet';
 import Annotation from 'types/Annotation';
 import cx from 'classnames';
-import { Box, StretchedLayoutItem, StretchedLayoutContainer, Button } from 'quinoa-design-library';
+import {
+  Box,
+  StretchedLayoutItem,
+  StretchedLayoutContainer,
+  Button,
+ } from 'quinoa-design-library';
 import Slideshow from 'types/Slideshow';
 import { List } from 'immutable';
 import { annotationToBounds } from 'utils/geo';
@@ -110,21 +116,53 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
   }, [props.leaflet && props.leaflet.map]);
   return (
     <div className={cx({ sidebar: true, visible: props.visible, hidden: !props.visible })}>
-      <Header onButtonClick={onClickToggle} />
-      <div className="sidebar--container">
-        {props.visible ?
-          props.slideshow.annotations.map((annotation: Annotation) =>
-            <MenuItem
-              onGoTo={onGoTo}
-              onClick={props.changeSelection}
-              annotation={annotation}
-              key={annotation.properties.id}
-              selected={props.selectedAnnotations.includes(annotation)}>{annotation.properties.content}</MenuItem>)
-          : <Control
-              selected={selected}
-              onNext={props.onNext}
-              onPrev={props.onPrev}>{selected.properties.content}</Control>}
-      </div>
+      <StretchedLayoutContainer style={{height: '100%'}}>
+        <StretchedLayoutItem>
+          <Header onButtonClick={onClickToggle} />
+        </StretchedLayoutItem>
+        <StretchedLayoutItem isFlex={1}>
+          <div className="sidebar--container">
+              {props.visible ?
+                props.slideshow.annotations.map((annotation: Annotation) =>
+                  <MenuItem
+                    onGoTo={onGoTo}
+                    onClick={props.changeSelection}
+                    annotation={annotation}
+                    key={annotation.properties.id}
+                    selected={props.selectedAnnotations.includes(annotation)}>{annotation.properties.content}
+                  </MenuItem>,
+                )
+                : <Control
+                    selected={selected}
+                    onNext={props.onNext}
+                    onPrev={props.onPrev}>{selected.properties.content}</Control>}
+            </div>
+        </StretchedLayoutItem>
+        <StretchedLayoutItem>
+          <footer className="sidebar--footer-container sidebar--spacing">
+            <StretchedLayoutContainer isDirection="horizontal" style={{width: '100%'}}>
+              <StretchedLayoutItem isFlex={1}>
+                <Link
+                  to={`/editor/${props.slideshow.id}`}
+                  className="button is-fullwidth is-primary"
+                >
+                    Back to edition
+                </Link>
+              </StretchedLayoutItem>
+              <StretchedLayoutItem isFlex={1}>
+                <StretchedLayoutContainer isDirection="horizontal">
+                  <StretchedLayoutItem isFlex={1}>
+                    <Button isFullWidth isColor="info" disabled={!props.slideshow.annotations.size} >Download ↓</Button>
+                  </StretchedLayoutItem>
+                  <StretchedLayoutItem>
+                    <Button isColor="info">?</Button>
+                  </StretchedLayoutItem>
+                </StretchedLayoutContainer>
+              </StretchedLayoutItem>
+            </StretchedLayoutContainer>
+          </footer>
+        </StretchedLayoutItem>
+      </StretchedLayoutContainer>
     </div>
   );
 });
