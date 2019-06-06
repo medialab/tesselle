@@ -13,11 +13,10 @@ textarea.textarea {
   flex-flow: column nowrap;
   justify-content: stretch;
   height: 30%;
-  /* min-height: 100px; */
+  min-height: 200px;
   transition: all .5s ease;
 }
 .sidebar.visible {
-  /* top: 0; */
   bottom: 0;
   left: 0;
   height: 100%;
@@ -30,10 +29,18 @@ textarea.textarea {
   max-height: initial;
   min-height: initial;
 }
-.sidebar--item-field--selected {
+.sidebar--item-field--selected:not(.sidebar--item-field--minified) {
   background: #3849a2;
   color: white;
 }
+
+.sidebar--minified-placeholder{
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  padding: 2rem;
+}
+
 .sidebar--wrapper{
   padding: 1rem;
   flex: 1;

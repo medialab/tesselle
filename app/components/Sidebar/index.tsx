@@ -69,6 +69,7 @@ const validator = (values: FormikValues) => {
 interface MenuItemProps {
   data: Annotation;
   selected: boolean;
+  minified?: boolean;
   onRemove: (annotation: Annotation) => void;
   onClick: (annotation: Annotation) => void;
   onChange: (oldAnnotation: Annotation, newAnnotation: Annotation) => void;
@@ -99,12 +100,14 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
     props.onRemove(props.data);
   }, [props.data, props.onRemove]);
 
+  const ContainerEl = props.minified ? React.Fragment : Box;
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
       'sidebar--menu-item__selected': props.selected,
+      'sidebar--menu-item__minified': props.minified,
     })} ref={forwardedRef} {...props.draggableProps} onClick={onClick}>
-      <Box>
+      <ContainerEl>
         <StretchedLayoutContainer isDirection="horizontal">
           <StretchedLayoutItem
             style={{
@@ -127,7 +130,10 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
                     maxRows={5}
                     selected={props.selected}
                     onBlur={onBlur}
-                    className={cx('textarea', 'sidebar--item-field', props.selected && 'sidebar--item-field--selected')}
+                    className={cx('textarea', 'sidebar--item-field', {
+                      'sidebar--item-field--selected': props.selected,
+                      'sidebar--item-field--minified': props.minified ,
+                    })}
                     name="content"
                     component={CustomTextarea}
                   />
@@ -161,7 +167,7 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
-      </Box>
+      </ContainerEl>
     </div>
   );
 });
@@ -292,7 +298,6 @@ const Sidebar: React.SFC<SidebarProps> = props => {
   );
   const onNameChange = useCallback(values => props.onNameChange(props.slideshow.set('name', values.title)), []);
   const selected = props.selectedAnnotations.first();
-
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
       <Header onButtonClick={onClickToggle} visible={props.visible} />
@@ -308,8 +313,12 @@ const Sidebar: React.SFC<SidebarProps> = props => {
               onClick={props.onAnnotationClick}
               onRemove={props.onRemove}
               data={selected as Annotation}
-              selected={!!selected} />
-            ) : 'select or create an annotation'
+              selected={!!selected}
+              minified={props.visible !== undefined}
+             />
+            ) : (
+              <span className="sidebar--minified-placeholder">select or create an annotation</span>
+            )
           }
         </div>
       </div>
