@@ -6,11 +6,22 @@
 
 import React, { useCallback, useMemo, useEffect, useRef } from 'react';
 import { List } from 'immutable';
-import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
+import {
+  Button,
+  Box,
+  StretchedLayoutContainer,
+  StretchedLayoutItem,
+  Icon,
+  Title as SimpleTitle,
+} from 'quinoa-design-library';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Formik, Form, FormikValues, FormikErrors, Field, FormikActions, FieldProps } from 'formik';
 import cx from 'classnames';
 import Textarea from 'react-textarea-autosize';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMinusSquare } from '@fortawesome/free-solid-svg-icons/faMinusSquare';
+import { faPlusSquare } from '@fortawesome/free-solid-svg-icons/faPlusSquare';
 
 import Annotation from 'types/Annotation';
 import Slideshow from 'types/Slideshow';
@@ -50,7 +61,7 @@ const CustomTextarea: React.SFC<FieldProps & {
 const validator = (values: FormikValues) => {
   const errors: FormikErrors<any> = {};
   if (!values.content && !values.content.length) {
-    errors.content = 'Required';
+    // errors.content = 'Required';
   }
   return errors;
 };
@@ -218,13 +229,18 @@ const Orderable: React.SFC<ListProps> = props => {
 
 const Header: React.SFC<{
   onButtonClick: () => void;
+  readonly visible: boolean;
 }> = (props) => (
   <div className="sidebar--header-container sidebar--spacing">
-    <div><Link to="/">Glissevoit</Link></div>
-    <span onClick={props.onButtonClick}>
-      <Icon>
-        <img src={icons.preview.white.svg} />
-      </Icon>
+    <SimpleTitle isSize={5}><Link to="/"><b>Glissemontre</b></Link></SimpleTitle>
+    <span className="minify-toggle" onClick={props.onButtonClick}>
+        <Icon>
+          { props.visible ?
+            <FontAwesomeIcon icon={faMinusSquare} />
+            :
+            <FontAwesomeIcon icon={faPlusSquare} />
+          }
+        </Icon>
     </span>
   </div>
 );
@@ -247,7 +263,7 @@ const Title: React.SFC<TitleProps> = (props) => {
       return (
         <Form>
           <Field
-            className="input__invisible"
+            className="input__invisible input"
             onBlur={onBlur}
             name="title"
           />
@@ -279,28 +295,40 @@ const Sidebar: React.SFC<SidebarProps> = props => {
 
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
-      <Header onButtonClick={onClickToggle} />
-      <Title title={props.slideshow.name} onChange={onNameChange} />
-      <Loader />
-      <div onClick={onClickSidebar} className="sidebar--container">
-        {props.visible ? (
-          <Orderable {...props} />
-        ) : selected && (
-          <MenuItem
-            onChange={props.onAnnotationChange}
-            onClick={props.onAnnotationClick}
-            onRemove={props.onRemove}
-            data={selected as Annotation}
-            selected={!!selected} />
-          )
-        }
+      <Header onButtonClick={onClickToggle} visible={props.visible} />
+      <div className="sidebar--wrapper">
+        {props.visible && <Title title={props.slideshow.name} onChange={onNameChange} />}
+        <Loader />
+        <div onClick={onClickSidebar} className="sidebar--container">
+          {props.visible ? (
+            <Orderable {...props} />
+          ) : selected ? (
+            <MenuItem
+              onChange={props.onAnnotationChange}
+              onClick={props.onAnnotationClick}
+              onRemove={props.onRemove}
+              data={selected as Annotation}
+              selected={!!selected} />
+            ) : 'select or create an annotation'
+          }
+        </div>
       </div>
       <footer className="sidebar--footer-container sidebar--spacing">
-        <Link to={`/player/${props.slideshow.id}`} className="button">Viewer</Link>
-        <div className="buttons has-addons">
-          <Button disabled={!props.slideshow.annotations.size} >Download ↓</Button>
-          <Button>?</Button>
-        </div>
+        <StretchedLayoutContainer isDirection="horizontal" style={{width: '100%'}}>
+          <StretchedLayoutItem isFlex={1}>
+            <Link to={`/player/${props.slideshow.id}`} className="button is-fullwidth is-primary">Preview</Link>
+          </StretchedLayoutItem>
+          <StretchedLayoutItem isFlex={1}>
+            <StretchedLayoutContainer isDirection="horizontal">
+              <StretchedLayoutItem isFlex={1}>
+                <Button isFullWidth isColor="info" disabled={!props.slideshow.annotations.size} >Download ↓</Button>
+              </StretchedLayoutItem>
+              <StretchedLayoutItem>
+                <Button isColor="info">?</Button>
+              </StretchedLayoutItem>
+            </StretchedLayoutContainer>
+          </StretchedLayoutItem>
+        </StretchedLayoutContainer>
       </footer>
     </div>
   );

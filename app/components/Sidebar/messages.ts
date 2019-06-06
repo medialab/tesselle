@@ -11,6 +11,6 @@ export const scope = 'app.components.Sidebar';
 export default defineMessages({
   annotationPlaceholder: {
     id: `${scope}.annotationPlaceholder`,
-    defaultMessage: 'This is a placeholder!',
+    defaultMessage: 'Write an annotation about this image part',
   },
 });
