@@ -3,15 +3,23 @@ textarea.textarea {
 }
 .sidebar {
   position: absolute;
-  left: 0;
   width: 25%;
   max-width: 450px;
   z-index: 420;
   max-height: 100vh;
-  overflow: auto;
+  overflow: hidden;
+  background: white;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: stretch;
+  height: 30%;
+  min-height: 200px;
+  transition: all .5s ease;
 }
 .sidebar.visible {
-  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
 }
 .sidebar.hidden {
   bottom: 25px;
@@ -21,9 +29,23 @@ textarea.textarea {
   max-height: initial;
   min-height: initial;
 }
-.sidebar--item-field--selected {
+.sidebar--item-field--selected:not(.sidebar--item-field--minified) {
   background: #3849a2;
   color: white;
+}
+
+.sidebar--minified-placeholder{
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  padding: 2rem;
+}
+
+.sidebar--wrapper{
+  padding: 1rem;
+  flex: 1;
+  overflow: hidden;
+  overflow-y: auto;
 }
 .sidebar--container {
   background: white;
@@ -47,18 +69,32 @@ textarea.textarea {
 .sidebar--header-container {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   background-color: var(--rgba-primary-2);
   color: white;
+}
+.sidebar--header-container .title{
+  margin: .5rem 1rem;
+}
+
+.sidebar--header-container .title a{
+  color: white;
+}
+
+.sidebar--header-container .minify-toggle{
+  cursor: pointer;
 }
 
 .sidebar--footer-container {
   display: flex;
   justify-content: space-between;
-  background-color: var(--rgba-primary-1);
+  /* background-color: var(--rgba-primary-2); */
   color: white;
+  padding: 0
 }
 
 .input__invisible {
-  width: 100%;
+  width: calc(100% - 1rem);
   border: none;
+  margin: 1rem .5rem;
 }
