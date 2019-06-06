@@ -173,6 +173,8 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
   const onRemove = useAction(removeAnnotationAction, []);
   const onAnnotationClick = useCallback((annotation) => {
     if (!props.selectedAnnotations.includes(annotation)) {
+      setTool(SupportedShapes.selector);
+      lockFuturShape();
       return props.changeSelection(annotation);
     }
     return;
@@ -196,7 +198,6 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
       <Map
         onClick={onMapClick}
         boxZoom={false}
-
         setTool={setTool}
         doubleClickZoom={false}
         zoomControl={false}
