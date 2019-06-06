@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback, useState, memo } from 'react';
+import React, { useCallback, useState, memo, useEffect } from 'react';
 import L from 'leaflet';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
@@ -98,17 +98,28 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
     setTool(SupportedShapes.selector);
   }, []);
   const onRectangleClick = useCallback(() => {
-    lockFuturShape(new L.Draw.Rectangle(map));
     setTool(SupportedShapes.rectangle);
   }, [map]);
   const onCircleClick = useCallback(() => {
-    lockFuturShape(new L.Draw.Circle(map));
     setTool(SupportedShapes.circle);
   }, [map]);
   const onPolygonClick = useCallback(() => {
-    lockFuturShape(new L.Draw.Polygon(map));
     setTool(SupportedShapes.polygon);
   }, [map]);
+
+  useEffect(() => {
+    if (tool !== SupportedShapes.selector) {
+      switch (tool) {
+        case SupportedShapes.rectangle:
+          return lockFuturShape(new L.Draw.Rectangle(map));
+        case SupportedShapes.circle:
+          return lockFuturShape(new L.Draw.Circle(map));
+        case SupportedShapes.polygon:
+        case SupportedShapes.polyline:
+          return lockFuturShape(new L.Draw.Polygon(map));
+      }
+    }
+  }, []);
 
   useMousetrap('p', onPolygonClick);
   useMousetrap('r', onRectangleClick);
@@ -117,7 +128,6 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
 
   const onCreate = useCallback((annotation) => {
     props.createAnnotation(annotation);
-    setTool(SupportedShapes.selector);
   }, []);
   const onLayerClick = useCallback((annotation) => {
       if (tool === SupportedShapes.selector) {
