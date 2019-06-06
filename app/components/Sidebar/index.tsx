@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
 import { List } from 'immutable';
 import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -20,14 +20,32 @@ import './styles.css';
 import { DomEvent } from 'leaflet';
 import { Link } from 'react-router-dom';
 import Loader from 'containers/Slicer';
+import { FormattedMessage } from 'react-intl';
+import messages from './messages';
 
-const CustomTextarea: React.SFC<FieldProps> = ({field, form: {touched, errors}, ...props}) => (
-  <div>
-    <Textarea {...field} {...props} />
-    {touched[field.name] &&
-      errors[field.name] && <div className="error">{errors[field.name]}</div>}
-  </div>
-);
+const CustomTextarea: React.SFC<FieldProps & {
+  readonly selected: boolean;
+}> = ({field, form: {touched, errors}, ...props}) => {
+  const ref = useRef<any>(null);
+  useEffect(() => {
+    if (props.selected) {
+      ref.current.focus();
+    }
+  }, [props.selected]);
+  return (
+    <div>
+      <FormattedMessage {...messages.annotationPlaceholder}>{
+        msg => (
+          <>
+            <Textarea inputRef={ref} autoFocus={props.selected} {...field} {...props} placeholder={msg as string} />
+            {touched[field.name] &&
+              errors[field.name] && <div className="error">{errors[field.name]}</div>}
+          </>
+        )
+      }</FormattedMessage>
+    </div>
+  );
+};
 
 const validator = (values: FormikValues) => {
   const errors: FormikErrors<any> = {};
@@ -96,6 +114,7 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
                   <Field
                     minRows={1}
                     maxRows={5}
+                    selected={props.selected}
                     onBlur={onBlur}
                     className={cx('textarea', 'sidebar--item-field', props.selected && 'sidebar--item-field--selected')}
                     name="content"
