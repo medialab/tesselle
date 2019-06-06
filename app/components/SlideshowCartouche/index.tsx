@@ -142,10 +142,10 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
           bodyContent={
             <Link to={`/editor/${props.slideshow.id}`}>
               <Columns>
-                <Column>
+                <Column
                   isSize={'1/4'}
-                  className="thumbnail-container" style=
-                  {{ marginRight: '1rem' }}
+                  className="thumbnail-container"
+                  style={{ marginRight: '1rem' }}
                   >
                   <img
                     src={thumbnail}
@@ -182,10 +182,11 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
         onClose={onDeleteCancel}
         headerContent="Deleting a slideshow"
         mainContent="Are you sure you want to delete this slideshow ?"
-        footerContent={
-          <StretchedLayoutContainer
+        footerContent={[
+        <StretchedLayoutContainer
             style={{ width: '100%' }}
             isDirection="horizontal"
+            key={0}
           >
             <StretchedLayoutItem isFlex={1}>
               <Button isFullWidth onClick={onRemove} isColor="danger">
@@ -197,8 +198,9 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
                 Cancel
               </Button>
             </StretchedLayoutItem>
-          </StretchedLayoutContainer>
-        }
+          </StretchedLayoutContainer>,
+        ]
+      }
       />
     </Level>
   );
