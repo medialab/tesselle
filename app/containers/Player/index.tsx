@@ -38,7 +38,7 @@ const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
       <AnnotationLayer
         data={props.slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations} />
-      <IiifLayer tileSize={512} id={props.slideshow.id} />
+      <IiifLayer tileSize={512} id={props.slideshow.image.id} />
     </React.Fragment>
   );
 });
