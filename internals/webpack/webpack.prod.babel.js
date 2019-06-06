@@ -1,11 +1,14 @@
 // Important modules this config uses
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackPwaManifest = require('webpack-pwa-manifest');
 const OfflinePlugin = require('offline-plugin');
 const { HashedModuleIdsPlugin } = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
+
+const publicPath = 'https://medialab.github.io/glisseMontre/';
 
 module.exports = require('./webpack.base.babel')({
   mode: 'production',
@@ -20,6 +23,7 @@ module.exports = require('./webpack.base.babel')({
   output: {
     filename: '[name].[chunkhash].js',
     chunkFilename: '[name].[chunkhash].chunk.js',
+    publicPath,
   },
 
   tsLoaders: [
@@ -84,6 +88,11 @@ module.exports = require('./webpack.base.babel')({
   },
 
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        basename: "'/glisseMontre'",
+      },
+    }),
     // Minify and optimize the index.html
     new HtmlWebpackPlugin({
       template: 'app/index.html',
@@ -106,7 +115,7 @@ module.exports = require('./webpack.base.babel')({
     // assets manipulations and do leak its manipulations to HtmlWebpackPlugin
     new OfflinePlugin({
       relativePaths: false,
-      publicPath: '/',
+      publicPath,
       appShell: '/',
 
       // No need to cache .htaccess. See http://mxs.is/googmp,

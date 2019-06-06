@@ -1,4 +1,38 @@
+#app{
+  max-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .home-container {
   padding-left: 1.3rem;
   padding-top: 1.4rem;
+  padding-top: 2rem;
+}
+
+.home-container .list-projects__title{
+  padding-top: .5rem;
+  font-weight: bold;
+}
+
+.home-container .cards-column .card-wrapper{
+  margin-bottom: 1rem;
+  padding-right: 1rem;
+}
+
+.home-container .drop-zone{
+  cursor: pointer;
+}
+
+.footer .logo-img{
+  max-width: 150px;
+  padding-bottom: .5rem;
+  padding-top: .5rem;
+  box-sizing: content-box;
+  padding-left: 2rem;
+  display: block;
+}
+
+.footer .about-column p:first-of-type{
+  padding-top: 1rem;
 }

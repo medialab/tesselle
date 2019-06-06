@@ -7,7 +7,7 @@
 import { combineReducers } from 'redux';
 
 import ActionTypes from './constants';
-import HomePageActionTypes from 'Containers/HomePage/constants';
+import HomePageActionTypes from 'containers/HomePage/constants';
 import { ContainerState, ContainerActions } from './types';
 import Annotation from 'types/Annotation';
 
@@ -55,35 +55,38 @@ export default combineReducers<ContainerState, ContainerActions>({
   },
   slideshow: (slideshow = initialState.slideshow, action) => {
       if (slideshow) {
-      switch (action.type) {
-        case HomePageActionTypes.LOAD_SLIDESHOWS as any:
-          return initialState.slideshow;
-        case ActionTypes.CHANGE_ORDER:
-          return slideshow.set(
-            'annotations',
-            action.payload,
-          );
-        case ActionTypes.CREATE_ANNOTATION:
-          return slideshow.set(
-            'annotations',
-            slideshow.annotations.push(fromJS(action.payload)),
-          );
-        case ActionTypes.EDIT_ANNOTATION:
-          return slideshow.set(
-            'annotations',
-            slideshow.annotations.map(replaceAnnotation(action)),
-          );
-        case ActionTypes.REMOVE_ANNOTATION:
+        switch (action.type) {
+          case HomePageActionTypes.LOAD_SLIDESHOWS as any:
+            return initialState.slideshow;
+          case ActionTypes.CHANGE_ORDER:
+            return slideshow.set(
+              'annotations',
+              action.payload,
+            );
+          case ActionTypes.CREATE_ANNOTATION:
+            return slideshow.set(
+              'annotations',
+              slideshow.annotations.push(fromJS(action.payload)),
+            );
+          case ActionTypes.EDIT_ANNOTATION:
+            return slideshow.set(
+              'annotations',
+              slideshow.annotations.map(replaceAnnotation(action)),
+            );
+          case ActionTypes.REMOVE_ANNOTATION:
             return slideshow.set(
               'annotations',
               slideshow.annotations.remove(
                 slideshow.annotations.indexOf(action.payload),
               ),
             );
-      }
+        }
     }
       switch (action.type) {
         case ActionTypes.EDIT_SLIDESHOW:
+          if (isImmutable(action.payload)) {
+            return action.payload;
+          }
           return new Slideshow({
             id: action.payload.id,
             name: action.payload.name,

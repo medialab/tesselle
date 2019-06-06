@@ -4,16 +4,14 @@
  *
  */
 
-import { LayerGroup as LeafletLayerGroup, withLeaflet, MapLayerProps, FeatureGroup } from 'react-leaflet';
+import { LayerGroup as LeafletLayerGroup, withLeaflet, FeatureGroup } from 'react-leaflet';
 import React, { useCallback, useRef } from 'react';
-import { SupportedShapes } from 'types';
+import { SupportedShapes, Annotations, SureContextProps } from 'types';
 import { DomEvent } from 'leaflet';
 import EditControl from './EditControl';
 import './styles.css';
-// import useDebouncedCallback from 'use-debounce/lib/callback';
 
 import Annotation from 'types/Annotation';
-import { List } from 'immutable';
 import AnnotationPolygon from './AnnotationPolygon';
 import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
@@ -22,22 +20,22 @@ import { editAnnotationAction } from 'containers/Editor/actions';
 import AnnotationRectangle from './AnnotationRectangle';
 import { fromJS } from 'utils/geo';
 
-interface AnnotationLayerProps extends MapLayerProps {
-  data: List<Annotation>;
-  selectedAnnotations: List<Annotation>;
+interface AnnotationLayerProps {
+  data: Annotations;
+  selectedAnnotations: Annotations;
   leaflet;
   onLayerClick?: (annotation: Annotation) => any;
   onCreated?: any;
+  editable?: boolean;
 }
 
 const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
   const {annotation, onClick} = props;
-  const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
   const onLayerClick = useCallback((event) => {
     DomEvent.stopPropagation(event);
     return onClick && onClick(annotation);
   }, [onClick, annotation]);
-  switch (geometry.type) {
+  switch (annotation.geometry.type) {
     case 'Point':
       return <AnnotationCircle {...props} onClick={onLayerClick} />;
     case 'Polygon':
@@ -50,12 +48,11 @@ const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
   return <React.Fragment />;
 };
 
-const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
+const AnnotationLayer = withLeaflet<AnnotationLayerProps & SureContextProps>((props) => {
   const map = props.leaflet.map;
-
   const dispatch = useDispatch();
-
-  const onEdit = useCallback((event) => {
+  const containerRef = useRef<FeatureGroup>(null);
+  const onEdit = useCallback(() => {
     if (props.selectedAnnotations && containerRef.current && props.onCreated) {
       containerRef.current.leafletElement.getLayers().forEach((layer: any) => {
         const annotation = props.selectedAnnotations.find(
@@ -64,30 +61,27 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
         if (annotation) {
           const feature = layer.toGeoJSON();
           if (annotation.properties.type === SupportedShapes.circle) {
-            dispatch(
-              editAnnotationAction(
-                annotation,
-                annotation.set(
-                  'geometry',
-                  fromJS(feature.geometry),
-                ).setIn(
-                  ['properties', 'radius'],
-                  (layer as L.CircleMarker).getRadius(),
-                ),
-              ));
-          } else {
-            dispatch(
-              editAnnotationAction(
-                annotation,
-                fromJS(feature).set('properties', annotation.properties),
+            dispatch(editAnnotationAction(
+              annotation,
+              annotation.set(
+                'geometry',
+                fromJS(feature.geometry),
+              ).setIn(
+                ['properties', 'radius'],
+                (layer as L.CircleMarker).getRadius(),
               ),
-            );
+            ));
           }
+          return dispatch(editAnnotationAction(
+            annotation,
+            fromJS(feature).set('properties', annotation.properties),
+          ));
         }
+        return;
       });
       return;
     }
-  }, [props.selectedAnnotations]);
+  }, [props.selectedAnnotations, props.onCreated, containerRef.current]);
   const onCreate = useCallback((event) => {
     if (event.layerType === SupportedShapes.circle) {
       const feature = event.layer.toGeoJSON();
@@ -101,39 +95,39 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
     return props.onCreated(feature);
   }, []);
 
-  const containerRef = useRef<FeatureGroup>(null);
-
   return (
     <LeafletLayerGroup>
       <FeatureGroup ref={containerRef}>
-        <EditControl
-          position="topright"
-          onEdited={onEdit}
-          onCreated={onCreate}
-          onEditMove={onEdit}
-          onEditResize={onEdit}
-          onEditVertex={onEdit}
-          edit={{
-            edit: false,
-            remove: false,
-          }}
-          draw={{
-            circlemarker: false,
-            marker: false,
-            polyline: false,
-            circle: false,
-            rectangle: false,
-            polygon: false,
-          }}
-        />
+        {props.editable &&
+          <EditControl
+            position="topright"
+            onEdited={onEdit}
+            onCreated={onCreate}
+            onEditMove={onEdit}
+            onEditResize={onEdit}
+            onEditVertex={onEdit}
+            edit={{
+              edit: false,
+              remove: false,
+            }}
+            draw={{
+              circlemarker: false,
+              marker: false,
+              polyline: false,
+              circle: false,
+              rectangle: false,
+              polygon: false,
+            }}
+          />}
         {props.data.map((annotation) => {
           const selected = props.selectedAnnotations.contains(annotation);
           return (
             <GuessComponent
               className={`annotation-shape ${selected && 'annotation-shape__editing'}`}
               key={annotation.properties.id}
-              color={selected ? 'cyan' : '#aaa'}
+              color={selected ? 'black' : 'white'}
               weight={1.5}
+              editable={props.editable}
               lineCap="butt"
               onClick={props.onLayerClick}
               annotation={annotation}
@@ -143,6 +137,6 @@ const AnnotationLayer: React.SFC<AnnotationLayerProps> = (props) => {
       </FeatureGroup>
     </LeafletLayerGroup>
   );
-};
+});
 
-export default withLeaflet(AnnotationLayer);
+export default AnnotationLayer;

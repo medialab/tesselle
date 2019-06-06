@@ -1,16 +1,18 @@
 import React, { useMemo, useRef } from 'react';
-import { Circle, Tooltip } from 'react-leaflet';
+import { Circle, Tooltip, CircleProps } from 'react-leaflet';
 import { coordsToLatLng } from 'utils/geo';
-import { AnnotationShapes } from './types';
+import { AnnotationShapes, AddedProperties } from './types';
 import { useEdit } from 'utils/hooks';
+import Annotation, { AnnotationCircleProperties } from 'types/Annotation';
+import { Point } from 'geojson';
 
-const AnnotationCircle: React.SFC<AnnotationShapes> = (props) => {
+const AnnotationCircle: React.SFC<AnnotationShapes & {
+  annotation: Annotation<Point, AnnotationCircleProperties>,
+}> = (props) => {
   const {annotation, selected} = props;
-  const geometry: any = annotation.type === 'Feature' ? annotation.geometry : annotation;
-  const coords = geometry ? geometry.coordinates : null;
-  const center = useMemo(() => coordsToLatLng(coords), [selected]);
-  const ref = useRef<Circle & any>(null);
-  useEdit(ref, selected);
+  const center = useMemo(() => coordsToLatLng(annotation.geometry.coordinates), [annotation.geometry.coordinates]);
+  const ref = useRef<Circle<AddedProperties & CircleProps>>(null);
+  useEdit(ref, props.editable && selected);
   return (
     <Circle
       key={props.className}
@@ -22,7 +24,7 @@ const AnnotationCircle: React.SFC<AnnotationShapes> = (props) => {
       original
       properties={annotation.properties}
     >
-      {!selected && (
+      {(!selected || !props.editable) && (
         <Tooltip opacity={1} permanent interactive>
           {annotation.properties.content}
         </Tooltip>

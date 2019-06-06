@@ -1,4 +1,20 @@
 import { resizeImage, calculateAspectRatioFit } from 'utils/imageManipulation';
+import { last } from 'ramda';
+
+export const generateInfo = (img, scaleFactors, id) => {
+  return {
+    '@context': 'http://library.stanford.edu/iiif/image-api/1.1/context.json',
+    '@id': id,
+    'formats': ['jpg'],
+    'height': img.height,
+    'profile': 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0',
+    'qualities': ['default'],
+    'scale_factors': scaleFactors,
+    'tile_height': 512,
+    'tile_width': 512,
+    'width': img.width,
+  };
+};
 
 function* staticPartialTileSizes(width: number, height: number, tilesize: number, scaleFactors: number[]) {
   for (const sf of scaleFactors) {
@@ -25,7 +41,7 @@ function* staticPartialTileSizes(width: number, height: number, tilesize: number
         const rh = rye - ry;
         const sh = Math.floor(((rh + sf) - 1) / sf);
         // debugger
-        yield [[rx, ry, rw, rh], [sw, sh]] as [[number, number, number, number], [number, number]];
+        yield [[rx, ry, rw, rh], [sw, sh], sf] as [[number, number, number, number], [number, number], number];
       }
     }
   }
@@ -53,7 +69,13 @@ interface GenerateImageOptions {
   scaleFactors?: number[];
 }
 
-export function* generate(img, options: GenerateImageOptions) {
+export type FuturImageParsing = () => Promise<File>;
+type ScaleFactor = number;
+
+export function* generate(
+  img,
+  options: GenerateImageOptions,
+): IterableIterator<[string, FuturImageParsing, ScaleFactor]> {
   const { width, height } = img;
   const { tileSize } = options;
   const scaleFactors: number[] = options.scaleFactors ? options.scaleFactors : scaleFactorsCreator(
@@ -62,10 +84,11 @@ export function* generate(img, options: GenerateImageOptions) {
     tileSize,
     height,
   );
-  for (const [region, size] of staticPartialTileSizes(width, height, tileSize, scaleFactors)) {
+  for (const [region, size, sf] of staticPartialTileSizes(width, height, tileSize, scaleFactors)) {
     yield [
       path(region, size),
-      resizeImage(img, region, size),
+      () => resizeImage(img, region, size),
+      sf,
     ];
   }
   const ratio = calculateAspectRatioFit(
@@ -74,11 +97,12 @@ export function* generate(img, options: GenerateImageOptions) {
   const lastRegion = [0, 0, width, height];
   const lastSize: [number, number] = [ratio.width, ratio.height];
   yield [
-    path(lastRegion, lastSize) as string,
-    resizeImage(
+    path(lastRegion, lastSize),
+    () => resizeImage(
       img,
       lastRegion,
       lastSize,
-    ) as Promise<File>,
+    ),
+    last(scaleFactors),
   ];
 }

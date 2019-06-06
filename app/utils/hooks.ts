@@ -5,14 +5,20 @@ import useMousetrap from 'react-hook-mousetrap';
 import { SupportedShapes } from 'types';
 import { LatLngBounds } from 'leaflet';
 import Cover from 'types/Cover';
+import { annotationToBounds } from './geo';
 
 export function useDispatch() {
   return useContext(ReactReduxContext).store.dispatch;
 }
 
-export function useAction(actionCreator: (...args: any) => any, scu = []) {
+export function useAction(actionCreator: (...args: any) => any, scu: any[] = []) {
   const dispatch = useDispatch();
-  return useCallback((...args) => dispatch(actionCreator(...args)), scu);
+  return useCallback((...args) => {
+    const action = actionCreator(...args);
+    if (action) {
+      dispatch(action);
+    }
+  }, scu);
 }
 
 // Hook
@@ -42,6 +48,8 @@ export function useWhyDidYouUpdate(name, props) {
       // If changesObj not empty then output to console
       if (Object.keys(changesObj).length) {
         console.log('[why-did-you-update]', name, changesObj);
+      } else {
+        console.log('[why-did-you-update]', 'no changes in props');
       }
     }
 
@@ -80,26 +88,23 @@ export const useTools = (defaultTool): [
   ];
 };
 
-export const useFlyTo = (map?: L.Map, bounds?: LatLngBounds): void =>
-  useEffect(() => {
-    if (map && bounds) {
-      console.log('fitBounds');
-      console.log(map, bounds);
-      map.fitBounds(bounds, {animate: true});
-    }
-  }, [map, bounds]);
-
 export const useUrl = (file: File): string => {
   const url = useMemo(() => window.URL.createObjectURL(file), [file]);
   useEffect(() => () => window.URL.revokeObjectURL(url), [url]);
   return url;
 };
 
+export const useFlyTo = (map?: L.Map, bounds?: LatLngBounds): void =>
+  useEffect(() => {
+    if (map && bounds) {
+      map.fitBounds(bounds, {animate: true});
+    }
+  }, [map, bounds]);
+
 export function useMapLock(map?: L.Map, image?: Cover): LatLngBounds {
   const [maxBounds, setMaxBounds] = useState();
   useLayoutEffect(() => {
     if (map && image) {
-      console.log('setMaxBounds', [0, image.height * 2], map.getMaxZoom());
       setMaxBounds(
         new LatLngBounds(
           map.unproject([0, image.height * 2], map.getMaxZoom()),
@@ -110,6 +115,26 @@ export function useMapLock(map?: L.Map, image?: Cover): LatLngBounds {
   }, [map, image]);
   return maxBounds;
 }
+
+export const useLockEffect = (map: L.Map, image: any) => {
+  useEffect(() => {
+    if (image.height) {
+      map.fitBounds(
+        new LatLngBounds(
+          map.unproject([0, image.height * 2], map.getMaxZoom()),
+          map.unproject([image.width * 2, 0], map.getMaxZoom()),
+        ),
+        {animate: true},
+      );
+    } else {
+      map.fitBounds(
+        annotationToBounds(image),
+        {animate: true},
+      );
+    }
+  }, [map, image]);
+};
+
 
 export const useEdit = (ref, selected) => {
   useEffect(() => {
@@ -122,16 +147,11 @@ export const useEdit = (ref, selected) => {
     }
   });
 };
-
-
-export const useLockEffect = (map: L.Map, image: Cover) => {
-  useEffect(() => {
-    map.fitBounds(
-      new LatLngBounds(
-        map.unproject([0, image.height * 2], map.getMaxZoom()),
-        map.unproject([image.width * 2, 0], map.getMaxZoom()),
-      ),
-      {animate: true},
-    );
-  }, [map]);
-};
+export function useToggleBoolean(initialState: boolean = true): [boolean, () => void, () => void] {
+  const [sidebarVisible, setSidebarVisible] = useState<boolean>(initialState);
+  return [
+    sidebarVisible,
+    useCallback(() => setSidebarVisible(false), []),
+    useCallback(() => setSidebarVisible(true), []),
+  ];
+}

@@ -4,145 +4,119 @@
  *
  */
 
-import React, { useState } from 'react';
-import { connect } from 'react-redux';
-import { Map, withLeaflet, MapLayerProps } from 'react-leaflet';
-import { createStructuredSelector } from 'reselect';
-import { compose } from 'redux';
+import React, { useCallback, useRef, useState } from 'react';
+import { Map, withLeaflet, ZoomControl } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
 
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
-import makeSelectPlayer from './selectors';
-import reducer from './reducer';
-import saga from './saga';
-import cx from 'classnames';
-
-import { StretchedLayoutContainer, StretchedLayoutItem } from 'quinoa-design-library';
-import L, { LatLngBounds } from 'leaflet';
+import L from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
 import IiifLayer from 'components/IiifLayer';
-import { List } from 'immutable';
-import { SupportedShapes } from 'types';
+import { useLockEffect, useToggleBoolean } from 'utils/hooks';
+import { enhancer } from 'containers/Editor';
+import ReactDOM from 'react-dom';
+import Sidebar from './Sidebar';
 import Slideshow from 'types/Slideshow';
-import { useMapLock, useFlyTo } from 'utils/hooks';
+import { List } from 'immutable';
 import Annotation from 'types/Annotation';
-import { coordsToLatLngs } from 'utils/geo';
-import { circle } from '@turf/turf';
-
-const mapStateToProps = createStructuredSelector({
-  player: makeSelectPlayer(),
-});
-
-const withConnect = connect(mapStateToProps);
-
-const withReducer = injectReducer({ key: 'player', reducer: reducer });
-const withSaga = injectSaga({ key: 'player', saga: saga });
-
-const decorator = compose(
-  withReducer,
-  withSaga,
-  withConnect,
-);
-
-interface PlayerProps extends MapLayerProps {
-  readonly slideshow: Slideshow;
-}
+import { SureContextProps, changeSelection } from 'types';
 
 const minZoom = 1;
 const maxZoom = 20;
 
-const PlayerMap: React.ComponentType<Pick<PlayerProps, any>> = withLeaflet(props => {
-  const [selected, setSelected] = useState<Annotation>();
-  useMousetrap('k', () => {
-    if (selected) {
-      const index = props.slideshow.annotations.indexOf(selected);
-      if (index < props.slideshow.annotations.size) {
-        setSelected(props.slideshow.annotations.get(index + 1));
-      }
-    } else {
-      setSelected(props.slideshow.annotations.first());
-    }
-  });
-  useMousetrap('j', () => {
-    if (selected) {
-      const index = props.slideshow.annotations.indexOf(selected);
-      if (index > 0) {
-        setSelected(props.slideshow.annotations.get(index - 1));
-      }
-    } else {
-      setSelected(props.slideshow.annotations.first());
-    }
-  });
-  if (props.leaflet) {
-    const maxBounds: LatLngBounds = useMapLock(props.leaflet.map, props.slideshow.image);
-    let zoomTo = maxBounds;
-    if (selected) {
-      const geometry: any = selected.type === 'Feature' ? selected.geometry : selected;
-      const coordsLevels = geometry.type === 'Polygon' ? 1 : 2;
-      if (selected.properties.type === SupportedShapes.circle) {
-        console.log('radius', selected.properties.radius);
-        const chiant = circle(selected.toJS(), selected.properties.radius);
-        zoomTo = coordsToLatLngs(
-          (chiant.geometry as any).coordinates,
-          1,
-        );
-        console.log(zoomTo);
-      } else {
-        zoomTo = coordsToLatLngs(
-          (selected.geometry as any).coordinates,
-          coordsLevels,
-        ).toJS();
-        console.log(zoomTo);
-      }
-    }
-    useFlyTo(props.leaflet.map, zoomTo);
-  } else {
-    throw new Error('This component did not get it\'s map property.');
-  }
+interface PlayerProps {
+  readonly playing: boolean;
+  readonly slideshow: Slideshow;
+  readonly selectedAnnotations: List<Annotation>;
+  readonly changeSelection: changeSelection;
+}
 
+const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
+  const selected = props.selectedAnnotations.first();
+  useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image);
   return (
     <React.Fragment>
       <AnnotationLayer
         data={props.slideshow.annotations}
-        selectedAnnotations={List(selected ? [selected] : [])}
-      />
-      <IiifLayer tileSize={512} />
+        selectedAnnotations={props.selectedAnnotations} />
+      <IiifLayer tileSize={512} id={props.slideshow.id} />
     </React.Fragment>
   );
 });
 
-function Player(props) {
+export const selectNext = (selected, annotations) => {
+  if (!selected) {
+    return annotations.first();
+  }
+  const index = annotations.indexOf(selected);
+  if (index + 1 < annotations.size) {
+    return annotations.get(index + 1);
+  } else {
+    return annotations.first();
+  }
+};
+
+const Player: React.SFC<PlayerProps> = (props) => {
+  const selected = props.selectedAnnotations.first();
+
+  const [mountSidebar, setMountSidebar] = useState<boolean>(false);
+  const [sidebarVisible, onClose, onOpen] = useToggleBoolean();
+  const onNext = useCallback(
+    () => props.changeSelection(selectNext(selected, props.slideshow.annotations)),
+    [selected, props.slideshow.annotations],
+  );
+  const onPrev = useCallback(
+    () => props.changeSelection(selectNext(selected, props.slideshow.annotations.reverse())),
+    [selected, props.slideshow.annotations],
+  );
+  useMousetrap('k', onNext);
+  useMousetrap('j', onPrev);
+  const onMapClick = useCallback((event) => props.changeSelection(), [props.changeSelection]);
+  const sidebarRef = useRef<Element | null>(null);
+  const sidebarReady = (domElement) => {
+    sidebarRef.current = domElement;
+    setMountSidebar(!!domElement);
+  };
+
   return (
-    <div className={cx({
-      map: true,
-      creating: SupportedShapes.selector,
-    })}>
+    <div className="map">
+      <div ref={sidebarReady} />
       <Map
         boxZoom={false}
-        dragging
+        dragging={false}
         doubleClickZoom={false}
+        zoomControl={false}
         crs={L.CRS.Simple}
+        onClick={onMapClick}
         center={[0, 0]}
         minZoom={minZoom}
         maxZoom={maxZoom}>
-        <PlayerMap slideshow={props.player} />
+          {(sidebarRef.current && mountSidebar) && ReactDOM.createPortal(
+            <Sidebar
+              slideshow={props.slideshow}
+              selectedAnnotations={props.selectedAnnotations}
+              visible={sidebarVisible}
+              onClose={onClose}
+              onOpen={onOpen}
+              onPrev={onPrev}
+              onNext={onNext}
+              changeSelection={props.changeSelection}
+            />,
+            sidebarRef.current,
+          )}
+          <ZoomControl position="topright" />
+          <PlayerMap
+            playing={!sidebarVisible}
+            slideshow={props.slideshow}
+            changeSelection={props.changeSelection}
+            selectedAnnotations={props.selectedAnnotations} />
       </Map>
     </div>
   );
-}
+};
 
-export default decorator(props => {
-  if (props.player) {
-    return (
-      <StretchedLayoutContainer
-        isFullHeight
-        isDirection="horizontal">
-          <StretchedLayoutItem isFlex={2}>
-            <Player {...props} />
-          </StretchedLayoutItem>
-      </StretchedLayoutContainer>
-    );
+export default enhancer(props => {
+  if (props.slideshow) {
+    return (<Player {...props} />);
   }
   return <div />;
 });

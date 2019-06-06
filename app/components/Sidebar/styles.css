@@ -1,13 +1,21 @@
+textarea.textarea {
+  transition: none;
+}
 .sidebar {
   position: absolute;
   left: 0;
   width: 25%;
   max-width: 450px;
   z-index: 420;
+  max-height: 100vh;
+  overflow: auto;
+}
+.sidebar.visible {
   top: 0;
 }
-.sidebar .sidebar--container {
-  background: white;
+.sidebar.hidden {
+  bottom: 25px;
+  left: 25px;
 }
 .textarea:not([rows]) {
   max-height: initial;
@@ -18,7 +26,8 @@
   color: white;
 }
 .sidebar--container {
-  max-height: calc(100vh - 40px);
+  background: white;
+  /* max-height: calc(100vh - 45px - 70px); */
   overflow: auto;
 }
 .sidebar--menu-item .box {

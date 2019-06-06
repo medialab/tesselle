@@ -4,11 +4,10 @@
  *
  */
 
-import React, { useCallback, useState, memo } from 'react';
+import React, { useCallback, useState, memo, useEffect } from 'react';
 import L from 'leaflet';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { List } from 'immutable';
 import { compose } from 'redux';
 import { Map, ZoomControl, withLeaflet } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
@@ -19,13 +18,16 @@ import injectReducer from 'utils/injectReducer';
 import Slideshow from 'types/Slideshow';
 import FloatinBar from 'components/FloatingBar';
 import Sidebar from 'components/Sidebar';
-import Annotation from 'types/Annotation';
-import { SupportedShapes } from 'types';
+import { SupportedShapes, changeSelection, Annotations, SureContextProps } from 'types';
 import AnnotationLayer from 'components/AnnotationLayer';
 
 import {
   addAnnotationAction,
   changeSelectionAction,
+  removeAnnotationAction,
+  editSlideshowAction,
+  editAnnotationAction,
+  editOrderAction,
 } from './actions';
 import {
   makeSelectSlideshow,
@@ -34,7 +36,7 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import IiifLayer from 'components/IiifLayer';
-import { useLockEffect } from 'utils/hooks';
+import { useLockEffect, useAction } from 'utils/hooks';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -52,7 +54,7 @@ const withConnect = connect(
 const withReducer = injectReducer({ key: 'editor', reducer: reducer });
 const withSaga = injectSaga({ key: 'editor', saga: saga });
 
-export const decorator = compose(
+export const enhancer = compose(
   withReducer,
   withSaga,
   withConnect,
@@ -60,10 +62,9 @@ export const decorator = compose(
 
 interface EditorProps {
   readonly slideshow: Slideshow;
-  readonly selectedAnnotations: List<Annotation>;
-  readonly map: L.Map;
+  readonly selectedAnnotations: Annotations;
   readonly createAnnotation: (frame: Feature) => void;
-  readonly changeSelection: (annotation?: Annotation | List<Annotation>) => void;
+  readonly changeSelection: changeSelection;
 }
 
 interface SetToolsProps {
@@ -86,7 +87,7 @@ const lockFuturShape = (instance?) => {
   }
 };
 
-const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = props => {
+const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(props => {
   const {slideshow, setTool, tool} = props;
   const map = props.leaflet.map;
 
@@ -97,17 +98,28 @@ const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = p
     setTool(SupportedShapes.selector);
   }, []);
   const onRectangleClick = useCallback(() => {
-    lockFuturShape(new L.Draw.Rectangle(map));
     setTool(SupportedShapes.rectangle);
   }, [map]);
   const onCircleClick = useCallback(() => {
-    lockFuturShape(new L.Draw.Circle(map));
     setTool(SupportedShapes.circle);
   }, [map]);
   const onPolygonClick = useCallback(() => {
-    lockFuturShape(new L.Draw.Polygon(map));
     setTool(SupportedShapes.polygon);
   }, [map]);
+
+  useEffect(() => {
+    if (tool !== SupportedShapes.selector) {
+      switch (tool) {
+        case SupportedShapes.rectangle:
+          return lockFuturShape(new L.Draw.Rectangle(map));
+        case SupportedShapes.circle:
+          return lockFuturShape(new L.Draw.Circle(map));
+        case SupportedShapes.polygon:
+        case SupportedShapes.polyline:
+          return lockFuturShape(new L.Draw.Polygon(map));
+      }
+    }
+  });
 
   useMousetrap('p', onPolygonClick);
   useMousetrap('r', onRectangleClick);
@@ -116,7 +128,6 @@ const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = p
 
   const onCreate = useCallback((annotation) => {
     props.createAnnotation(annotation);
-    setTool(SupportedShapes.selector);
   }, []);
   const onLayerClick = useCallback((annotation) => {
       if (tool === SupportedShapes.selector) {
@@ -129,6 +140,7 @@ const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = p
   return (
     <React.Fragment>
       <AnnotationLayer
+        editable
         onLayerClick={onLayerClick}
         onCreated={onCreate}
         data={slideshow.annotations}
@@ -143,11 +155,9 @@ const EditorMap: React.ComponentType<Pick<EditorProps & SetToolsProps, any>> = p
         onPolygonClick={onPolygonClick} />
     </React.Fragment>
   );
-};
+});
 
-const EditorMapMap = withLeaflet(EditorMap);
-
-const Editor: React.SFC<EditorProps> = (props) => {
+const Editor: React.SFC<EditorProps> = memo((props) => {
   const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
   const onMapClick = useCallback(() => {
     if (tool === SupportedShapes.selector) {
@@ -155,23 +165,36 @@ const Editor: React.SFC<EditorProps> = (props) => {
     }
   }, []);
   const [sidebarVisible, setSidebarVisible] = useState<boolean>(true);
-
   const onClose = useCallback(() => setSidebarVisible(false), []);
   const onOpen = useCallback(() => setSidebarVisible(true), []);
-
+  const onNameChange = useAction(editSlideshowAction, []);
+  const onRemove = useAction(removeAnnotationAction, []);
+  const onAnnotationClick = useCallback((annotation) => {
+    if (!props.selectedAnnotations.includes(annotation)) {
+      return props.changeSelection(annotation);
+    }
+    return;
+  }, [props.selectedAnnotations]);
+  const onAnnotationChange = useAction(editAnnotationAction, []);
+  const onOrderChange = useAction(editOrderAction, []);
   return (
     <div className="map">
       <Sidebar
+        onAnnotationClick={onAnnotationClick}
+        onAnnotationChange={onAnnotationChange}
+        onOrderChange={onOrderChange}
         slideshow={props.slideshow}
         selectedAnnotations={props.selectedAnnotations}
         visible={sidebarVisible}
         onClose={onClose}
+        onRemove={onRemove}
         onOpen={onOpen}
+        onNameChange={onNameChange}
       />
       <Map
         onClick={onMapClick}
         boxZoom={false}
-        dragging={false}
+
         setTool={setTool}
         doubleClickZoom={false}
         zoomControl={false}
@@ -179,17 +202,15 @@ const Editor: React.SFC<EditorProps> = (props) => {
         minZoom={MIN_ZOOM}
         maxZoom={MAX_ZOOM}>
           <ZoomControl position="topright" />
-          <EditorMapMap {...props} setTool={setTool} tool={tool} />
+          <EditorMap {...props} setTool={setTool} tool={tool} />
       </Map>
     </div>
   );
-};
+});
 
-const Meditor = memo(Editor);
-
-export default decorator(props => {
+export default enhancer((props: EditorProps) => {
   if (props.slideshow) {
-    return <Meditor {...props} />;
+    return <Editor {...props} />;
   }
   return 'loading';
 });

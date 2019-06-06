@@ -3,19 +3,19 @@ import { Record } from 'immutable';
 
 interface CoverArgs {
   id?: string;
-  file?: boolean;
+  file?: File;
   width?: number;
   height?: number;
 }
 
 export default class Cover extends Record({
   id: '',
-  file: false,
+  file: {},
   width: 0,
   height: 0,
 }) {
   public id!: string;
-  public file!: false;
+  public file!: File;
   public width!: number;
   public height!: number;
   constructor(params?: CoverArgs) {

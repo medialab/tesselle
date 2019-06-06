@@ -2,6 +2,7 @@ import L from 'leaflet';
 import { Feature } from 'geojson';
 import { map, pipe, max } from 'ramda';
 import SAT, { Vector } from 'sat';
+import circleToPolygon from 'circle-to-polygon';
 
 import {
   Feature as ImmutableFeature,
@@ -15,10 +16,9 @@ import {
   MultiPolygon,
 } from 'immutable-geojson';
 import { fromJS as rawFromJs, Map } from 'immutable';
-import {
+import Annotation, {
   annotationPropertiesCreator,
   annotationCirclePropertiesCreator,
-  annotationRectanglePropertiesCreator,
 } from 'types/Annotation';
 import { SupportedShapes } from 'types';
 
@@ -26,8 +26,6 @@ function propertiesReviver(key, value) {
   try {
     if (value.has('radius')) {
       return annotationCirclePropertiesCreator(value.toMap());
-    } else if (value.has('type')) {
-      return annotationRectanglePropertiesCreator(value.toMap());
     }
     return annotationPropertiesCreator(value.toMap());
   } catch (e) {
@@ -109,7 +107,7 @@ export function latLngsToCoords(latlngs: [], levelsDeep?: number, closed?: boole
 // @function coordsToLatLng(coords: Array): LatLng
 // Creates a `LatLng` object from an array of 2 numbers (longitude, latitude)
 // or 3 numbers (longitude, latitude, altitude) used in GeoJSON for points.
-export const coordsToLatLng = (coords: [number, number, number]): L.LatLng => new L.LatLng(
+export const coordsToLatLng = (coords: [number, number, number] | number[]): L.LatLng => new L.LatLng(
   coords[1],
   coords[0],
   coords[2],
@@ -201,6 +199,23 @@ export function collision(selectionPolygon: Feature, annotations: Feature[]) {
       ),
     ),
   );
+}
+
+export function annotationToBounds(annotation: Annotation | any) {
+  switch (annotation.properties.type) {
+    case SupportedShapes.circle:
+      return coordsToLatLngs(
+        circleToPolygon(annotation.geometry.coordinates.toJS(), annotation.properties.radius, 5).coordinates,
+        1,
+      );
+    case SupportedShapes.rectangle:
+    case SupportedShapes.polygon:
+      return coordsToLatLngs(
+        annotation.geometry.coordinates,
+        annotation.geometry.type === 'Polygon' ? 1 : 2,
+      ).toJS();
+  }
+  throw new Error('Unsupportd shape:' + annotation.properties.type);
 }
 
 export const allEvents = [
