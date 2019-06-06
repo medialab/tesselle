@@ -34,6 +34,10 @@ textarea.textarea {
   color: white;
 }
 
+.sidebar--item-field--selected:not(.sidebar--item-field--minified)::placeholder{
+  color: white;
+}
+
 .sidebar--minified-placeholder{
   height: 100%;
   width: 100%;
