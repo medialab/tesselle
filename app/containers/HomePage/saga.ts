@@ -10,6 +10,7 @@ import { slice } from 'containers/Slicer/saga';
 import { push } from 'connected-react-router';
 import { setProgress } from 'containers/Slicer/actions';
 import makeSelectSlicer from 'containers/Slicer/selectors';
+import uuid from 'uuid';
 
 const selectSlideshows = makeSelectSlideshows();
 const selectSlicer = makeSelectSlicer();
@@ -21,10 +22,19 @@ export function* setSlideshows(slideshows: any) {
   yield put(loadSlideshowsAction(slideshows));
 }
 
+export function* duplicateSlideshow(action) {
+  const slideshow = action.payload;
+  const slideshows: List<Slideshow> = yield select(selectSlideshows);
+  yield setSlideshows(slideshows.push(
+    slideshow.set('id', uuid()).set('name', `${slideshow.name} - duplicate`),
+  ));
+}
+
 export function* createSlideshow(action, sliceing) {
   try {
-    const [slideshow, img] = yield slideshowCreator(action.payload, sliceing);
-    yield* slice(img, slideshow.id, sliceing);
+    const [slideshow, img]: [Slideshow, (HTMLImageElement | SVGElement)] =
+      yield slideshowCreator(action.payload, sliceing);
+    yield* slice(img, slideshow.image.id, sliceing);
     const slideshows: List<Slideshow> = yield select(selectSlideshows);
     yield setSlideshows(slideshows.push(slideshow));
     return slideshow;
@@ -47,15 +57,21 @@ export function* createAndRedirect(action) {
 
 export function* removeSlideshow(action) {
   // const slideshows: List<Slideshow> = yield select(selectSlideshows);
-  const slideshows = yield call([db, db.getItem], 'slideshows');
-  const id = action.payload.id;
-  db.setItem('slideshows', slideshows.filter(slideshow => slideshow.id !== id));
-  const allKeys = yield db.keys();
-  yield all(allKeys.filter((key: string) =>
-    key.startsWith(`/${id}`),
-  ).map(key =>
-    call([db, db.removeItem], key),
-  ));
+  const slideshow = action.payload as Slideshow;
+  let slideshows = yield call([db, db.getItem], 'slideshows');
+  slideshows.forEach(slideshow => console.log(slideshow.image.id));
+  const slidedhowId = slideshow.id;
+  const imageId = slideshow.image.id;
+  slideshows = slideshows.filter(slideshow => slideshow.id !== slidedhowId);
+  db.setItem('slideshows', slideshows);
+  if (!slideshows.some(s => s.image.id === slideshow.image.id)) {
+    const allKeys = yield db.keys();
+    yield all(allKeys.filter((key: string): boolean =>
+      key.startsWith(`/${imageId}`),
+    ).map(key =>
+      call([db, db.removeItem], key)),
+    );
+  }
   yield put(removeSlideshowAction.success(action));
   // We could yield to wait for all items to be removed, but I don't see the point ATM.
 }
@@ -65,6 +81,7 @@ export default function* homePageSaga() {
   // See example in containers/HomePage/saga.js
   yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
   yield takeLatest(ActionTypes.REMOVE_SLIDESHOW, removeSlideshow);
+  yield takeLatest(ActionTypes.SLIDESHOW_DUPLICATE, duplicateSlideshow);
   try {
     let rawSlideshows = yield db.getItem('slideshows');
     if (rawSlideshows === null) {

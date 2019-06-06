@@ -136,7 +136,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
         data={slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations}
       />
-      <IiifLayer tileSize={512} id={props.slideshow.id} />
+      <IiifLayer tileSize={512} id={props.slideshow.image.id} />
       <FloatinBar
         onSelectClick={onSelectClick}
         activeButton={tool}

@@ -19,6 +19,7 @@ export const createSlideshowAction = createAsyncAction(
   ActionTypes.CREATE_SLIDESHOW_FAILURE,
 )<File, Slideshow, Error>();
 
+export const duplicationSlideshowAction = (slideshow: Slideshow) => action(ActionTypes.SLIDESHOW_DUPLICATE, slideshow);
 
 export const removeSlideshowAction = createAsyncAction(
   ActionTypes.REMOVE_SLIDESHOW,

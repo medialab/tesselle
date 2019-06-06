@@ -21,7 +21,7 @@ import reducer from './reducer';
 import saga from './saga';
 import messages from './messages';
 import './styles.css';
-import { createSlideshowAction, removeSlideshowAction } from './actions';
+import { createSlideshowAction, removeSlideshowAction, duplicationSlideshowAction } from './actions';
 
 import SlideshowCartouche from 'components/SlideshowCartouche';
 
@@ -31,9 +31,9 @@ import { slicerContainer, Loader, LoaderProps } from 'containers/Slicer';
 import medialabLogo from './assets/logo-medialab.svg';
 import forccastLogo from './assets/logo-forccast.svg';
 
-
 interface HomePageProps {
   createSlideshow: () => void;
+  duplicateSlideshow: (slideshow) => void;
 }
 
 const ifFileIsImage = (func: () => any) => pipe(
@@ -78,7 +78,10 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
             <ul className="cards-container">
               {props.slideshows.map(slideshow => (
                 <li className="card-wrapper" key={slideshow.id}>
-                  <SlideshowCartouche onDelete={onDelete} slideshow={slideshow} />
+                  <SlideshowCartouche
+                    onDelete={onDelete}
+                    slideshow={slideshow}
+                    onDuplicate={props.duplicateSlideshow} />
                 </li>
               ))}
             </ul>
@@ -159,7 +162,10 @@ const mapStateToProps = createStructuredSelector({
 
 const withConnect = connect(
   mapStateToProps,
-  {createSlideshow: createSlideshowAction.request},
+  {
+    createSlideshow: createSlideshowAction.request,
+    duplicateSlideshow: duplicationSlideshowAction,
+  },
 );
 
 const withReducer = injectReducer({ key: 'homePage', reducer: reducer });

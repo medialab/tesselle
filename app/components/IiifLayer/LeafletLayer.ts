@@ -65,7 +65,6 @@ const Iiif = L.TileLayer.extend({
 
     options = (L as any).setOptions(this, options);
     this._infoDeferred = this._getInfo();
-    this._baseUrl = '/{id}/{region}/{size}/{rotation}/{quality}.{format}';
   },
 
   createTile: function(coords, done) {
@@ -120,7 +119,7 @@ const Iiif = L.TileLayer.extend({
     };
 
     const path = L.Util.template(
-      this._baseUrl,
+      '/{id}/{region}/{size}/{rotation}/{quality}.{format}',
       {...options, ...this.options},
     );
     // debugger;
