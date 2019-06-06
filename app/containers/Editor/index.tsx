@@ -194,7 +194,7 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
       <Map
         onClick={onMapClick}
         boxZoom={false}
-        dragging={false}
+
         setTool={setTool}
         doubleClickZoom={false}
         zoomControl={false}
