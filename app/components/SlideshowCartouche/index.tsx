@@ -42,6 +42,7 @@ const InlineIcon = ({ children }) => (
 interface OwnProps {
   slideshow: Slideshow;
   onDelete: (toDelete) => void;
+  onDuplicate: (toDuplicate: Slideshow) => void;
 }
 
 const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
@@ -76,6 +77,8 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
           return goToEditor();
         case 'read':
           return goToPlayer();
+        case 'duplicate':
+            return props.onDuplicate(props.slideshow);
       }
     },
     [props.slideshow],
