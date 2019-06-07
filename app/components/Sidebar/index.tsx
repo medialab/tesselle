@@ -288,6 +288,7 @@ interface SidebarProps extends ListProps {
 }
 
 const Sidebar: React.SFC<SidebarProps> = props => {
+  const exportData = useCallback(console.log, []);
   const onClickSidebar = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
     return props.onAnnotationClick();
@@ -330,7 +331,11 @@ const Sidebar: React.SFC<SidebarProps> = props => {
           <StretchedLayoutItem isFlex={1}>
             <StretchedLayoutContainer isDirection="horizontal">
               <StretchedLayoutItem isFlex={1}>
-                <Button isFullWidth isColor="info" disabled={!props.slideshow.annotations.size} >Download ↓</Button>
+                <Button
+                  onClick={exportData}
+                  isFullWidth
+                  isColor="info"
+                  disabled={!props.slideshow.annotations.size}>Download ↓</Button>
               </StretchedLayoutItem>
               <StretchedLayoutItem>
                 <Button isColor="info">?</Button>

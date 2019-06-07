@@ -6,7 +6,7 @@
 
 import React, { useCallback } from 'react';
 import { Columns, Column, Content, Container, DropZone, Footer, Title } from 'quinoa-design-library';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
@@ -25,7 +25,6 @@ import { createSlideshowAction, removeSlideshowAction, duplicationSlideshowActio
 
 import SlideshowCartouche from 'components/SlideshowCartouche';
 
-import { useAction } from 'utils/hooks';
 import { slicerContainer, Loader, LoaderProps } from 'containers/Slicer';
 
 import medialabLogo from './assets/logo-medialab.svg';
@@ -45,8 +44,9 @@ const ifFileIsImage = (func: () => any) => pipe(
 );
 
 function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
+  const dispatch = useDispatch();
   const onDrop = useCallback(ifFileIsImage(props.createSlideshow), [props.createSlideshow]);
-  const onDelete = useAction(removeSlideshowAction.request);
+  const onDelete = useCallback(pipe(removeSlideshowAction.request, dispatch), []);
   return (
     <>
     <Container className="home-container">

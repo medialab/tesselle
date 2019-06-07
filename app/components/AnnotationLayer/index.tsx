@@ -9,13 +9,13 @@ import React, { useCallback, useRef } from 'react';
 import { SupportedShapes, Annotations, SureContextProps } from 'types';
 import { DomEvent } from 'leaflet';
 import EditControl from './EditControl';
+import { useDispatch } from 'react-redux';
 import './styles.css';
 
 import Annotation from 'types/Annotation';
 import AnnotationPolygon from './AnnotationPolygon';
 import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
-import { useDispatch } from 'utils/hooks';
 import { editAnnotationAction } from 'containers/Editor/actions';
 import AnnotationRectangle from './AnnotationRectangle';
 import { fromJS } from 'utils/geo';

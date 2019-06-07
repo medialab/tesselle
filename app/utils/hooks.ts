@@ -1,25 +1,10 @@
-import { ReactReduxContext } from 'react-redux';
-import React, { useContext, useRef, useEffect, useState, useMemo, useLayoutEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useLayoutEffect, useCallback } from 'react';
 
 import useMousetrap from 'react-hook-mousetrap';
 import { SupportedShapes } from 'types';
 import { LatLngBounds } from 'leaflet';
 import Cover from 'types/Cover';
 import { annotationToBounds } from './geo';
-
-export function useDispatch() {
-  return useContext(ReactReduxContext).store.dispatch;
-}
-
-export function useAction(actionCreator: (...args: any) => any, scu: any[] = []) {
-  const dispatch = useDispatch();
-  return useCallback((...args) => {
-    const action = actionCreator(...args);
-    if (action) {
-      dispatch(action);
-    }
-  }, scu);
-}
 
 // Hook
 export function useWhyDidYouUpdate(name, props) {
