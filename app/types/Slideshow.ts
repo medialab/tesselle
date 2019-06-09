@@ -137,6 +137,7 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
           top: 0,
           bottom: img.height,
           right: img.width,
+          name: 'thumbnail.jpg',
         });
 
         const slideshow = new Slideshow({

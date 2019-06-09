@@ -161,6 +161,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
 });
 
 const Editor: React.SFC<EditorProps> = memo((props) => {
+  console.log(props);
   const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
   const dispatch = useDispatch();
   const onMapClick = useCallback(() => {

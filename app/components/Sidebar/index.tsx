@@ -33,6 +33,8 @@ import { Link } from 'react-router-dom';
 import Loader from 'containers/Slicer';
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
+import { useDispatch } from 'react-redux';
+import { exportSlideshowActionCreator } from 'containers/Slicer/actions';
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -288,7 +290,10 @@ interface SidebarProps extends ListProps {
 }
 
 const Sidebar: React.SFC<SidebarProps> = props => {
-  const exportData = useCallback(console.log, []);
+  const dispatch = useDispatch();
+  const exportData = useCallback(() => {
+    dispatch(exportSlideshowActionCreator.request(props.slideshow));
+  }, [dispatch]);
   const onClickSidebar = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
     return props.onAnnotationClick();

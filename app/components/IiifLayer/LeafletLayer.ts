@@ -219,7 +219,7 @@ const Iiif = L.TileLayer.extend({
   },
   _getInfo: async function() {
     try {
-      const data: any = await db.getItem('/' + this.options.id + '/info.json');
+      const data: any = await db.getItem(`/info/${this.options.id}.json`);
       if (data === null) {
         throw new Error('info.json is null');
       }
