@@ -293,7 +293,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
   const dispatch = useDispatch();
   const exportData = useCallback(() => {
     dispatch(exportSlideshowActionCreator.request(props.slideshow));
-  }, [dispatch]);
+  }, [dispatch, props.slideshow]);
   const onClickSidebar = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
     return props.onAnnotationClick();
@@ -302,7 +302,10 @@ const Sidebar: React.SFC<SidebarProps> = props => {
     props.visible ? props.onClose : props.onOpen,
     [props.visible],
   );
-  const onNameChange = useCallback(values => props.onNameChange(props.slideshow.set('name', values.title)), []);
+  const onNameChange = useCallback(
+    values => props.onNameChange(props.slideshow.set('name', values.title)),
+    [props.slideshow],
+  );
   const selected = props.selectedAnnotations.first();
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>

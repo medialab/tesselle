@@ -125,7 +125,6 @@
     "react-leaflet": "^2.2.1",
     "react-leaflet-control": "^2.1.1",
     "react-leaflet-figure-editor": "^0.2.4",
-    "react-leaflet-sidebarv2": "^0.6.0",
     "react-redux": "^7.1.0-rc.1",
     "react-router": "5.0.1",
     "react-router-dom": "5.0.1",

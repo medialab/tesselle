@@ -85,7 +85,6 @@ export default combineReducers<ContainerState, ContainerActions>({
     }
       switch (action.type) {
         case ActionTypes.EDIT_SLIDESHOW:
-          console.log(action.payload);
           if (isImmutable(action.payload)) {
             return action.payload;
           }

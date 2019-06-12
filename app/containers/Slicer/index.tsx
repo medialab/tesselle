@@ -16,7 +16,7 @@ import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
 import { ContainerState } from './types';
-import { exportSlideshowActionCreator } from './actions';
+import { exportSlideshowActionCreator, importSlideshowAction } from './actions';
 
 export interface LoaderProps {
   slicer: ContainerState;
@@ -42,7 +42,10 @@ const mapStateToProps = createStructuredSelector({
 
 const withConnect = connect(
   mapStateToProps,
-  {exportSlideshow: exportSlideshowActionCreator},
+  {
+    exportSlideshow: exportSlideshowActionCreator,
+    importSlideshow: importSlideshowAction.request,
+  },
 );
 
 const withReducer = injectReducer({ key: 'slicer', reducer: reducer });

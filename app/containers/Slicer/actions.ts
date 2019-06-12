@@ -18,3 +18,10 @@ export const exportSlideshowActionCreator = createAsyncAction(
   ActionTypes.EXPORT_SUCCESS,
   ActionTypes.EXPORT_FAILURE,
 )<Slideshow, any, Error>();
+
+
+export const importSlideshowAction = createAsyncAction(
+  ActionTypes.IMPORT_SLIDESHOW,
+  ActionTypes.IMPORT_SLIDESHOW_SUCCESS,
+  ActionTypes.IMPORT_SLIDESHOW_FAILURE,
+)<any, Slideshow, Error>();
