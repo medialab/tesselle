@@ -89,7 +89,7 @@ const Iiif = L.TileLayer.extend({
     }, this.options));
   },
   onAdd: function(map) {
-    let _this = this;
+    const _this = this;
 
     // Wait for deferred to complete
     _this._infoDeferred.then(function() {
@@ -102,7 +102,7 @@ const Iiif = L.TileLayer.extend({
 
       // Set minZoom and minNativeZoom based on how the imageSizes match up
       let smallestImage = _this._imageSizes[0];
-      let mapSize = _this._map.getSize();
+      const mapSize = _this._map.getSize();
       let newMinZoom = 0;
       // Loop back through 5 times to see if a better fit can be found.
       for (let i = 1; i <= 5; i++) {
@@ -133,7 +133,7 @@ const Iiif = L.TileLayer.extend({
       // Reset tile sizes to handle non 256x256 IIIF tiles
       _this.on('tileload', function(tile, url) {
 
-        let height = tile.tile.naturalHeight,
+        const height = tile.tile.naturalHeight,
           width = tile.tile.naturalWidth;
 
         // No need to resize if tile is 256 x 256
@@ -146,7 +146,7 @@ const Iiif = L.TileLayer.extend({
     });
   },
   onRemove: function(map) {
-    let _this = this;
+    const _this = this;
 
     map._layersMinZoom = _this._prev_map_layersMinZoom;
     _this._imageSizes = _this._imageSizesOriginal;
@@ -161,27 +161,27 @@ const Iiif = L.TileLayer.extend({
 
   },
   _fitBounds: function() {
-    let _this = this;
+    const _this = this;
 
     // Find best zoom level and center map
-    let initialZoom = _this._getInitialZoom(_this._map.getSize());
-    let offset = _this._imageSizes.length - 1 - _this.options.maxNativeZoom;
-    let imageSize = _this._imageSizes[initialZoom + offset];
-    let sw = _this._map.options.crs.pointToLatLng(L.point(0, imageSize.y), initialZoom);
-    let ne = _this._map.options.crs.pointToLatLng(L.point(imageSize.x, 0), initialZoom);
-    let bounds = L.latLngBounds(sw, ne);
+    const initialZoom = _this._getInitialZoom(_this._map.getSize());
+    const offset = _this._imageSizes.length - 1 - _this.options.maxNativeZoom;
+    const imageSize = _this._imageSizes[initialZoom + offset];
+    const sw = _this._map.options.crs.pointToLatLng(L.point(0, imageSize.y), initialZoom);
+    const ne = _this._map.options.crs.pointToLatLng(L.point(imageSize.x, 0), initialZoom);
+    const bounds = L.latLngBounds(sw, ne);
 
     _this._map.fitBounds(bounds, true);
   },
   _setMaxBounds: function() {
-    let _this = this;
+    const _this = this;
 
     // Find best zoom level, center map, and constrain viewer
-    let initialZoom = _this._getInitialZoom(_this._map.getSize());
-    let imageSize = _this._imageSizes[initialZoom];
-    let sw = _this._map.options.crs.pointToLatLng(L.point(0, imageSize.y), initialZoom);
-    let ne = _this._map.options.crs.pointToLatLng(L.point(imageSize.x, 0), initialZoom);
-    let bounds = L.latLngBounds(sw, ne);
+    const initialZoom = _this._getInitialZoom(_this._map.getSize());
+    const imageSize = _this._imageSizes[initialZoom];
+    const sw = _this._map.options.crs.pointToLatLng(L.point(0, imageSize.y), initialZoom);
+    const ne = _this._map.options.crs.pointToLatLng(L.point(imageSize.x, 0), initialZoom);
+    const bounds = L.latLngBounds(sw, ne);
 
     _this._map.setMaxBounds(bounds, true);
   },
@@ -247,7 +247,7 @@ const Iiif = L.TileLayer.extend({
   },
 
   _setQuality: function() {
-    let _this = this;
+    const _this = this;
     let profileToCheck = _this.profile;
 
     if (_this._explicitQuality) {
@@ -279,11 +279,11 @@ const Iiif = L.TileLayer.extend({
   },
   _isValidTile: function(coords) {
     // let tileBounds = this._tileCoordsToBounds(coords);
-    let _this = this;
-    let zoom = _this._getZoomForUrl();
-    let sizes = _this._tierSizes[zoom];
-    let x = coords.x;
-    let y = coords.y;
+    const _this = this;
+    const zoom = _this._getZoomForUrl();
+    const sizes = _this._tierSizes[zoom];
+    const x = coords.x;
+    const y = coords.y;
     if (zoom < 0 && x >= 0 && y >= 0) {
       return true;
     }
@@ -296,11 +296,11 @@ const Iiif = L.TileLayer.extend({
     }
   },
   _getInitialZoom: function(mapSize) {
-    let _this = this;
-    let tolerance = 0.8;
+    const _this = this;
+    const tolerance = 0.8;
     let imageSize;
     // Calculate an offset between the zoom levels and the array accessors
-    let offset = _this._imageSizes.length - 1 - _this.options.maxNativeZoom;
+    const offset = _this._imageSizes.length - 1 - _this.options.maxNativeZoom;
     for (let i = _this._imageSizes.length - 1; i >= 0; i--) {
       imageSize = _this._imageSizes[i];
       if (imageSize.x * tolerance < mapSize.x && imageSize.y * tolerance < mapSize.y) {
