@@ -37,7 +37,7 @@
     "lint:eslint:fix": "eslint --ignore-path .gitignore --ignore-pattern internals/scripts --fix",
     "lint:js": "npm run lint:eslint -- . ",
     "lint:ts": "npm run lint:tslint",
-    "lint:tslint": "tslint --config ./tslint.json --project ./tsconfig.json",
+    "lint:tslint": "tslint --config ./tslint.json --project ./tsconfig.json --fix",
     "lint:staged": "lint-staged",
     "pretest": "npm run test:clean && npm run lint",
     "test:clean": "rimraf ./coverage",

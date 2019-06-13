@@ -1,6 +1,7 @@
 import { call, put, select, spawn, takeLatest, all } from 'redux-saga/effects';
 import { last, groupBy, pipe, values, sort, splitAt } from 'ramda';
 import saveAs from 'save-file';
+import html from './export-file';
 
 import { generate, scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
 import db from 'utils/db';
@@ -10,14 +11,21 @@ import ActionTypes from './constants';
 import Slideshow from 'types/Slideshow';
 import JSzip from 'jszip';
 import Cover from 'types/Cover';
-import { List } from 'immutable';
-import { setSlideshows } from 'containers/HomePage/saga';
+import { List, isImmutable } from 'immutable';
 import makeSelectSlideshows from 'containers/HomePage/selectors';
+import { loadSlideshowsAction } from 'containers/HomePage/actions';
 
 const selectSlicer = makeSelectSlicer();
 const selectSlideshows = makeSelectSlideshows();
 
 const BASE_TILESIZE = 512;
+
+export function* setSlideshows(slideshows: any) {
+  if (isImmutable(slideshows)) {
+    yield db.setItem('slideshows', slideshows.toJS());
+  }
+  yield put(loadSlideshowsAction(slideshows));
+}
 
 function* rawSlice(images, sliceState, slideshowId) {
   for (const imagesByScaleFactor of images) {
@@ -44,7 +52,6 @@ export function* slice(img, id: string, slicing = true) {
   );
   const azeaze = generateInfo(img, scaleFactors, id);
   db.setItem(`/info/${id}.json`, azeaze);
-
   if (slicing) {
     try {
       const parsedImage = Array.from(generate(
@@ -75,6 +82,9 @@ function* exportSlideshow(action) {
     const zip = new JSzip();
     zip.file(slideshow.image.file.name, slideshow.image.file);
     zip.file('slideshow.json', JSON.stringify(slideshow));
+    zip.file('_headers', `/*
+    Access-Control-Allow-Origin: *`);
+    zip.file('index.html', html);
     const infojson = yield db.getItem(`/info/${slideshow.image.id}.json`);
     zip.file('info.json', JSON.stringify(infojson));
     const images = zip.folder('images');
@@ -84,7 +94,7 @@ function* exportSlideshow(action) {
     ));
     for (const url of imageUrls) {
       const imgFile = yield call([db, db.getItem], url);
-      images.file(url, imgFile);
+      images.file(url.replace(`/${slideshow.image.id}`, ''), imgFile);
     }
     zip.generateAsync({type: 'blob'}).then(content =>
       saveAs(content, `${slideshow.name}.zip`),
@@ -96,7 +106,7 @@ function* exportSlideshow(action) {
 }
 
 function* importSlideshow(action) {
-  console.log(importSlideshow);
+  console.log('import', action);
   const newZip = new JSzip();
   // more files !
   const zip = yield newZip.loadAsync(action.payload);
@@ -125,14 +135,12 @@ function* importSlideshow(action) {
       `native.jpg`,
       {type: 'image/jpeg'},
     );
-    yield db.setItem(`/${relativePath.slice(8)}`, file);
+    yield db.setItem(`/${rawInfo['@id']}/${relativePath.slice(8)}`, file);
     slicerState = slicerState.set('present', slicerState.present + 1).set('level', 1);
     yield put(setProgress(slicerState));
   }
   const slideshows: List<Slideshow> = yield select(selectSlideshows);
   yield setSlideshows(slideshows.push(slideshow));
-
-  console.log(slideshow);
 }
 
 // Individual exports for testing

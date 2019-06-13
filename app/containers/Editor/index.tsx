@@ -38,7 +38,7 @@ import {
 } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-import IiifLayer from 'components/IiifLayer';
+import IiifLayer from 'components/LocalIiifLayer';
 import { useLockEffect } from 'utils/hooks';
 
 const mapStateToProps = createStructuredSelector({
@@ -93,7 +93,7 @@ const lockFuturShape = (instance?) => {
 const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(props => {
   const {slideshow, setTool, tool} = props;
   const map = props.leaflet.map;
-
+  console.log(props.slideshow.image);
   useLockEffect(map, props.slideshow.image);
 
   const onSelectClick = useCallback(() => {
@@ -129,9 +129,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
   useMousetrap('c', onCircleClick);
   useMousetrap('esc', onSelectClick);
 
-  const onCreate = useCallback((annotation) => {
-    props.createAnnotation(annotation);
-  }, []);
+  const onCreate = useCallback(props.createAnnotation, [props.createAnnotation]);
   const onLayerClick = useCallback((annotation) => {
       if (tool === SupportedShapes.selector) {
         props.changeSelection(annotation);
@@ -139,6 +137,8 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
     },
     [props.changeSelection, tool],
   );
+
+  console.log(props);
 
   return (
     <React.Fragment>
@@ -161,7 +161,6 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
 });
 
 const Editor: React.SFC<EditorProps> = memo((props) => {
-  console.log(props);
   const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
   const dispatch = useDispatch();
   const onMapClick = useCallback(() => {
@@ -218,5 +217,6 @@ export default enhancer((props: EditorProps) => {
   if (props.slideshow) {
     return <Editor {...props} />;
   }
+  console.log(props);
   return 'loading';
 });

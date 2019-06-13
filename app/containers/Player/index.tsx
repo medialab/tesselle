@@ -10,7 +10,7 @@ import useMousetrap from 'react-hook-mousetrap';
 
 import L from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
-import IiifLayer from 'components/IiifLayer';
+import IiifLayer from 'components/LocalIiifLayer';
 import { useLockEffect, useToggleBoolean } from 'utils/hooks';
 import { enhancer } from 'containers/Editor';
 import ReactDOM from 'react-dom';
@@ -57,7 +57,7 @@ export const selectNext = (selected, annotations) => {
   }
 };
 
-const Player: React.SFC<PlayerProps> = (props) => {
+export const Player: React.SFC<PlayerProps> = (props) => {
   const selected = props.selectedAnnotations.first();
 
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
