@@ -4,86 +4,42 @@
  *
  */
 
-import React, { useState, useEffect } from 'react';
-import { Map, withLeaflet } from 'react-leaflet';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
-import { compose } from 'redux';
-
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
-import makeSelectViewer from './selectors';
-import reducer from './reducer';
-import saga from './saga';
-import IiifLayer from 'components/IiifLayer';
-import L from 'leaflet';
-import { SureContextProps } from 'types';
-import { useLockEffect } from 'utils/hooks';
 import Slideshow from 'types/Slideshow';
-
-const minZoom = 1;
-const maxZoom = 20;
-
-const ViewerMap = withLeaflet<SureContextProps & any>((props) => {
-  const params = new URLSearchParams(props.location.search);
-  console.log(props.slideshow);
-  useLockEffect(props.leaflet.map, props.slideshow.image);
-  return (
-    <>
-      <IiifLayer url={`${params.get('url')}/info.json`} />
-    </>
-  );
-});
+import { Player } from 'containers/Player';
+import { List } from 'immutable';
+import Annotation from 'types/Annotation';
+import normalize from 'normalize-url';
 
 function Viewer(props) {
   const params = new URLSearchParams(props.location.search);
+  const base = normalize(params.get('url') as string);
+  console.log(base, params.get('url'));
   const [slideshow, setSlideshow] = useState<Slideshow>();
   useEffect(() => {
-    window.fetch(`${params.get('url')}/slideshow.json`).then(res => res.json()).then(setSlideshow);
+    window.fetch(`${params.get('url')}/slideshow.json`)
+    .then(res => res.json())
+    .then((rawSlideshow) => setSlideshow(new Slideshow(rawSlideshow)));
   }, []);
-  console.log(slideshow);
-  return (
-    <div className="map player-map">
-      <Map
-        boxZoom={false}
-        dragging={true}
-        doubleClickZoom={false}
-        zoomControl={false}
-        crs={L.CRS.Simple}
-        center={[0, 0]}
-        minZoom={minZoom}
-        maxZoom={maxZoom}>
-          {slideshow && <ViewerMap {...props} slideshow={slideshow} />}
-        </Map>
-    </div>
-  );
+  const [selected, setSelected] = useState<List<Annotation>>(List([]));
+  const onChangeSelection = useCallback((annotation: Annotation) => setSelected(List([annotation])), []);
+  if (slideshow) {
+    return (
+      <Player
+        url={`${base}/info.json`}
+        slideshow={slideshow}
+        selectedAnnotations={selected}
+        changeSelection={onChangeSelection}
+      />
+    );
+  } else {
+    return <div>Loading</div>;
+  }
 }
 
 Viewer.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = createStructuredSelector({
-  viewer: makeSelectViewer(),
-});
-
-function mapDispatchToProps(dispatch) {
-  return {
-    dispatch: dispatch,
-  };
-}
-
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-);
-
-const withReducer = injectReducer({ key: 'viewer', reducer: reducer });
-const withSaga = injectSaga({ key: 'viewer', saga: saga });
-
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect,
-)(Viewer);
+export default Viewer;

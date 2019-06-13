@@ -186,7 +186,7 @@ const Iiif = L.TileLayer.extend({
     _this._map.setMaxBounds(bounds, true);
   },
   _getInfo: async function() {
-    const data = await fetch(`//${this._infoUrl}`).then(response => response.json());
+    const data = await fetch(`${this._infoUrl}`).then(response => response.json());
     this.y = data.height;
     this.x = data.width;
 

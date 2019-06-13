@@ -111,6 +111,7 @@
     "localforage": "^1.7.3",
     "lodash": "4.17.11",
     "minimist": "1.2.0",
+    "normalize-url": "^4.3.0",
     "pica": "^5.0.0",
     "prop-types": "15.7.2",
     "quinoa-design-library": "^0.1.9",
