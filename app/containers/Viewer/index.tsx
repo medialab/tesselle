@@ -14,13 +14,18 @@ import { useFetchJson } from 'utils/hooks';
 
 function Viewer(props) {
   const params = new URLSearchParams(props.location.search);
-  const base = normalize(params.get('url') as string);
+  const base = normalize(window.location.protocol + params.get('url') as string);
   const slideshow = useFetchJson<Slideshow>(
     `${params.get('url')}/slideshow.json`,
     rawSlideshow => new Slideshow(rawSlideshow),
   );
   const [selected, setSelected] = useState<List<Annotation>>(List([]));
-  const onChangeSelection = useCallback((annotation: Annotation) => setSelected(List([annotation])), []);
+  const onChangeSelection = useCallback((annotation: Annotation) => {
+    const newSelection = annotation ? List([annotation]) : List([]);
+    if (!newSelection.equals(selected)) {
+      return setSelected(newSelection);
+    }
+  }, [selected]);
   if (slideshow) {
     return (
       <Player

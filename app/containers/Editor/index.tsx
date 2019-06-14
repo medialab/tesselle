@@ -39,7 +39,7 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import { LocalIiifLayer } from 'components/IiifLayer';
-import { useLockEffect, useWhyDidYouUpdate } from 'utils/hooks';
+import { useLockEffect } from 'utils/hooks';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -93,7 +93,6 @@ const lockFuturShape = (instance?) => {
 const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(props => {
   const {slideshow, setTool, tool} = props;
   const map = props.leaflet.map;
-  useWhyDidYouUpdate('editor', props);
   useLockEffect(map, props.slideshow.image);
 
   const onSelectClick = useCallback(() => {
