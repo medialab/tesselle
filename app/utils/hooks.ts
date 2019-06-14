@@ -144,10 +144,11 @@ export function useToggleBoolean(initialState: boolean = true): [boolean, () => 
 export const useFetchJson: <Model> (...args) => Model = (url: RequestInfo, onLoad: (...args) => any) => {
   const [response, setResponse] = useState();
   useEffect(() => {
-    window.fetch(url)
-    .then(res => res.json())
-    .then(onLoad)
-    .then(setResponse);
+    let request = window.fetch(url).then(res => res.json());
+    if (onLoad) {
+      request = request.then(onLoad);
+    }
+    request.then(setResponse);
   }, []);
   return response;
 };

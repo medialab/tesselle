@@ -13,7 +13,6 @@ const AnnotationCircle: React.SFC<AnnotationShapes & {
   const center = useMemo(() => coordsToLatLng(annotation.geometry.coordinates), [annotation.geometry.coordinates]);
   const ref = useRef<Circle<AddedProperties & CircleProps>>(null);
   useEdit(ref, props.editable && selected);
-  const showPopup = props.editable && !selected;
   return (
     <Circle
       key={props.className}
@@ -25,7 +24,7 @@ const AnnotationCircle: React.SFC<AnnotationShapes & {
       original
       properties={annotation.properties}
     >
-      {(showPopup) && (
+      {(!selected || !props.editable) && (
         <Tooltip opacity={1} permanent interactive>
           {annotation.properties.content}
         </Tooltip>

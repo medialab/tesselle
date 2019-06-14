@@ -38,7 +38,7 @@ import {
 } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-import IiifLayer from 'components/LocalIiifLayer';
+import { LocalIiifLayer } from 'components/IiifLayer';
 import { useLockEffect } from 'utils/hooks';
 
 const mapStateToProps = createStructuredSelector({
@@ -93,7 +93,6 @@ const lockFuturShape = (instance?) => {
 const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(props => {
   const {slideshow, setTool, tool} = props;
   const map = props.leaflet.map;
-  console.log(props.slideshow.image);
   useLockEffect(map, props.slideshow.image);
 
   const onSelectClick = useCallback(() => {
@@ -129,7 +128,6 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
   useMousetrap('c', onCircleClick);
   useMousetrap('esc', onSelectClick);
 
-  const onCreate = useCallback(props.createAnnotation, [props.createAnnotation]);
   const onLayerClick = useCallback((annotation) => {
       if (tool === SupportedShapes.selector) {
         props.changeSelection(annotation);
@@ -138,18 +136,16 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
     [props.changeSelection, tool],
   );
 
-  console.log(props);
-
   return (
     <React.Fragment>
       <AnnotationLayer
         editable
         onLayerClick={onLayerClick}
-        onCreated={onCreate}
+        onCreated={props.createAnnotation}
         data={slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations}
       />
-      <IiifLayer tileSize={512} id={props.slideshow.image.id} />
+      <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} />
       <FloatinBar
         onSelectClick={onSelectClick}
         activeButton={tool}
@@ -217,6 +213,5 @@ export default enhancer((props: EditorProps) => {
   if (props.slideshow) {
     return <Editor {...props} />;
   }
-  console.log(props);
   return 'loading';
 });

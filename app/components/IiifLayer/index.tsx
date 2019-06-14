@@ -17,6 +17,9 @@ export const DistantIiifLayer = withLeaflet(class DistantIiifLayer extends MapLa
 
   public updateLeafletElement(fromProps, toProps) {
     super.updateLeafletElement(fromProps, toProps);
+    if (toProps.url !== fromProps.url) {
+      toProps.leafletElement.setUrl(toProps.url);
+    }
   }
 });
 

@@ -291,17 +291,14 @@ interface SidebarProps extends ListProps {
 
 const Sidebar: React.SFC<SidebarProps> = props => {
   const dispatch = useDispatch();
-  const exportData = useCallback(() => {
-    dispatch(exportSlideshowActionCreator.request(props.slideshow));
-  }, [dispatch, props.slideshow]);
+  const exportData = useCallback(
+    () => dispatch(exportSlideshowActionCreator.request(props.slideshow)),
+    [dispatch, props.slideshow],
+  );
   const onClickSidebar = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
     return props.onAnnotationClick();
   }, []);
-  const onClickToggle = React.useCallback(
-    props.visible ? props.onClose : props.onOpen,
-    [props.visible],
-  );
   const onNameChange = useCallback(
     values => props.onNameChange(props.slideshow.set('name', values.title)),
     [props.slideshow],
@@ -309,7 +306,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
   const selected = props.selectedAnnotations.first();
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
-      <Header onButtonClick={onClickToggle} visible={props.visible} />
+      <Header onButtonClick={props.visible ? props.onClose : props.onOpen} visible={props.visible} />
       <div className="sidebar--wrapper">
         {props.visible && <Title title={props.slideshow.name} onChange={onNameChange} />}
         <Loader />

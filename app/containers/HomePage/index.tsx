@@ -59,7 +59,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
       return props.createSlideshow(file);
     }
     if (validateImportTypes(file)) {
-      props.importSlideshow(file);
+      return props.importSlideshow(file);
     }
   }, [props.createSlideshow, props.importSlideshow]);
   const onDelete = useCallback(pipe(removeSlideshowAction.request, dispatch), []);

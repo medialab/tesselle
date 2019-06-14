@@ -64,7 +64,6 @@ function loadImage(file: File, options: Options): Promise<File> {
     img.height = height;
     canvas.width = width;
     canvas.height = height;
-    console.log('recu', file);
 
     img.onload = () => {
       context.drawImage(
