@@ -10,8 +10,7 @@ import useMousetrap from 'react-hook-mousetrap';
 
 import L from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
-import LocalIiifLayer from 'components/LocalIiifLayer';
-import IiifLayer from 'components/IiifLayer';
+import { LocalIiifLayer, DistantIiifLayer } from 'components/IiifLayer';
 import { useLockEffect, useToggleBoolean } from 'utils/hooks';
 import { enhancer } from 'containers/Editor';
 import ReactDOM from 'react-dom';
@@ -40,14 +39,13 @@ interface PlayerProps extends PlayerContainerProps {
 const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
   const selected = props.selectedAnnotations.first();
   useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image);
-  console.log(props.url);
   return (
     <React.Fragment>
       <AnnotationLayer
         data={props.slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations} />
       {props.url ?
-        <IiifLayer url={props.url} /> :
+        <DistantIiifLayer url={props.url} /> :
         <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} />}
     </React.Fragment>
   );

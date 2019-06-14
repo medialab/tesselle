@@ -1,3 +1,5 @@
+// tslint:disable: max-classes-per-file
+
 /**
  *
  * IiifLayer
@@ -5,16 +7,25 @@
  */
 
 import { withLeaflet, MapLayer } from 'react-leaflet';
-import Iiif from './LeafletLayer';
+import DistantIiif from './DistantLeafletLayer';
+import LocalIiif from './LocalLeafletLayer';
 
-class IiifLayer extends MapLayer<any, Iiif> {
+export const DistantIiifLayer = withLeaflet(class DistantIiifLayer extends MapLayer<any, any> {
   public createLeafletElement(props) {
-    return new (Iiif as any)(props.url, this.getOptions(props));
+    return new (DistantIiif as any)(this.getOptions(props));
   }
 
   public updateLeafletElement(fromProps, toProps) {
     super.updateLeafletElement(fromProps, toProps);
   }
-}
+});
 
-export default withLeaflet(IiifLayer);
+export const LocalIiifLayer = withLeaflet(class LocalIiifLayer extends MapLayer<any, any> {
+  public createLeafletElement(props) {
+    return new (LocalIiif as any)(this.getOptions(props));
+  }
+
+  public updateLeafletElement(fromProps, toProps) {
+    super.updateLeafletElement(fromProps, toProps);
+  }
+});

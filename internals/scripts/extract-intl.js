@@ -18,12 +18,9 @@ const { appLocales, DEFAULT_LOCALE } = require('../../app/i18n');
 
 const babel = require('../../babel.config.js');
 const { presets } = babel;
-let plugins = babel.plugins || [];
+const plugins = babel.plugins || [];
 
 plugins.push('react-intl');
-
-// NOTE: styled-components plugin is filtered out as it creates errors when used with transform
-plugins = plugins.filter(p => p !== 'styled-components');
 
 // Glob to match all js files except test files
 const FILES_TO_PARSE = 'app/**/!(*.test).js';

@@ -140,3 +140,14 @@ export function useToggleBoolean(initialState: boolean = true): [boolean, () => 
     useCallback(() => setSidebarVisible(true), []),
   ];
 }
+
+export const useFetchJson: <Model> (...args) => Model = (url: RequestInfo, onLoad: (...args) => any) => {
+  const [response, setResponse] = useState();
+  useEffect(() => {
+    window.fetch(url)
+    .then(res => res.json())
+    .then(onLoad)
+    .then(setResponse);
+  }, []);
+  return response;
+};
