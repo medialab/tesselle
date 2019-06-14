@@ -42,8 +42,11 @@ export default function* editorSaga(props: RouteComponentProps<{id: string}>) {
   yield takeLatest(ActionTypes.CHANGE_ORDER, saveSlideshow);
   yield takeLatest(ActionTypes.EDIT_SLIDESHOW, saveSlideshow);
   try {
+    const immutableSlideshow = yield select(selectSlideshow);
+    if (immutableSlideshow && immutableSlideshow.id === slideshowId) {
+      return;
+    }
     const slideshows = yield db.getItem('slideshows');
-
     const rawSlideshow: Slideshow = slideshows.find(({id}) => id === slideshowId);
     if (rawSlideshow) {
       yield setSlideshow(rawSlideshow);
