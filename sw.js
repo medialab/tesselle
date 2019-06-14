@@ -7,7 +7,7 @@ var __wpo = {
     ],
     "additional": [
       "https://medialab.github.io/glisseMontre/vendor.a4e303918d84573a26cb.chunk.js",
-      "https://medialab.github.io/glisseMontre/main.6c4bf982347957a2e92b.chunk.js",
+      "https://medialab.github.io/glisseMontre/main.17158bc6a02986d67a62.chunk.js",
       "https://medialab.github.io/glisseMontre/3.5c932ddb32714b20246d.chunk.js",
       "https://medialab.github.io/glisseMontre/4.5bce229ebef2591782e1.chunk.js"
     ],
@@ -17,15 +17,15 @@ var __wpo = {
   "hashesMap": {
     "5e53ef208f3fa79a48f8374488f473c76e1233de": "https://medialab.github.io/glisseMontre/favicon.ico",
     "e9a1074e548b1aa42fb397e751baa6898a4b9ffa": "https://medialab.github.io/glisseMontre/vendor.a4e303918d84573a26cb.chunk.js",
-    "0da77fd8ceb46d5926808eeabced4fd98fc72cfc": "https://medialab.github.io/glisseMontre/main.6c4bf982347957a2e92b.chunk.js",
+    "bcea3d08b8e2c4dddd90efd658c3ed19ae5c2020": "https://medialab.github.io/glisseMontre/main.17158bc6a02986d67a62.chunk.js",
     "e7a19a334a1da29f4c5fd4a890108c7361b88448": "https://medialab.github.io/glisseMontre/runtime~main.1334d5dd2024bbb55669.js",
     "d6ed9684fb89f9400128b4ec2ded0c91ba85ca92": "https://medialab.github.io/glisseMontre/3.5c932ddb32714b20246d.chunk.js",
     "d622d1c83cbd1e7cae0493b080994550a622468b": "https://medialab.github.io/glisseMontre/4.5bce229ebef2591782e1.chunk.js",
-    "89c543390887e8718904d462ed13e453903c13b5": "https://medialab.github.io/glisseMontre/"
+    "908471e32679a837b6aca517207fd03c9c19cbc9": "https://medialab.github.io/glisseMontre/"
   },
   "strategy": "changed",
   "responseStrategy": "cache-first",
-  "version": "2019-6-14 17:52:38",
+  "version": "2019-6-14 17:59:35",
   "name": "webpack-offline",
   "pluginVersion": "5.0.6",
   "relativePaths": false
