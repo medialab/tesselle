@@ -1,7 +1,6 @@
 import L from 'leaflet';
 import { Feature } from 'geojson';
-import { map, pipe, max } from 'ramda';
-import SAT, { Vector } from 'sat';
+import { map } from 'ramda';
 import circleToPolygon from 'circle-to-polygon';
 
 import {
@@ -156,51 +155,6 @@ export function asFeature(geojson: Feature) {
 
 // We use this box creator function because of a SAT.js bug:
 // https://github.com/jriecken/sat-js/issues/55
-const createRectangle = (feature: FeatureCollection): SAT.Polygon => {
-  const coords = feature.geometry.coordinates[0];
-  const [ y, x ] = coords[0];
-  const width = Math.abs(coords[1][1] - coords[0][1]);
-  const height = Math.abs(coords[2][0] - coords[1][0]);
-  return new SAT.Box(new Vector(x, y), max(width, 0.0001), max(height, 0.0001)).toPolygon();
-};
-
-function featureToSAT(feature: FeatureCollection): SAT.Circle | SAT.Polygon | never {
-  switch (feature.properties.type) {
-    case SupportedShapes.circle:
-      return new SAT.Circle(
-        new Vector(
-          feature.geometry.coordinates[1], feature.geometry.coordinates[0],
-        ),
-        feature.properties.radius,
-      );
-    case SupportedShapes.rectangle:
-    case undefined:
-      return new SAT.Polygon(
-        new Vector(),
-        feature.geometry.coordinates[0].map(([y, x]) => new SAT.Vector(x, y)),
-      );
-  }
-  throw new Error('Case not handeled.');
-}
-
-const collisionTester = (master: SAT.Polygon) => (feature: SAT.Polygon | SAT.Circle) => {
-  if (feature instanceof SAT.Circle) {
-    return SAT.testPolygonCircle(master, feature);
-  }
-  return SAT.testPolygonPolygon(master, feature);
-};
-
-export function collision(selectionPolygon: Feature, annotations: Feature[]) {
-  return annotations.map(
-    pipe(
-      featureToSAT,
-      collisionTester(
-        createRectangle(selectionPolygon),
-      ),
-    ),
-  );
-}
-
 export function annotationToBounds(annotation: Annotation | any) {
   switch (annotation.properties.type) {
     case SupportedShapes.circle:

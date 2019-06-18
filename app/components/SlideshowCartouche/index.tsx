@@ -27,7 +27,8 @@ import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
 import { FormattedMessage } from 'react-intl';
 import Slideshow from 'types/Slideshow';
 import { Link } from 'react-router-dom';
-import { useAction, useUrl } from 'utils/hooks';
+import { useDispatch } from 'react-redux';
+import { useUrl } from 'utils/hooks';
 import { push } from 'connected-react-router';
 import messages from './messages';
 
@@ -46,17 +47,12 @@ interface OwnProps {
 }
 
 const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
-  const goToEditor = useAction(() => push(`/editor/${props.slideshow.id}`), [
-    props.slideshow.id,
-  ]);
-  const goToPlayer = useAction(() => push(`/player/${props.slideshow.id}`), [
-    props.slideshow.id,
-  ]);
+  const dispatch = useDispatch();
+  const goToEditor = React.useCallback(() => dispatch(push(`/editor/${props.slideshow.id}`)), [props.slideshow.id]);
+  const goToPlayer = React.useCallback(() => dispatch(push(`/player/${props.slideshow.id}`)), [props.slideshow.id]);
 
   const [removing, setRemoving] = React.useState<boolean>(false);
-  const [isPendingToDelete, setPendingToDelete] = React.useState<boolean>(
-    false,
-  );
+  const [isPendingToDelete, setPendingToDelete] = React.useState<boolean>(false);
 
   const onRemove = () => {
     setRemoving(true);

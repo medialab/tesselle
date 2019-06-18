@@ -5,6 +5,7 @@ import { ContainerState as EditorState } from '../containers/Editor/types';
 import { ContainerState as PlayerState } from '../containers/Player/types';
 import { ContainerState as HomePageState } from '../containers/HomePage/types';
 import { ContainerState as SlicerState } from '../containers/Slicer/types';
+import { ContainerState as ViewerState } from '../containers/Viewer/types';
 import Annotation from './Annotation';
 import { LeafletContext, ContextProps } from 'react-leaflet';
 import { List } from 'immutable';
@@ -43,6 +44,7 @@ export interface ApplicationRootState {
   readonly player: PlayerState;
   readonly homePage: HomePageState;
   readonly slicer: SlicerState;
+  readonly viewer: ViewerState;
   // for testing purposes
   readonly test: any;
 }

@@ -6,7 +6,8 @@
 
 import React, { useCallback, useState, memo, useEffect } from 'react';
 import L from 'leaflet';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import { pipe } from 'ramda';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import { Map, ZoomControl, withLeaflet } from 'react-leaflet';
@@ -37,8 +38,8 @@ import {
 } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-import IiifLayer from 'components/IiifLayer';
-import { useLockEffect, useAction } from 'utils/hooks';
+import { LocalIiifLayer } from 'components/IiifLayer';
+import { useLockEffect } from 'utils/hooks';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -92,7 +93,6 @@ const lockFuturShape = (instance?) => {
 const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(props => {
   const {slideshow, setTool, tool} = props;
   const map = props.leaflet.map;
-
   useLockEffect(map, props.slideshow.image);
 
   const onSelectClick = useCallback(() => {
@@ -128,9 +128,6 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
   useMousetrap('c', onCircleClick);
   useMousetrap('esc', onSelectClick);
 
-  const onCreate = useCallback((annotation) => {
-    props.createAnnotation(annotation);
-  }, []);
   const onLayerClick = useCallback((annotation) => {
       if (tool === SupportedShapes.selector) {
         props.changeSelection(annotation);
@@ -144,11 +141,11 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
       <AnnotationLayer
         editable
         onLayerClick={onLayerClick}
-        onCreated={onCreate}
+        onCreated={props.createAnnotation}
         data={slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations}
       />
-      <IiifLayer tileSize={512} id={props.slideshow.image.id} />
+      <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} />
       <FloatinBar
         onSelectClick={onSelectClick}
         activeButton={tool}
@@ -161,6 +158,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
 
 const Editor: React.SFC<EditorProps> = memo((props) => {
   const [tool, setTool] = useState<SupportedShapes>(SupportedShapes.selector);
+  const dispatch = useDispatch();
   const onMapClick = useCallback(() => {
     if (tool === SupportedShapes.selector) {
       props.changeSelection();
@@ -169,8 +167,8 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
   const [sidebarVisible, setSidebarVisible] = useState<boolean>(true);
   const onClose = useCallback(() => setSidebarVisible(false), []);
   const onOpen = useCallback(() => setSidebarVisible(true), []);
-  const onNameChange = useAction(editSlideshowAction, []);
-  const onRemove = useAction(removeAnnotationAction, []);
+  const onNameChange = useCallback(pipe(editSlideshowAction, dispatch), []);
+  const onRemove = useCallback(pipe(removeAnnotationAction, dispatch), []);
   const onAnnotationClick = useCallback((annotation) => {
     if (!props.selectedAnnotations.includes(annotation)) {
       setTool(SupportedShapes.selector);
@@ -179,8 +177,8 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
     }
     return;
   }, [props.selectedAnnotations]);
-  const onAnnotationChange = useAction(editAnnotationAction, []);
-  const onOrderChange = useAction(editOrderAction, []);
+  const onAnnotationChange = useCallback(pipe(editAnnotationAction, dispatch), []);
+  const onOrderChange = useCallback(pipe(editOrderAction, dispatch), []);
   return (
     <div className="map">
       <Sidebar

@@ -5,6 +5,7 @@ interface Options {
   right: number;
   bottom: number;
   left: number;
+  name?: string;
 }
 
 export function calculateAspectRatioFit(srcWidth: number, srcHeight: number, maxWidth: number, maxHeight: number) {
@@ -80,7 +81,7 @@ function loadImage(file: File, options: Options): Promise<File> {
         resolve(
           new File(
             [blob],
-            `${file.name}-${width}x${height}-${options.right}-${options.top}-${options.bottom}-${options.left}`,
+            options.name ? options.name : file.name,
             {type: file.type},
           ),
         );

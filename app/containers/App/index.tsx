@@ -13,6 +13,7 @@ import { Switch, Route } from 'react-router-dom';
 import HomePage from 'containers/HomePage';
 import Editor from 'containers/Editor';
 import Player from 'containers/Player';
+import Viewer from 'containers/Viewer';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
       <Route exact path="/" component={HomePage} />
       <Route exact path="/editor/:id" component={Editor} />
       <Route exact path="/player/:id" component={Player} />
+      <Route exact path="/viewer/" component={Viewer} />
       <Route component={NotFoundPage} />
     </Switch>
   );

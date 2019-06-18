@@ -33,6 +33,8 @@ import { Link } from 'react-router-dom';
 import Loader from 'containers/Slicer';
 import { FormattedMessage } from 'react-intl';
 import messages from './messages';
+import { useDispatch } from 'react-redux';
+import { exportSlideshowActionCreator } from 'containers/Slicer/actions';
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -288,19 +290,23 @@ interface SidebarProps extends ListProps {
 }
 
 const Sidebar: React.SFC<SidebarProps> = props => {
+  const dispatch = useDispatch();
+  const exportData = useCallback(
+    () => dispatch(exportSlideshowActionCreator.request(props.slideshow)),
+    [dispatch, props.slideshow],
+  );
   const onClickSidebar = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
     return props.onAnnotationClick();
   }, []);
-  const onClickToggle = React.useCallback(
-    props.visible ? props.onClose : props.onOpen,
-    [props.visible],
+  const onNameChange = useCallback(
+    values => props.onNameChange(props.slideshow.set('name', values.title)),
+    [props.slideshow],
   );
-  const onNameChange = useCallback(values => props.onNameChange(props.slideshow.set('name', values.title)), []);
   const selected = props.selectedAnnotations.first();
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
-      <Header onButtonClick={onClickToggle} visible={props.visible} />
+      <Header onButtonClick={props.visible ? props.onClose : props.onOpen} visible={props.visible} />
       <div className="sidebar--wrapper">
         {props.visible && <Title title={props.slideshow.name} onChange={onNameChange} />}
         <Loader />
@@ -330,7 +336,11 @@ const Sidebar: React.SFC<SidebarProps> = props => {
           <StretchedLayoutItem isFlex={1}>
             <StretchedLayoutContainer isDirection="horizontal">
               <StretchedLayoutItem isFlex={1}>
-                <Button isFullWidth isColor="info" disabled={!props.slideshow.annotations.size} >Download ↓</Button>
+                <Button
+                  onClick={exportData}
+                  isFullWidth
+                  isColor="info"
+                  disabled={!props.slideshow.annotations.size}>Download ↓</Button>
               </StretchedLayoutItem>
               <StretchedLayoutItem>
                 <Button isColor="info">?</Button>

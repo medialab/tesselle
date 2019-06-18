@@ -1,5 +1,4 @@
 import { takeLatest, put, select } from 'redux-saga/effects';
-import { push } from 'connected-react-router';
 import { when } from 'ramda';
 
 import ActionTypes from './constants';
@@ -43,13 +42,14 @@ export default function* editorSaga(props: RouteComponentProps<{id: string}>) {
   yield takeLatest(ActionTypes.CHANGE_ORDER, saveSlideshow);
   yield takeLatest(ActionTypes.EDIT_SLIDESHOW, saveSlideshow);
   try {
+    const immutableSlideshow = yield select(selectSlideshow);
+    if (immutableSlideshow && immutableSlideshow.id === slideshowId) {
+      return;
+    }
     const slideshows = yield db.getItem('slideshows');
-
     const rawSlideshow: Slideshow = slideshows.find(({id}) => id === slideshowId);
     if (rawSlideshow) {
       yield setSlideshow(rawSlideshow);
-    } else {
-      yield put(push('/'));
     }
   } catch (e) {
     console.error(e);

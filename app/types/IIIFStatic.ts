@@ -16,7 +16,7 @@ export const generateInfo = (img, scaleFactors, id) => {
   };
 };
 
-function* staticPartialTileSizes(width: number, height: number, tilesize: number, scaleFactors: number[]) {
+export function* staticPartialTileSizes(width: number, height: number, tilesize: number, scaleFactors: number[]) {
   for (const sf of scaleFactors) {
     if (sf * tilesize > width && sf * tilesize >= height) {
       continue;
@@ -47,7 +47,7 @@ function* staticPartialTileSizes(width: number, height: number, tilesize: number
   }
 }
 
-function path(region, size): string {
+export function path(region, size): string {
   return `/${region.join(',')}/${size[0]},/0/native.jpg`;
 }
 

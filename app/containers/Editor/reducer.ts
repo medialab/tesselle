@@ -15,6 +15,7 @@ import { when } from 'ramda';
 import { fromJS } from 'utils/geo';
 import { isImmutable, List } from 'immutable';
 import Slideshow from 'types/Slideshow';
+import Cover from 'types/Cover';
 
 export const initialState: ContainerState = {
   slideshow: null,
@@ -90,7 +91,7 @@ export default combineReducers<ContainerState, ContainerActions>({
           return new Slideshow({
             id: action.payload.id,
             name: action.payload.name,
-            image: action.payload.image,
+            image: new Cover(action.payload.image),
             annotations: action.payload.annotations.map(fromJS),
           });
         }

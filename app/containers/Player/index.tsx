@@ -10,7 +10,7 @@ import useMousetrap from 'react-hook-mousetrap';
 
 import L from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
-import IiifLayer from 'components/IiifLayer';
+import { LocalIiifLayer, DistantIiifLayer } from 'components/IiifLayer';
 import { useLockEffect, useToggleBoolean } from 'utils/hooks';
 import { enhancer } from 'containers/Editor';
 import ReactDOM from 'react-dom';
@@ -25,11 +25,15 @@ import './style.css';
 const minZoom = 1;
 const maxZoom = 20;
 
-interface PlayerProps {
-  readonly playing: boolean;
+interface PlayerContainerProps {
   readonly slideshow: Slideshow;
   readonly selectedAnnotations: List<Annotation>;
   readonly changeSelection: changeSelection;
+  readonly url?: string;
+}
+
+interface PlayerProps extends PlayerContainerProps {
+  readonly playing: boolean;
 }
 
 const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
@@ -40,7 +44,9 @@ const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
       <AnnotationLayer
         data={props.slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations} />
-      <IiifLayer tileSize={512} id={props.slideshow.image.id} />
+      {props.url ?
+        <DistantIiifLayer url={props.url} /> :
+        <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} />}
     </React.Fragment>
   );
 });
@@ -57,7 +63,7 @@ export const selectNext = (selected, annotations) => {
   }
 };
 
-const Player: React.SFC<PlayerProps> = (props) => {
+export const Player: React.SFC<PlayerContainerProps> = (props) => {
   const selected = props.selectedAnnotations.first();
 
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
@@ -107,6 +113,7 @@ const Player: React.SFC<PlayerProps> = (props) => {
           )}
           <ZoomControl position="topright" />
           <PlayerMap
+            url={props.url}
             playing={!sidebarVisible}
             slideshow={props.slideshow}
             changeSelection={props.changeSelection}
@@ -118,7 +125,7 @@ const Player: React.SFC<PlayerProps> = (props) => {
 
 export default enhancer(props => {
   if (props.slideshow) {
-    return (<Player {...props} />);
+    return (<Player {...props} local />);
   }
   return <div />;
 });

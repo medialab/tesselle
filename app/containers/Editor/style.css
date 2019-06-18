@@ -4,10 +4,6 @@
     display: none
 }
 
-.map .leaflet-tooltip{
-    display: none;
-}
-
 .map .leaflet-marker-icon{
     background: #ff1f4b;
     border: none;
