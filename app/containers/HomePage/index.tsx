@@ -41,8 +41,16 @@ interface HomePageProps {
   importSlideshow: (file: File) => void;
 }
 
+const acceptedFileFormats = [
+  'image/svg+xml',
+  'image/jpeg',
+  'image/png',
+  'image/bmp',
+  'image/webp',
+];
+
 const validateImageTypes: (File) => boolean = propSatisfies(
-  includes(__, ['image/jpeg', 'image/svg+xml', 'image/png']),
+  includes(__, acceptedFileFormats),
   'type',
 );
 
@@ -55,6 +63,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
   const dispatch = useDispatch();
   const onDrop = useCallback((files: File[]) => {
     const file = head(files);
+    console.log(file);
     if (validateImageTypes(file)) {
       return props.createSlideshow(file);
     }
@@ -78,7 +87,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
             </Content>
             {props.slicer.total === 0
               ? <DropZone
-                  accept={['image/jpeg', 'application/zip']}
+                  accept={acceptedFileFormats}
                   onDrop={onDrop}
                 >
                   {(props as any).loading ? 'LoadingModal...' : 'Drop a file'}
