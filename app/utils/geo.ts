@@ -1,7 +1,6 @@
 import L from 'leaflet';
 import { Feature } from 'geojson';
 import { map } from 'ramda';
-import circleToPolygon from 'circle-to-polygon';
 
 import {
   Feature as ImmutableFeature,
@@ -20,6 +19,35 @@ import Annotation, {
   annotationCirclePropertiesCreator,
 } from 'types/Annotation';
 import { SupportedShapes } from 'types';
+
+function circleToPolygon([lng, lat], radius, vertices) {
+
+  const points: any[] = [];
+  const crs = L.CRS.Simple as any;
+  const DOUBLE_PI = Math.PI * 2;
+  let angle = 0.0;
+  let projectedCentroid;
+  let point: any;
+  let project: (...args: any[]) => any;
+  let unproject: (...args: any[]) => any;
+
+  project = crs.projection.project.bind(crs.projection);
+  unproject = crs.projection.unproject.bind(crs.projection);
+  projectedCentroid = project({lng: lng, lat: lat});
+
+  for (let i = 0; i < vertices - 1; i++) {
+    angle -= (DOUBLE_PI / vertices); // clockwise
+    point = new L.Point(
+      projectedCentroid.x + (radius * Math.cos(angle)),
+      projectedCentroid.y + (radius * Math.sin(angle)),
+    );
+    if (i > 0 && point.equals(points[i - 1])) {
+      continue;
+    }
+    points.push(unproject(point));
+  }
+  return points;
+}
 
 function propertiesReviver(key, value) {
   try {
@@ -153,15 +181,10 @@ export function asFeature(geojson: Feature) {
   };
 }
 
-// We use this box creator function because of a SAT.js bug:
-// https://github.com/jriecken/sat-js/issues/55
 export function annotationToBounds(annotation: Annotation | any) {
   switch (annotation.properties.type) {
     case SupportedShapes.circle:
-      return coordsToLatLngs(
-        circleToPolygon(annotation.geometry.coordinates.toJS(), annotation.properties.radius, 5).coordinates,
-        1,
-      );
+      return circleToPolygon(annotation.geometry.coordinates.toJS(), annotation.properties.radius, 5);
     case SupportedShapes.rectangle:
     case SupportedShapes.polygon:
       return coordsToLatLngs(
