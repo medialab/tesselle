@@ -93,7 +93,12 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
                   accept={acceptedFiles}
                   onDrop={onDrop}
                 >
-                  {(props as any).loading ? 'LoadingModal...' : 'Drop a file'}
+                  {
+                    (props as any).loading ? 
+                    'Loading...' 
+                    : 
+                    'Drop an image file (.jpg, .png, or .svg) or a tesselle project (.zip)'
+                  }
                 </DropZone>
               : <Loader {...props} />
               }
@@ -101,7 +106,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
           <Column isSize={'2/3'} className="cards-column">
             <div className="list-projects__container">
               <h4 className="list-projects__title title is-2">
-                Your slideshows
+                Your documents
               </h4>
               <ul className="cards-container">
                 {props.slideshows.map(slideshow => (
