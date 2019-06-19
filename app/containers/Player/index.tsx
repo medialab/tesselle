@@ -4,76 +4,128 @@
  *
  */
 
-import React from 'react';
-import { connect } from 'react-redux';
-import { Map, ImageOverlay } from 'react-leaflet';
-import { createStructuredSelector } from 'reselect';
-import { compose } from 'redux';
+import React, { useCallback, useRef, useState } from 'react';
+import { Map, withLeaflet, ZoomControl } from 'react-leaflet';
+import useMousetrap from 'react-hook-mousetrap';
 
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
-import makeSelectPlayer from './selectors';
-import reducer from './reducer';
-import saga from './saga';
-import L, { LatLngBounds } from 'leaflet';
-// import AnnotationLayer from 'components/AnnotationLayer';
-import { useUrl, useMapLock } from 'utils/hooks';
-import 'containers/Editor/styles.css';
+import L from 'leaflet';
+import AnnotationLayer from 'components/AnnotationLayer';
+import { LocalIiifLayer, DistantIiifLayer } from 'components/IiifLayer';
+import { useLockEffect, useToggleBoolean } from 'utils/hooks';
+import { enhancer } from 'containers/Editor';
+import ReactDOM from 'react-dom';
+import Sidebar from './Sidebar';
+import Slideshow from 'types/Slideshow';
+import { List } from 'immutable';
+import Annotation from 'types/Annotation';
+import { SureContextProps, changeSelection } from 'types';
 
-const minZoom = 8;
-const maxZoom = 12;
+import './style.css';
 
-function Player(props) {
-  const slideshow = props.player;
-  const map = props.map;
-  const maxBounds: LatLngBounds = useMapLock(map, slideshow.image);
-  const imageUrl: string = useUrl(slideshow.image.file);
-  return (
-    <div className="map">
-      <Map
-        dragging={false}
-        doubleClickZoom={false}
-        // zoomControl={false}
-        // keyboard={false}
-        // scrollWheelZoom={false}
-        crs={L.CRS.Simple}
-        minZoom={minZoom}
-        maxZoom={maxZoom}
-        center={[0, 0]}>
-        {maxBounds && <ImageOverlay url={imageUrl} bounds={maxBounds} />}
-        {/* <AnnotationLayer
-          data={slideshow.annotations}
-        /> */}
-      </Map>>
-    </div>
-  );
+const minZoom = 1;
+const maxZoom = 20;
+
+interface PlayerContainerProps {
+  readonly slideshow: Slideshow;
+  readonly selectedAnnotations: List<Annotation>;
+  readonly changeSelection: changeSelection;
+  readonly url?: string;
 }
 
-const mapStateToProps = createStructuredSelector({
-  player: makeSelectPlayer(),
+interface PlayerProps extends PlayerContainerProps {
+  readonly playing: boolean;
+}
+
+const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
+  const selected = props.selectedAnnotations.first();
+  useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image);
+  return (
+    <React.Fragment>
+      <AnnotationLayer
+        data={props.slideshow.annotations}
+        selectedAnnotations={props.selectedAnnotations} />
+      {props.url ?
+        <DistantIiifLayer url={props.url} /> :
+        <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} />}
+    </React.Fragment>
+  );
 });
 
-function mapDispatchToProps(dispatch) {
-  return {
-    dispatch: dispatch,
+export const selectNext = (selected, annotations) => {
+  if (!selected) {
+    return annotations.first();
+  }
+  const index = annotations.indexOf(selected);
+  if (index + 1 < annotations.size) {
+    return annotations.get(index + 1);
+  } else {
+    return annotations.first();
+  }
+};
+
+export const Player: React.SFC<PlayerContainerProps> = (props) => {
+  const selected = props.selectedAnnotations.first();
+
+  const [mountSidebar, setMountSidebar] = useState<boolean>(false);
+  const [sidebarVisible, onClose, onOpen] = useToggleBoolean();
+  const onNext = useCallback(
+    () => props.changeSelection(selectNext(selected, props.slideshow.annotations)),
+    [selected, props.slideshow.annotations],
+  );
+  const onPrev = useCallback(
+    () => props.changeSelection(selectNext(selected, props.slideshow.annotations.reverse())),
+    [selected, props.slideshow.annotations],
+  );
+  useMousetrap('k', onNext);
+  useMousetrap('j', onPrev);
+  const onMapClick = useCallback((event) => props.changeSelection(), [props.changeSelection]);
+  const sidebarRef = useRef<Element | null>(null);
+  const sidebarReady = (domElement) => {
+    sidebarRef.current = domElement;
+    setMountSidebar(!!domElement);
   };
-}
 
-const withConnect = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-);
+  return (
+    <div className="map player-map">
+      <div ref={sidebarReady} />
+      <Map
+        boxZoom={false}
+        dragging={true}
+        doubleClickZoom={false}
+        zoomControl={false}
+        crs={L.CRS.Simple}
+        onClick={onMapClick}
+        center={[0, 0]}
+        minZoom={minZoom}
+        maxZoom={maxZoom}>
+          {(sidebarRef.current && mountSidebar) && ReactDOM.createPortal(
+            <Sidebar
+              slideshow={props.slideshow}
+              selectedAnnotations={props.selectedAnnotations}
+              visible={sidebarVisible}
+              onClose={onClose}
+              onOpen={onOpen}
+              onPrev={onPrev}
+              onNext={onNext}
+              changeSelection={props.changeSelection}
+            />,
+            sidebarRef.current,
+          )}
+          <ZoomControl position="topright" />
+          <PlayerMap
+            url={props.url}
+            playing={!sidebarVisible}
+            slideshow={props.slideshow}
+            changeSelection={props.changeSelection}
+            selectedAnnotations={props.selectedAnnotations} />
+      </Map>
+    </div>
+  );
+};
 
-const withReducer = injectReducer({ key: 'player', reducer: reducer });
-const withSaga = injectSaga({ key: 'player', saga: saga });
-
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect,
-)(props => {
-  if (props.player.player && props.player.player.default) {
-    return <Player {...props} player={props.player.player.default} map={props.player.player.map} />;
+export default enhancer(props => {
+  if (props.slideshow) {
+    return (<Player {...props} local />);
   }
   return <div />;
 });

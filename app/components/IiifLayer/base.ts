@@ -1,9 +1,37 @@
-import L, { DomEvent, Util } from 'leaflet';
-import db from 'utils/db';
-
+import L, { TileLayerOptions } from 'leaflet';
 // https://github.com/mejackreed/Leaflet-IIIF/blob/master/leaflet-iiif.js
 
-export const Iiif = L.TileLayer.extend({
+interface IiifLayerOptions extends TileLayerOptions {
+  readonly continuousWorld: boolean;
+  readonly updateWhenIdle: boolean;
+  readonly tileFormat: string;
+  readonly fitBounds: boolean;
+  readonly setMaxBounds: boolean;
+  readonly tileSize: number;
+  readonly quality: string;
+}
+
+interface IiifBase extends L.TileLayer {
+  options: IiifLayerOptions;
+  y: number;
+  x: number;
+  profile?: any;
+  maxZoom?: number;
+  maxNativeZoom?: number;
+  quality?: string;
+
+  new (options?: IiifLayerOptions);
+
+  getTileUrl(coords: { x: number; y: number; }): string;
+  onAdd(map: L.Map): this;
+  onRemove(map: L.Map): this;
+}
+
+function ceilLog2(x: number) {
+  return Math.ceil(Math.log(x) / Math.LN2);
+}
+
+const IiifBase = L.TileLayer.extend({
   options: {
     continuousWorld: true,
     tileSize: 512,
@@ -12,8 +40,14 @@ export const Iiif = L.TileLayer.extend({
     fitBounds: true,
     setMaxBounds: false,
   },
+  x: 0,
+  y: 0,
+  _levels: {},
+  _tyles: {},
 
-  initialize: function(options: any = {}) {
+  _baseUrl: '',
+
+  initialize: function(options) {
     if (options.maxZoom) {
       this._customMaxZoom = true;
     }
@@ -29,33 +63,61 @@ export const Iiif = L.TileLayer.extend({
     }
 
     options = (L as any).setOptions(this, options);
-    this._infoDeferred = this._getInfo();
-    this._baseUrl = this._templateUrl();
+    this._infoDeferred = this._getInfo().then(res => this.onInfo(res));
   },
 
-  createTile: function(coords, done) {
-    const tile = document.createElement('img');
-    DomEvent.on(tile, 'load', Util.bind(this._tileOnLoad, this, done, tile));
-    DomEvent.on(tile, 'error', Util.bind(this._tileOnError, this, done, tile));
+  onInfo: function(data) {
+    this.y = data.height;
+    this.x = data.width;
 
-    if (this.options.crossOrigin || this.options.crossOrigin === '') {
-      tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
-    }
-    tile.alt = '';
-    tile.setAttribute('role', 'presentation');
-    const inMemory = this.getTileUrl(coords);
-    db.getItem(inMemory).then((file: File) => {
-      if (file) {
-        tile.src = window.URL.createObjectURL(file);
-        tile.onload = () => {
-          done(null, tile);
-        };
-      } else {
-        console.log('🔥', inMemory, '🔥');
-        done(new Error('not in memory: ' + inMemory));
+    const tierSizes: any[] = [];
+    const imageSizes: any[] = [];
+    let scale;
+    let width;
+    let height;
+    let tilesX;
+    let tilesY;
+
+    // Set quality based off of IIIF version
+    this.profile = data.profile instanceof Array ? this.profile = data.profile[0] : this.profile = data.profile ;
+
+    this._setQuality();
+
+    // Unless an explicit tileSize is set, use a preferred tileSize
+    if (!this._explicitTileSize) {
+      // Set the default first
+      this.options.tileSize = 512;
+      if (data.tiles) {
+        // Image API 2.0 Case
+        this.options.tileSize = data.tiles[0].width;
+      } else if (data.tile_width) {
+        // Image API 1.1 Case
+        this.options.tileSize = data.tile_width;
       }
-    });
-    return tile;
+    }
+
+    // Calculates maximum native zoom for the layer
+    this.maxNativeZoom = Math.max(ceilLog2(this.x / this.options.tileSize),
+      ceilLog2(this.y / this.options.tileSize));
+    this.options.maxNativeZoom = this.maxNativeZoom;
+
+    // Enable zooming further than native if maxZoom option supplied
+    this.maxZoom = this._customMaxZoom && this.options.maxZoom > this.maxNativeZoom
+      ? this.options.maxZoom
+      : this.maxNativeZoom;
+
+    for (let i = 0; i <= this.maxZoom; i++) {
+      scale = Math.pow(2, this.maxNativeZoom - i);
+      width = Math.ceil(this.x / scale);
+      height = Math.ceil(this.y / scale);
+      tilesX = Math.ceil(width / this.options.tileSize);
+      tilesY = Math.ceil(height / this.options.tileSize);
+      tierSizes.push([tilesX, tilesY]);
+      imageSizes.push(L.point(width, height));
+    }
+
+    this._tierSizes = tierSizes;
+    this._imageSizes = imageSizes;
   },
 
   getTileUrl: function(coords) {
@@ -88,6 +150,7 @@ export const Iiif = L.TileLayer.extend({
     // debugger;
     return path;
   },
+
   onAdd: function(map) {
     // Wait for deferred to complete
     this._infoDeferred.then(() => {
@@ -145,7 +208,6 @@ export const Iiif = L.TileLayer.extend({
     });
   },
   onRemove: function(map) {
-
     map._layersMinZoom = this._prev_map_layersMinZoom;
     this._imageSizes = this._imageSizesOriginal;
 
@@ -153,11 +215,8 @@ export const Iiif = L.TileLayer.extend({
     if (this.options.setMaxBounds) {
       map.setMaxBounds(null);
     }
-
-    // Call remove TileLayer
-    L.TileLayer.prototype.onRemove.call(this, map);
-
   },
+
   _fitBounds: function() {
     // Find best zoom level and center map
     const initialZoom = this._getInitialZoom(this._map.getSize());
@@ -169,6 +228,7 @@ export const Iiif = L.TileLayer.extend({
 
     this._map.fitBounds(bounds, true);
   },
+
   _setMaxBounds: function() {
     // Find best zoom level, center map, and constrain viewer
     const initialZoom = this._getInitialZoom(this._map.getSize());
@@ -178,64 +238,6 @@ export const Iiif = L.TileLayer.extend({
     const bounds = L.latLngBounds(sw, ne);
 
     this._map.setMaxBounds(bounds, true);
-  },
-  _getInfo: async function() {
-    const data: any = await db.getItem('info.json');
-    this.y = data.height;
-    this.x = data.width;
-
-    const tierSizes: any[] = [];
-    const imageSizes: any[] = [];
-    let scale;
-    let width;
-    let height;
-    let tilesX;
-    let tilesY;
-
-    // Set quality based off of IIIF version
-    this.profile = data.profile instanceof Array ? this.profile = data.profile[0] : this.profile = data.profile ;
-
-    this._setQuality();
-
-    // Unless an explicit tileSize is set, use a preferred tileSize
-    if (!this._explicitTileSize) {
-      // Set the default first
-      this.options.tileSize = 256;
-      if (data.tiles) {
-        // Image API 2.0 Case
-        this.options.tileSize = data.tiles[0].width;
-      } else if (data.tile_width) {
-        // Image API 1.1 Case
-        this.options.tileSize = data.tile_width;
-      }
-    }
-
-    function ceilLog2(x) {
-      return Math.ceil(Math.log(x) / Math.LN2);
-    }
-
-    // Calculates maximum native zoom for the layer
-    this.maxNativeZoom = Math.max(ceilLog2(this.x / this.options.tileSize),
-      ceilLog2(this.y / this.options.tileSize));
-    this.options.maxNativeZoom = this.maxNativeZoom;
-
-    // Enable zooming further than native if maxZoom option supplied
-    this.maxZoom = this._customMaxZoom && this.options.maxZoom > this.maxNativeZoom
-      ? this.options.maxZoom
-      : this.maxNativeZoom;
-
-    for (let i = 0; i <= this.maxZoom; i++) {
-      scale = Math.pow(2, this.maxNativeZoom - i);
-      width = Math.ceil(this.x / scale);
-      height = Math.ceil(this.y / scale);
-      tilesX = Math.ceil(width / this.options.tileSize);
-      tilesY = Math.ceil(height / this.options.tileSize);
-      tierSizes.push([tilesX, tilesY]);
-      imageSizes.push(L.point(width, height));
-    }
-
-    this._tierSizes = tierSizes;
-    this._imageSizes = imageSizes;
   },
 
   _setQuality: function() {
@@ -250,9 +252,6 @@ export const Iiif = L.TileLayer.extend({
       profileToCheck = profileToCheck['@id'];
     }
     this.options.quality = 'native';
-  },
-  _templateUrl: () => {
-    return '/{region}/{size}/{rotation}/{quality}.{format}';
   },
   _isValidTile: function(coords) {
     const zoom = this._getZoomForUrl();
@@ -288,4 +287,4 @@ export const Iiif = L.TileLayer.extend({
   },
 });
 
-export default Iiif;
+export default IiifBase;

@@ -1,7 +1,7 @@
 import L from 'leaflet';
 import { Feature } from 'geojson';
-import { map, pipe, max } from 'ramda';
-import SAT, { Vector } from 'sat';
+import { map } from 'ramda';
+import circleToPolygon from 'circle-to-polygon';
 
 import {
   Feature as ImmutableFeature,
@@ -15,20 +15,23 @@ import {
   MultiPolygon,
 } from 'immutable-geojson';
 import { fromJS as rawFromJs, Map } from 'immutable';
-import {
+import Annotation, {
   annotationPropertiesCreator,
   annotationCirclePropertiesCreator,
-  annotationRectanglePropertiesCreator,
 } from 'types/Annotation';
 import { SupportedShapes } from 'types';
 
 function propertiesReviver(key, value) {
-  if (value.has('radius')) {
-    return annotationCirclePropertiesCreator(value.toMap());
-  } else if (value.has('type')) {
-    return annotationRectanglePropertiesCreator(value.toMap());
+  try {
+    if (value.has('radius')) {
+      return annotationCirclePropertiesCreator(value.toMap());
+    }
+    return annotationPropertiesCreator(value.toMap());
+  } catch (e) {
+    console.error('fromJS error');
+    console.log(key, value);
+    return rawFromJs(value);
   }
-  return annotationPropertiesCreator(value.toMap());
 }
 
 export const fromJS = (value) => {
@@ -103,7 +106,7 @@ export function latLngsToCoords(latlngs: [], levelsDeep?: number, closed?: boole
 // @function coordsToLatLng(coords: Array): LatLng
 // Creates a `LatLng` object from an array of 2 numbers (longitude, latitude)
 // or 3 numbers (longitude, latitude, altitude) used in GeoJSON for points.
-export const coordsToLatLng = (coords: [number, number, number]): L.LatLng => new L.LatLng(
+export const coordsToLatLng = (coords: [number, number, number] | number[]): L.LatLng => new L.LatLng(
   coords[1],
   coords[0],
   coords[2],
@@ -152,49 +155,21 @@ export function asFeature(geojson: Feature) {
 
 // We use this box creator function because of a SAT.js bug:
 // https://github.com/jriecken/sat-js/issues/55
-const createRectangle = (feature: FeatureCollection): SAT.Polygon => {
-  const coords = feature.geometry.coordinates[0];
-  const [ y, x ] = coords[0];
-  const width = Math.abs(coords[1][1] - coords[0][1]);
-  const height = Math.abs(coords[2][0] - coords[1][0]);
-  return new SAT.Box(new Vector(x, y), max(width, 0.0001), max(height, 0.0001)).toPolygon();
-};
-
-function featureToSAT(feature: FeatureCollection): SAT.Circle | SAT.Polygon | never {
-  switch (feature.properties.type) {
+export function annotationToBounds(annotation: Annotation | any) {
+  switch (annotation.properties.type) {
     case SupportedShapes.circle:
-      return new SAT.Circle(
-        new Vector(
-          feature.geometry.coordinates[1], feature.geometry.coordinates[0],
-        ),
-        feature.properties.radius,
+      return coordsToLatLngs(
+        circleToPolygon(annotation.geometry.coordinates.toJS(), annotation.properties.radius, 5).coordinates,
+        1,
       );
     case SupportedShapes.rectangle:
-    case undefined:
-      return new SAT.Polygon(
-        new Vector(),
-        feature.geometry.coordinates[0].map(([y, x]) => new SAT.Vector(x, y)),
-      );
+    case SupportedShapes.polygon:
+      return coordsToLatLngs(
+        annotation.geometry.coordinates,
+        annotation.geometry.type === 'Polygon' ? 1 : 2,
+      ).toJS();
   }
-  throw new Error('Case not handeled.');
-}
-
-const collisionTester = (master: SAT.Polygon) => (feature: SAT.Polygon | SAT.Circle) => {
-  if (feature instanceof SAT.Circle) {
-    return SAT.testPolygonCircle(master, feature);
-  }
-  return SAT.testPolygonPolygon(master, feature);
-};
-
-export function collision(selectionPolygon: Feature, annotations: Feature[]) {
-  return annotations.map(
-    pipe(
-      featureToSAT,
-      collisionTester(
-        createRectangle(selectionPolygon),
-      ),
-    ),
-  );
+  throw new Error('Unsupportd shape:' + annotation.properties.type);
 }
 
 export const allEvents = [

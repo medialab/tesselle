@@ -1,36 +1,42 @@
-import uuid from 'uuid';
 import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
+import uuid from 'uuid';
 import Annotation from 'types/Annotation';
-import slicer from 'utils/slice';
-import db from 'utils/db';
-import Cover from './Cover';
 
-interface SlideshowArgs {
+import Cover from './Cover';
+import { fromJS } from 'utils/geo';
+import loadImage from 'utils/imageManipulation';
+
+export interface SlideshowArgs {
   id?: string;
+  name?: string;
   annotations?: List<Annotation>;
   image?: Cover;
 }
 
 class Slideshow extends Record({
-  id: uuid(),
+  id: '',
+  name: 'Unnamed Slideshow',
   annotations: List(),
   image: {},
 }) {
-  public readonly id!: string;
+  public readonly name!: string;
   public readonly annotations!: List<Annotation>;
   public readonly image!: Cover;
   constructor(params?: SlideshowArgs) {
     if (params) {
+      if (params.annotations instanceof Array) {
+        params.annotations = List<Annotation>(params.annotations.map(fromJS));
+      }
       if (!params.id) {
         params.id = uuid();
       }
-      if (params.annotations instanceof Array) {
-        params.annotations = List<Annotation>(params.annotations);
-      }
       super(params);
     } else {
-      super();
+      const defaultParams = {
+        id: uuid() as string,
+      };
+      super(defaultParams);
     }
   }
   public with(values: SlideshowArgs) {
@@ -73,54 +79,40 @@ const getSvgSize = (svgElement: Element): Box | never => {
   throw new Error('No width / height nor viewBox');
 };
 
-const generateInfo = img => {
-  return {
-    '@context': 'http://library.stanford.edu/iiif/image-api/1.1/context.json',
-    '@id': 'test-image',
-    'formats': ['jpg'],
-    'height': img.height,
-    'profile': 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0',
-    'qualities': ['native'],
-    'scale_factors': [
-      1,
-      2,
-      4,
-    ],
-    'tile_height': 512,
-    'tile_width': 512,
-    'width': img.width,
-  };
-};
-
-export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
+export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
   new Promise((resolve, reject) => {
     if (file.type === svgType) {
       const reader = new FileReader();
       reader.onload = () => {
         const container = document.createElement('div');
         container.innerHTML = reader.result as string;
-        const svgElement = container.getElementsByTagName('svg')[0] as Element;
+        const svgElement = container.getElementsByTagName('svg')[0] as SVGElement;
         try {
           const box: Box = getSvgSize(svgElement);
-          return resolve(
+          return resolve([
             new Slideshow({
               image: new Cover({
-                file: false,
+                file: {} as any,
                 width: box.width,
                 height: box.height,
               }),
-            }));
+            }),
+            svgElement,
+          ]);
         } catch (error) {
           svgElement.setAttribute('width', maxX);
           svgElement.setAttribute('height', maxY);
           const box: Box = getSvgSize(svgElement);
-          return resolve(new Slideshow({
-            image: new Cover({
-              file: false,
-              width: box.width,
-              height: box.height,
+          return resolve([
+            new Slideshow({
+              image: new Cover({
+                file: {} as any,
+                width: box.width,
+                height: box.height,
+              }),
             }),
-          }));
+            svgElement,
+          ]);
         }
       };
       reader.readAsText(file);
@@ -135,19 +127,28 @@ export const slideshowCreator = (file: File, slicing): Promise<Slideshow> =>
         if (img.height === 0) {
           return reject(new Error('Slideshow.image has a height of 0'));
         }
-        await db.setItem('info.json', generateInfo(img));
-        if (slicing) {
-          for (const [url, file] of await slicer(img)) {
-            await db.setItem(url, file);
-          }
-        }
-        return resolve(new Slideshow({
+        const MAX_DIMENSION = 100;
+        const thumbnailWidth = img.width > img.height ? MAX_DIMENSION : (img.width / img.height) * MAX_DIMENSION;
+        const thumbnailHeight = img.height > img.height ? MAX_DIMENSION : (img.height / img.width) * MAX_DIMENSION;
+        const thumbnail = await loadImage(file, {
+          maxWidth: thumbnailWidth,
+          maxHeight: thumbnailHeight,
+          left: 0,
+          top: 0,
+          bottom: img.height,
+          right: img.width,
+          name: 'thumbnail.jpg',
+        });
+
+        const slideshow = new Slideshow({
           image: new Cover({
-            file: slicing,
+            file: thumbnail,
             width: img.width,
             height: img.height,
           }),
-        }));
+        });
+        window.URL.revokeObjectURL(url);
+        return resolve([slideshow, img]);
       };
       img.onerror = (error) => {
         console.error(error);

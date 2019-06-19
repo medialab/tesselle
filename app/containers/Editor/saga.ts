@@ -1,12 +1,13 @@
 import { takeLatest, put, select } from 'redux-saga/effects';
-import { push } from 'connected-react-router';
+import { when } from 'ramda';
 
 import ActionTypes from './constants';
-import Slideshow, { slideshowCreator } from '../../types/Slideshow';
-import { createSlideshowAction } from './actions';
+import Slideshow from '../../types/Slideshow';
 import db from 'utils/db';
 import { makeSelectSlideshow } from './selectors';
 import { isImmutable } from 'immutable';
+import { RouteComponentProps } from 'react-router';
+import { editSlideshowAction } from './actions';
 
 const selectSlideshow = makeSelectSlideshow();
 
@@ -15,55 +16,40 @@ export function* setSlideshow(slideshow: Slideshow) {
     yield db.setItem('slideshow', slideshow.toJS());
   }
   yield put(
-    createSlideshowAction.success(
-      slideshow,
-    ),
+    editSlideshowAction(slideshow),
   );
 }
 
-export function* createSlideshow(action: any, slice) {
-  try {
-    const slideshow: Slideshow = yield slideshowCreator(action.payload, slice);
-    // sagas: slideshow initalized
-    // sagas: sending slideshow to reducer
-    yield setSlideshow(slideshow);
-    // sagas: slideshow sent to reducer
-    return slideshow;
-  } catch (e) {
-    console.info('This should not happend');
-    console.error(e);
-  }
-}
-
-export function* createAndRedirect(action) {
-  // sagas: createSlideshow
-  yield db.clear();
-  yield createSlideshow(action, true);
-  // sagas: slidehsow created
-  // sagas: redirect to editor
-  yield put(push('/editor'));
-}
-
-export function* saveSlideshow() {
+export function* saveSlideshow(action) {
   const slideshow: Slideshow = yield select(selectSlideshow);
   if (isImmutable(slideshow)) {
-    yield db.setItem('slideshow', slideshow.toJS());
+    const slideshows = yield db.getItem('slideshows');
+    yield db.setItem('slideshows', slideshows.map(
+      when(
+        raw => raw.id === slideshow.id,
+        _ => slideshow.toJS(),
+      ),
+    ));
   }
 }
 
 // Individual exports for testing
-export default function* editorSaga() {
-  yield takeLatest(ActionTypes.CREATE_SLIDESHOW, createAndRedirect);
+export default function* editorSaga(props: RouteComponentProps<{id: string}>) {
+  const slideshowId = props.match.params.id;
   yield takeLatest(ActionTypes.CREATE_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.REMOVE_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.EDIT_ANNOTATION, saveSlideshow);
   yield takeLatest(ActionTypes.CHANGE_ORDER, saveSlideshow);
+  yield takeLatest(ActionTypes.EDIT_SLIDESHOW, saveSlideshow);
   try {
-    const rawSlideshow: Slideshow = yield db.getItem('slideshow');
+    const immutableSlideshow = yield select(selectSlideshow);
+    if (immutableSlideshow && immutableSlideshow.id === slideshowId) {
+      return;
+    }
+    const slideshows = yield db.getItem('slideshows');
+    const rawSlideshow: Slideshow = slideshows.find(({id}) => id === slideshowId);
     if (rawSlideshow) {
       yield setSlideshow(rawSlideshow);
-    } else {
-      yield put(push('/'));
     }
   } catch (e) {
     console.error(e);

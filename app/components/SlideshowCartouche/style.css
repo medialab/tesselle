@@ -1,0 +1,33 @@
+
+
+.SlideshowCartouche .thumbnail-container {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.SlideshowCartouche .content{
+    color:#4a4a4a;
+}
+
+.SlideshowCartouche .content a{
+    outline: none;
+}
+
+.SlideshowCartouche .annotations-container{
+    display: flex;
+}
+
+.SlideshowCartouche .annotations-number{
+    background:#f2f2f2;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    font-size: .7em;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
+    margin-right: .5rem;
+}

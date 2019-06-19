@@ -4,7 +4,7 @@
  *
  */
 
-import { createAsyncAction, createAction } from 'typesafe-actions';
+import { createAction } from 'typesafe-actions';
 import {} from './types';
 
 import ActionTypes from './constants';
@@ -13,17 +13,9 @@ import Annotation from 'types/Annotation';
 import { List } from 'immutable';
 import { Feature, Point } from 'geojson';
 
-export const createSlideshowAction = createAsyncAction(
-    ActionTypes.CREATE_SLIDESHOW,
-    ActionTypes.CREATE_SLIDESHOW_SUCCESS,
-    ActionTypes.CREATE_SLIDESHOW_FAILURE,
-  )<File, Slideshow, Error>();
-
 export const addAnnotationAction = createAction(ActionTypes.CREATE_ANNOTATION, action => {
   return (feature: Feature<Point, any>) => action(feature);
 });
-
-export const setMap = createAction(ActionTypes.SET_MAP, action => (map: L.Map) => action(map));
 
 export const removeAnnotationAction = createAction(
   ActionTypes.REMOVE_ANNOTATION,
@@ -48,3 +40,7 @@ export const changeSelectionAction = createAction(
   action => (select?: Annotation | List<Annotation>, meta?) => action(select, meta),
 );
 
+export const editSlideshowAction = createAction(
+  ActionTypes.EDIT_SLIDESHOW,
+  action => (slideshow: Slideshow) => action(slideshow),
+);

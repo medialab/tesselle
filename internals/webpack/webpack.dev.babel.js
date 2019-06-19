@@ -7,12 +7,8 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 
-const createStyledComponentsTransformer = require('typescript-plugin-styled-components')
-  .default;
-
 // 2. create a transformer;
 // the factory additionally accepts an options object which described below
-const styledComponentsTransformer = createStyledComponentsTransformer();
 
 module.exports = require('./webpack.base.babel')({
   mode: 'development',
@@ -47,6 +43,11 @@ module.exports = require('./webpack.base.babel')({
       exclude: /a\.js|node_modules/, // exclude node_modules
       failOnError: false, // show a warning when there is a circular dependency
     }),
+    new webpack.DefinePlugin({
+      'process.env': {
+        basename: "'/'",
+      },
+    }),
   ],
 
   tsLoaders: [
@@ -58,9 +59,6 @@ module.exports = require('./webpack.base.babel')({
           babelrc: true,
         },
         useCache: true,
-        getCustomTransformers: () => ({
-          before: [styledComponentsTransformer],
-        }),
       },
     },
   ],

@@ -1,14 +1,11 @@
-import { ReactReduxContext } from 'react-redux';
-import React, { useContext, useRef, useEffect, useState, useMemo, useLayoutEffect } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useLayoutEffect, useCallback } from 'react';
 
 import useMousetrap from 'react-hook-mousetrap';
 import { SupportedShapes } from 'types';
 import { LatLngBounds } from 'leaflet';
 import Cover from 'types/Cover';
+import { annotationToBounds } from './geo';
 
-export function useDispatch() {
-  return useContext(ReactReduxContext).store.dispatch;
-}
 // Hook
 export function useWhyDidYouUpdate(name, props) {
   // Get a mutable ref object where we can store props ...
@@ -36,6 +33,8 @@ export function useWhyDidYouUpdate(name, props) {
       // If changesObj not empty then output to console
       if (Object.keys(changesObj).length) {
         console.log('[why-did-you-update]', name, changesObj);
+      } else {
+        console.log('[why-did-you-update]', 'no changes in props');
       }
     }
 
@@ -74,23 +73,23 @@ export const useTools = (defaultTool): [
   ];
 };
 
-export const useFlyTo = (map: L.Map, bounds: LatLngBounds): void =>
-  useEffect(() => {
-    if (map && bounds) {
-      map.fitBounds(bounds);
-    }
-  }, [map, bounds]);
-
 export const useUrl = (file: File): string => {
   const url = useMemo(() => window.URL.createObjectURL(file), [file]);
   useEffect(() => () => window.URL.revokeObjectURL(url), [url]);
   return url;
 };
 
-export function useMapLock(map: L.Map, image: Cover): LatLngBounds {
+export const useFlyTo = (map?: L.Map, bounds?: LatLngBounds): void =>
+  useEffect(() => {
+    if (map && bounds) {
+      map.fitBounds(bounds, {animate: true});
+    }
+  }, [map, bounds]);
+
+export function useMapLock(map?: L.Map, image?: Cover): LatLngBounds {
   const [maxBounds, setMaxBounds] = useState();
   useLayoutEffect(() => {
-    if (map !== null) {
+    if (map && image) {
       setMaxBounds(
         new LatLngBounds(
           map.unproject([0, image.height * 2], map.getMaxZoom()),
@@ -102,6 +101,26 @@ export function useMapLock(map: L.Map, image: Cover): LatLngBounds {
   return maxBounds;
 }
 
+export const useLockEffect = (map: L.Map, image: any) => {
+  useEffect(() => {
+    if (image.height) {
+      map.fitBounds(
+        new LatLngBounds(
+          map.unproject([0, image.height * 2], map.getMaxZoom()),
+          map.unproject([image.width * 2, 0], map.getMaxZoom()),
+        ),
+        {animate: true},
+      );
+    } else {
+      map.fitBounds(
+        annotationToBounds(image),
+        {animate: true},
+      );
+    }
+  }, [map, image]);
+};
+
+
 export const useEdit = (ref, selected) => {
   useEffect(() => {
     if (ref.current) {
@@ -112,4 +131,24 @@ export const useEdit = (ref, selected) => {
       }
     }
   });
+};
+export function useToggleBoolean(initialState: boolean = true): [boolean, () => void, () => void] {
+  const [sidebarVisible, setSidebarVisible] = useState<boolean>(initialState);
+  return [
+    sidebarVisible,
+    useCallback(() => setSidebarVisible(false), []),
+    useCallback(() => setSidebarVisible(true), []),
+  ];
+}
+
+export const useFetchJson: <Model> (...args) => Model = (url: RequestInfo, onLoad: (...args) => any) => {
+  const [response, setResponse] = useState();
+  useEffect(() => {
+    let request = window.fetch(url).then(res => res.json());
+    if (onLoad) {
+      request = request.then(onLoad);
+    }
+    request.then(setResponse);
+  }, []);
+  return response;
 };

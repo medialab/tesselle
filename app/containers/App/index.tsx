@@ -13,19 +13,17 @@ import { Switch, Route } from 'react-router-dom';
 import HomePage from 'containers/HomePage';
 import Editor from 'containers/Editor';
 import Player from 'containers/Player';
+import Viewer from 'containers/Viewer';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 
-import GlobalStyle from '../../global-styles';
 export default function App() {
   return (
-    <div>
-      <Switch>
-        <Route exact path="/" component={HomePage} />
-        <Route exact path="/editor" component={Editor} />
-        <Route exact path="/player" component={Player} />
-        <Route component={NotFoundPage} />
-      </Switch>
-      <GlobalStyle />
-    </div>
+    <Switch>
+      <Route exact path="/" component={HomePage} />
+      <Route exact path="/editor/:id" component={Editor} />
+      <Route exact path="/player/:id" component={Player} />
+      <Route exact path="/viewer/" component={Viewer} />
+      <Route component={NotFoundPage} />
+    </Switch>
   );
 }

@@ -9,7 +9,6 @@ import { List } from 'immutable';
 interface EditorState {
   readonly slideshow: Slideshow | null;
   readonly selectedAnnotations: List<Annotation>;
-  readonly map: L.Map | null;
 }
 
 /* --- ACTIONS --- */

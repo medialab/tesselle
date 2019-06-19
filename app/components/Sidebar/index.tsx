@@ -4,81 +4,112 @@
  *
  */
 
-import * as React from 'react';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
 import { List } from 'immutable';
-import { Button, Box, StretchedLayoutContainer, StretchedLayoutItem, Icon } from 'quinoa-design-library';
-import { useDispatch } from 'utils/hooks';
+import {
+  Button,
+  Box,
+  StretchedLayoutContainer,
+  StretchedLayoutItem,
+  Icon,
+  Title as SimpleTitle,
+} from 'quinoa-design-library';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Formik, Form, FormikValues, FormikErrors, Field } from 'formik';
+import { Formik, Form, FormikValues, FormikErrors, Field, FormikActions, FieldProps } from 'formik';
 import cx from 'classnames';
 import Textarea from 'react-textarea-autosize';
 
-const CustomTextarea = ({field, form: {touched, errors}, ...props}: any) => (
-  <div>
-    <Textarea {...field} {...props} />
-    {touched[field.name] &&
-      errors[field.name] && <div className="error">{errors[field.name]}</div>}
-  </div>
-);
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMinusSquare } from '@fortawesome/free-solid-svg-icons/faMinusSquare';
+import { faPlusSquare } from '@fortawesome/free-solid-svg-icons/faPlusSquare';
 
-import {
-  removeAnnotationAction,
-  editOrderAction,
-  changeSelectionAction,
-  editAnnotationAction,
-} from 'containers/Editor/actions';
 import Annotation from 'types/Annotation';
+import Slideshow from 'types/Slideshow';
 import icons from 'quinoa-design-library/src/themes/millet/icons';
 
 import './styles.css';
 import { DomEvent } from 'leaflet';
+import { Link } from 'react-router-dom';
+import Loader from 'containers/Slicer';
+import { FormattedMessage } from 'react-intl';
+import messages from './messages';
+import { useDispatch } from 'react-redux';
+import { exportSlideshowActionCreator } from 'containers/Slicer/actions';
 
-interface MenuItemProps {
-  data: Annotation;
-  selected: boolean;
-  draggableProps;
-  dragHandleProps;
-}
+const CustomTextarea: React.SFC<FieldProps & {
+  readonly selected: boolean;
+}> = ({field, form: {touched, errors}, ...props}) => {
+  const ref = useRef<any>(null);
+  useEffect(() => {
+    if (props.selected) {
+      ref.current.focus();
+    }
+  }, [props.selected]);
+  return (
+    <div>
+      <FormattedMessage {...messages.annotationPlaceholder}>{
+        msg => (
+          <>
+            <Textarea inputRef={ref} autoFocus={props.selected} {...field} {...props} placeholder={msg as string} />
+            {touched[field.name] &&
+              errors[field.name] && <div className="error">{errors[field.name]}</div>}
+          </>
+        )
+      }</FormattedMessage>
+    </div>
+  );
+};
 
 const validator = (values: FormikValues) => {
   const errors: FormikErrors<any> = {};
   if (!values.content && !values.content.length) {
-    errors.content = 'Required';
+    // errors.content = 'Required';
   }
   return errors;
 };
 
-const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwardedRef) => {
-  const dispatch = useDispatch();
-  const onRemove = React.useCallback(
-    (event) => {
-      DomEvent.stopPropagation(event);
-      return dispatch(removeAnnotationAction(props.data));
-    },
-    [props.data],
-  );
-  const changeSelection = React.useCallback((event) => {
+interface MenuItemProps {
+  data: Annotation;
+  selected: boolean;
+  minified?: boolean;
+  onRemove: (annotation: Annotation) => void;
+  onClick: (annotation: Annotation) => void;
+  onChange: (oldAnnotation: Annotation, newAnnotation: Annotation) => void;
+  draggableProps?;
+  dragHandleProps?;
+}
+
+const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
+  const onClick = React.useCallback((event) => {
     event.stopPropagation();
-    if (!props.selected) {
-      dispatch(changeSelectionAction(props.data));
-    }
-  }, [props.data, props.selected]);
-  const onSubmit = React.useCallback((values) => {
+    props.onClick(props.data);
+  }, [props.onClick, props.data]);
+
+  const onSubmit = useCallback((values) => {
     if (values.content !== props.data.properties.content) {
-      dispatch(
-        editAnnotationAction(
-          props.data,
-          props.data.set(
-            'properties',
-            props.data.properties.set('content', values.content),
-          ),
+      props.onChange(
+        props.data,
+        props.data.set(
+          'properties',
+          props.data.properties.set('content', values.content),
         ),
       );
     }
-  }, [props.data]);
+  }, [props.data, props.onChange]);
+
+  const onRemove = useCallback(event => {
+    DomEvent.preventDefault(event);
+    props.onRemove(props.data);
+  }, [props.data, props.onRemove]);
+
+  const ContainerEl = props.minified ? React.Fragment : Box;
   return (
-    <div ref={forwardedRef} {...props.draggableProps} onClick={changeSelection}>
-      <Box style={{background: props.selected ? '#3849a2' : 'transparent'}}>
+    <div className={cx({
+      'sidebar--menu-item sidebar--spacing': true,
+      'sidebar--menu-item__selected': props.selected,
+      'sidebar--menu-item__minified': props.minified,
+    })} ref={forwardedRef} {...props.draggableProps} onClick={onClick}>
+      <ContainerEl>
         <StretchedLayoutContainer isDirection="horizontal">
           <StretchedLayoutItem
             style={{
@@ -86,7 +117,7 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
             }}
             isFlex={1}>
             <Formik
-              initialValues={props.data.properties}
+              initialValues={useMemo(() => props.data.properties.toJS(), [props.data.properties])}
               onSubmit={onSubmit}
               validate={validator}
             >{(innerProps) => {
@@ -99,8 +130,12 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
                   <Field
                     minRows={1}
                     maxRows={5}
+                    selected={props.selected}
                     onBlur={onBlur}
-                    className={cx('textarea', 'sidebar--item-field', props.selected && 'sidebar--item-field--selected')}
+                    className={cx('textarea', 'sidebar--item-field', {
+                      'sidebar--item-field--selected': props.selected,
+                      'sidebar--item-field--minified': props.minified ,
+                    })}
                     name="content"
                     component={CustomTextarea}
                   />
@@ -119,7 +154,7 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
                   <img src={icons.remove.black.svg} />
                 </Icon>
               </Button>
-              <div {...props.dragHandleProps}>
+              {props.dragHandleProps && <div {...props.dragHandleProps}>
                 <div
                   className="button is-lock-status-open"
                   style={{marginBottom: '.5rem'}}
@@ -130,19 +165,14 @@ const MenuItem: any = React.forwardRef<any, any>((props: MenuItemProps, forwarde
                     <img src={icons.move.black.svg} />
                   </Icon>
                 </div>
-              </div>
+              </div>}
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
-      </Box>
+      </ContainerEl>
     </div>
   );
 });
-
-interface OwnProps {
-  annotations: List<Annotation>;
-  selectedAnnotations: List<Annotation>;
-}
 
 const reorder = (list: List<Annotation>, startIndex: number, endIndex: number) => {
   const removed = list.get(startIndex);
@@ -152,23 +182,28 @@ const reorder = (list: List<Annotation>, startIndex: number, endIndex: number) =
   return list;
 };
 
-const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
-  const dispatch = useDispatch();
-  const onDragEnd = React.useCallback((result) => {
+interface ListProps {
+  slideshow: Slideshow;
+  onRemove: (annotation: Annotation) => void;
+  onAnnotationClick: (annotation?: Annotation) => void;
+  selectedAnnotations: List<Annotation>;
+  onAnnotationChange: (oldAnnotation: Annotation, newAnnotation: Annotation) => void;
+  onOrderChange: (newOrder: List<Annotation>) => void;
+}
+
+const Orderable: React.SFC<ListProps> = props => {
+  const onDragEnd = useCallback((result) => {
     if (!result.destination) {
       return;
     }
-
-    dispatch(
-      editOrderAction(
-        reorder(
-          props.annotations,
-          result.source.index,
-          result.destination.index,
-        ),
+    props.onOrderChange(
+      reorder(
+        props.slideshow.annotations,
+        result.source.index,
+        result.destination.index,
       ),
     );
-  }, [props.annotations]);
+  }, []);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -177,10 +212,13 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}>
-            {props.annotations.map((annotation, index) => (
+            {props.slideshow.annotations.map((annotation, index) => (
               <Draggable key={annotation.properties.id} draggableId={annotation.properties.id} index={index}>
                 {(provided) => (
                   <MenuItem
+                    onChange={props.onAnnotationChange}
+                    onClick={props.onAnnotationClick}
+                    onRemove={props.onRemove}
                     ref={provided.innerRef}
                     draggableProps={provided.draggableProps}
                     dragHandleProps={provided.dragHandleProps}
@@ -197,20 +235,122 @@ const Orderable: React.SFC<OwnProps> = (props: OwnProps) => {
   );
 };
 
-const Sidebar: React.SFC<OwnProps> = (props: OwnProps) => {
+const Header: React.SFC<{
+  onButtonClick: () => void;
+  readonly visible: boolean;
+}> = (props) => (
+  <div className="sidebar--header-container sidebar--spacing">
+    <SimpleTitle isSize={5}><Link to="/"><b>Glissemontre</b></Link></SimpleTitle>
+    <span className="minify-toggle" onClick={props.onButtonClick}>
+        <Icon>
+          { props.visible ?
+            <FontAwesomeIcon icon={faMinusSquare} />
+            :
+            <FontAwesomeIcon icon={faPlusSquare} />
+          }
+        </Icon>
+    </span>
+  </div>
+);
+
+interface TitleProps {
+  title: string;
+  onChange: (values: TitleProps, formikActions: FormikActions<TitleProps>) => void;
+}
+
+const Title: React.SFC<TitleProps> = (props) => {
+  return (
+    <Formik
+      initialValues={props}
+      onSubmit={props.onChange}
+    >{(innerProps) => {
+      const onBlur = (event) => {
+        innerProps.handleBlur(event);
+        innerProps.submitForm();
+      };
+      return (
+        <Form>
+          <Field
+            className="input__invisible input"
+            onBlur={onBlur}
+            name="title"
+          />
+        </Form>
+      );
+    }}
+    </Formik>
+  );
+};
+
+interface SidebarProps extends ListProps {
+  visible: boolean;
+  onNameChange: (slideshow: Slideshow) => void;
+  onClose: () => void;
+  onOpen: () => void;
+}
+
+const Sidebar: React.SFC<SidebarProps> = props => {
   const dispatch = useDispatch();
-  const onClickSidebar = React.useCallback((event: React.SyntheticEvent) => {
+  const exportData = useCallback(
+    () => dispatch(exportSlideshowActionCreator.request(props.slideshow)),
+    [dispatch, props.slideshow],
+  );
+  const onClickSidebar = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
-    dispatch(changeSelectionAction());
+    return props.onAnnotationClick();
   }, []);
-  if (props.annotations.size === 0) {
-    return (
-      <div className="sidebar">
-        <h1>Edit your annotations here.</h1>
+  const onNameChange = useCallback(
+    values => props.onNameChange(props.slideshow.set('name', values.title)),
+    [props.slideshow],
+  );
+  const selected = props.selectedAnnotations.first();
+  return (
+    <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
+      <Header onButtonClick={props.visible ? props.onClose : props.onOpen} visible={props.visible} />
+      <div className="sidebar--wrapper">
+        {props.visible && <Title title={props.slideshow.name} onChange={onNameChange} />}
+        <Loader />
+        <div onClick={onClickSidebar} className="sidebar--container">
+          {props.visible ? (
+            <Orderable {...props} />
+          ) : selected ? (
+            <MenuItem
+              onChange={props.onAnnotationChange}
+              onClick={props.onAnnotationClick}
+              onRemove={props.onRemove}
+              data={selected as Annotation}
+              selected={!!selected}
+              minified={props.visible !== undefined}
+             />
+            ) : (
+              <span className="sidebar--minified-placeholder">select or create an annotation</span>
+            )
+          }
+        </div>
       </div>
-    );
-  }
-  return <div onClick={onClickSidebar} className="sidebar"><Orderable {...props} /></div>;
+      <footer className="sidebar--footer-container sidebar--spacing">
+        <StretchedLayoutContainer isDirection="horizontal" style={{width: '100%'}}>
+          <StretchedLayoutItem isFlex={1}>
+            <Link to={`/player/${props.slideshow.id}`} className="button is-fullwidth is-primary">Preview</Link>
+          </StretchedLayoutItem>
+          <StretchedLayoutItem isFlex={1}>
+            <StretchedLayoutContainer isDirection="horizontal">
+              <StretchedLayoutItem isFlex={1}>
+                <Button
+                  onClick={exportData}
+                  isFullWidth
+                  isColor="info"
+                  disabled={!props.slideshow.annotations.size}>Download ↓</Button>
+              </StretchedLayoutItem>
+              <StretchedLayoutItem>
+                <Button isColor="info">?</Button>
+              </StretchedLayoutItem>
+            </StretchedLayoutContainer>
+          </StretchedLayoutItem>
+        </StretchedLayoutContainer>
+      </footer>
+    </div>
+  );
 };
 
 export default Sidebar;

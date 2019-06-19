@@ -1,0 +1,30 @@
+
+
+.map .leaflet-control-attribution {
+    display: none
+}
+
+.map .leaflet-marker-icon{
+    background: #ff1f4b;
+    border: none;
+    border-radius: 50%;
+}
+
+.map .annotation-shape__editing{
+    stroke: black;
+    fill: black;
+}
+
+.map .leaflet-control-zoom{
+    box-shadow: none;
+    border: none;
+    margin-right: 1rem;
+    margin-top: 1rem;
+}
+
+.map .leaflet-control-zoom-in,
+.map .leaflet-control-zoom-out{
+    border: none;
+    box-shadow: none;
+    font-size: 1.3rem;
+}
