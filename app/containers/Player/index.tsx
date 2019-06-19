@@ -10,6 +10,7 @@ import useMousetrap from 'react-hook-mousetrap';
 
 import L from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
+import Loader from 'components/Loader';
 import { LocalIiifLayer, DistantIiifLayer } from 'components/IiifLayer';
 import { useLockEffect, useToggleBoolean } from 'utils/hooks';
 import { enhancer } from 'containers/Editor';
@@ -127,5 +128,5 @@ export default enhancer(props => {
   if (props.slideshow) {
     return (<Player {...props} local />);
   }
-  return <div />;
+  return <Loader />
 });

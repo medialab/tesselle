@@ -19,6 +19,7 @@ import injectReducer from 'utils/injectReducer';
 import Slideshow from 'types/Slideshow';
 import FloatinBar from 'components/FloatingBar';
 import Sidebar from 'components/Sidebar';
+import Loader from 'components/Loader';
 import { SupportedShapes, changeSelection, Annotations, SureContextProps } from 'types';
 import AnnotationLayer from 'components/AnnotationLayer';
 
@@ -213,5 +214,5 @@ export default enhancer((props: EditorProps) => {
   if (props.slideshow) {
     return <Editor {...props} />;
   }
-  return 'loading';
+  return <Loader/>;
 });

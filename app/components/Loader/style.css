@@ -1,0 +1,44 @@
+
+
+.loader-container{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.loader-content{
+    text-align: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.loader-title-container{
+    display: flex;
+    flex-flow: row nowrap;
+    font-weight: bold;
+    padding-bottom: 0;
+    margin-bottom: 0;
+
+}
+
+.loader-content .spinner{
+    animation: spinAround 5000ms infinite linear;
+    max-height: 2rem;
+    margin-right: 1rem;
+    position: relative;
+    top: .5rem;
+}
+
+.loader-content .is-3{
+    margin-top: 0;
+    font-style: italic;
+}
