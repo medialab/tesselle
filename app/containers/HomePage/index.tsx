@@ -32,6 +32,7 @@ import { slicerContainer, Loader, LoaderProps } from 'containers/Slicer';
 
 import medialabLogo from './assets/logo-medialab.svg';
 import forccastLogo from './assets/logo-forccast.svg';
+import appLogo from './assets/logo.svg';
 import Slideshow from 'types/Slideshow';
 import { importSlideshowAction } from 'containers/Slicer/actions';
 
@@ -79,13 +80,18 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
     <>
       <Container className="home-container">
         <Helmet>
-          <title>Tesselle</title>
+          <title>
+            Tesselle
+          </title>
           <meta name="description" content="An image annotation and publishing tool" />
         </Helmet>
         <Columns>
-          <Column isSize={'1/3'}>
+          <Column className="aside-column" isSize={'1/3'}>
             <Content>
-              <Title isSize={1}>Tesselle</Title>
+              <Title className="app-title" isSize={1}>
+                <img src={appLogo} />
+                <span>Tesselle</span>
+              </Title>
               <p><FormattedMessage {...messages.chapo} /></p>
             </Content>
             {props.slicer.total === 0
@@ -94,9 +100,9 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
                   onDrop={onDrop}
                 >
                   {
-                    (props as any).loading ? 
-                    'Loading...' 
-                    : 
+                    (props as any).loading ?
+                    'Loading...'
+                    :
                     'Drop an image file (.jpg, .png, or .svg) or a tesselle project (.zip)'
                   }
                 </DropZone>
@@ -125,7 +131,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
       <Footer id={'footer'}>
         <Container>
           <Columns>
-            <Column isSize={'1/3'}>
+            <Column className="logos-column" isSize={'1/3'}>
               <div>
                 <a
                   target={'blank'}
