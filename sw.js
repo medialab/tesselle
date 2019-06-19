@@ -1,31 +1,31 @@
 var __wpo = {
   "assets": {
     "main": [
-      "https://medialab.github.io/glisseMontre/favicon.ico",
-      "https://medialab.github.io/glisseMontre/runtime~main.1334d5dd2024bbb55669.js",
-      "https://medialab.github.io/glisseMontre/"
+      "https://medialab.github.io/tesselle/favicon.ico",
+      "https://medialab.github.io/tesselle/runtime~main.bb764c7dac4535b6ae9d.js",
+      "https://medialab.github.io/tesselle/"
     ],
     "additional": [
-      "https://medialab.github.io/glisseMontre/vendor.a4e303918d84573a26cb.chunk.js",
-      "https://medialab.github.io/glisseMontre/main.e61493a901190ec8e3b3.chunk.js",
-      "https://medialab.github.io/glisseMontre/3.5c932ddb32714b20246d.chunk.js",
-      "https://medialab.github.io/glisseMontre/4.5bce229ebef2591782e1.chunk.js"
+      "https://medialab.github.io/tesselle/vendor.b3db59081ba1fba7353a.chunk.js",
+      "https://medialab.github.io/tesselle/main.54c16fdd435dea8ed22e.chunk.js",
+      "https://medialab.github.io/tesselle/3.5c932ddb32714b20246d.chunk.js",
+      "https://medialab.github.io/tesselle/4.5bce229ebef2591782e1.chunk.js"
     ],
     "optional": []
   },
   "externals": [],
   "hashesMap": {
-    "5e53ef208f3fa79a48f8374488f473c76e1233de": "https://medialab.github.io/glisseMontre/favicon.ico",
-    "e9a1074e548b1aa42fb397e751baa6898a4b9ffa": "https://medialab.github.io/glisseMontre/vendor.a4e303918d84573a26cb.chunk.js",
-    "7fd371398208ba657dada5f26ab7c29a5b7e6020": "https://medialab.github.io/glisseMontre/main.e61493a901190ec8e3b3.chunk.js",
-    "e7a19a334a1da29f4c5fd4a890108c7361b88448": "https://medialab.github.io/glisseMontre/runtime~main.1334d5dd2024bbb55669.js",
-    "d6ed9684fb89f9400128b4ec2ded0c91ba85ca92": "https://medialab.github.io/glisseMontre/3.5c932ddb32714b20246d.chunk.js",
-    "d622d1c83cbd1e7cae0493b080994550a622468b": "https://medialab.github.io/glisseMontre/4.5bce229ebef2591782e1.chunk.js",
-    "f110178180a147a3f697608cfb7e18fc5c565930": "https://medialab.github.io/glisseMontre/"
+    "5e53ef208f3fa79a48f8374488f473c76e1233de": "https://medialab.github.io/tesselle/favicon.ico",
+    "bbcf979d065c131934b27f06e05cc21c54572cdf": "https://medialab.github.io/tesselle/vendor.b3db59081ba1fba7353a.chunk.js",
+    "4b7eee807cb4a28d8d5388f6034484c3e2c38282": "https://medialab.github.io/tesselle/main.54c16fdd435dea8ed22e.chunk.js",
+    "247cc925b53d5c8e7c4f2c89a641a83898bc5291": "https://medialab.github.io/tesselle/runtime~main.bb764c7dac4535b6ae9d.js",
+    "d6ed9684fb89f9400128b4ec2ded0c91ba85ca92": "https://medialab.github.io/tesselle/3.5c932ddb32714b20246d.chunk.js",
+    "d622d1c83cbd1e7cae0493b080994550a622468b": "https://medialab.github.io/tesselle/4.5bce229ebef2591782e1.chunk.js",
+    "8b99577bcb3065e2bce04224cab05775b2a7130f": "https://medialab.github.io/tesselle/"
   },
   "strategy": "changed",
   "responseStrategy": "cache-first",
-  "version": "2019-6-19 11:19:22",
+  "version": "2019-6-19 15:47:35",
   "name": "webpack-offline",
   "pluginVersion": "5.0.6",
   "relativePaths": false
@@ -110,7 +110,7 @@ var __wpo = {
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "https://medialab.github.io/glisseMontre/";
+/******/ 	__webpack_require__.p = "https://medialab.github.io/tesselle/";
 /******/
 /******/
 /******/ 	// Load entry module and return exports
