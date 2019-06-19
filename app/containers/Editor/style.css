@@ -28,3 +28,7 @@
     box-shadow: none;
     font-size: 1.3rem;
 }
+
+.map .leaflet-tooltip{
+    display: none;
+}
