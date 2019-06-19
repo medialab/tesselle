@@ -4,12 +4,10 @@ export default `
     <style>p { color: lightblue }</style>
     <script>
       locationUrl = window.location.href.replace(window.location.protocol, '').replace('/index.html', '');
-      const url = 'http://localhost:3000/#/viewer/?url=' + locationUrl;
+      const url = 'http://medialab.github.io/tesselle/#/viewer/?url=' + locationUrl;
       function setUrl () {
-        const link = document.getElementById('link');
-        console.log(link, url);
-        link.href = url;
-        link.append(url);
+        const iframe = document.getElementById('iframe');
+        iframe.src = url;
       }
       if(window.addEventListener) {
         window.addEventListener('load', setUrl, false);
@@ -18,8 +16,18 @@ export default `
       }
     </script>
   </head>
+  <style>
+      #iframe{
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        position: fixed;
+        border: none;
+      }
+  </style>
   <body>
-    <p>Click to see your image : </p> <a id='link' href=''></a>
+    <iframe id="iframe"></iframe>
   </body>
 </html>
 `;
