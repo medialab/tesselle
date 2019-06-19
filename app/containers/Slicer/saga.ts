@@ -40,7 +40,10 @@ function* rawSlice(images, sliceState, slideshowId) {
 }
 
 function* initializeSlicer(nbImages) {
-  return put(setProgress((yield select(selectSlicer)).set('total', nbImages).set('present', 0)));
+  let slicer = yield select(selectSlicer);
+  slicer = slicer.set('total', nbImages).set('present', 0);
+  yield put(setProgress(slicer));
+  return slicer;
 }
 
 export function* slice(img, id: string, slicing = true) {
@@ -50,8 +53,7 @@ export function* slice(img, id: string, slicing = true) {
     BASE_TILESIZE,
     img.height,
   );
-  const azeaze = generateInfo(img, scaleFactors, id);
-  db.setItem(`/info/${id}.json`, azeaze);
+  db.setItem(`/info/${id}.json`, generateInfo(img, scaleFactors, id));
   if (slicing) {
     try {
       const parsedImage = Array.from(generate(
@@ -105,29 +107,50 @@ function* exportSlideshow(action) {
   }
 }
 
-function* importSlideshow(action) {
-  console.log('import', action);
-  const newZip = new JSzip();
-  // more files !
-  const zip = yield newZip.loadAsync(action.payload);
-  const images = zip.filter(relativePath => relativePath.startsWith(`images`) && relativePath.endsWith('jpg'));
-  yield initializeSlicer(images.length);
+function* importSlideshow(zip: JSzip) {
+  const slideshows: List<Slideshow> = yield select(selectSlideshows);
   const rawSlideshow = JSON.parse(yield zip.file('slideshow.json').async('string'));
-  const rawInfo = JSON.parse(yield zip.file('info.json').async('string'));
-  yield db.setItem(`/info/${rawInfo['@id']}.json`, rawInfo);
-  const thumbnail = new File(
+  if (slideshows.some(s => s.id === rawSlideshow.id)) {
+    delete rawSlideshow.id;
+  }
+  const sameNameSlideshow = slideshows.find(s => s.name.startsWith(rawSlideshow.name));
+  if (sameNameSlideshow) {
+    rawSlideshow.name = `${sameNameSlideshow.name} - 2`;
+  }
+  return new Slideshow(rawSlideshow);
+}
+
+function* importInfos(zip: JSzip) {
+  let info = zip.file('info.json');
+  info = JSON.parse(yield call([info, info.async], 'string'));
+  db.setItem(`/info/${info['@id']}.json`, info);
+  return info;
+}
+
+function* importThumbnail(zip: JSzip) {
+  return new File(
     [yield zip.file('thumbnail.jpg').async('blob')],
     `thumbnail.jpg`,
     {type: 'image/jpeg'},
   );
-  let cover = new Cover(rawSlideshow.image);
-  cover = cover.set(
+}
+
+function* importZip(action) {
+  const zip = new JSzip();
+  // more files !
+  yield zip.loadAsync(action.payload);
+  const images = zip.filter(relativePath => relativePath.startsWith(`images`) && relativePath.endsWith('jpg'));
+// tslint:disable-next-line: prefer-const
+  let [rawInfo, thumbnail, slicerState, slideshow] = yield all([
+    call(importInfos, zip),
+    call(importThumbnail, zip),
+    call(initializeSlicer, images.length),
+    call(importSlideshow, zip),
+  ]);
+  slideshow = slideshow.set('image', new Cover(slideshow.image).set(
     'file',
     thumbnail,
-  );
-  let slideshow = new Slideshow(rawSlideshow);
-  slideshow = slideshow.set('image', cover);
-  let slicerState = yield select(selectSlicer);
+  ));
   for (const zipEntry of images) {
     const relativePath = zipEntry.name;
     const file = new File(
@@ -141,11 +164,12 @@ function* importSlideshow(action) {
   }
   const slideshows: List<Slideshow> = yield select(selectSlideshows);
   yield setSlideshows(slideshows.push(slideshow));
+  yield put(setProgress());
 }
 
 // Individual exports for testing
 export default function* slicerSaga() {
   // See example in containers/HomePage/saga.js
   yield takeLatest(ActionTypes.EXPORT_START, exportSlideshow);
-  yield takeLatest(ActionTypes.IMPORT_SLIDESHOW, importSlideshow);
+  yield takeLatest(ActionTypes.IMPORT_SLIDESHOW, importZip);
 }
