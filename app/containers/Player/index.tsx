@@ -65,9 +65,14 @@ export const selectNext = (selected, annotations) => {
 
 export const Player: React.SFC<PlayerContainerProps> = (props) => {
   const selected = props.selectedAnnotations.first();
-
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
   const [sidebarVisible, onClose, onOpen] = useToggleBoolean();
+  const onPlay = useCallback(() => {
+    onOpen();
+    if (!selected) {
+      onNext();
+    }
+  }, [onOpen]);
   const onNext = useCallback(
     () => props.changeSelection(selectNext(selected, props.slideshow.annotations)),
     [selected, props.slideshow.annotations],
@@ -78,7 +83,11 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
   );
   useMousetrap('k', onNext);
   useMousetrap('j', onPrev);
-  const onMapClick = useCallback((event) => props.changeSelection(), [props.changeSelection]);
+  const onMapClick = useCallback((event) => {
+    if (sidebarVisible) {
+      return props.changeSelection();
+    }
+  }, [sidebarVisible, props.changeSelection]);
   const sidebarRef = useRef<Element | null>(null);
   const sidebarReady = (domElement) => {
     sidebarRef.current = domElement;
@@ -95,7 +104,6 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
         zoomControl={false}
         crs={L.CRS.Simple}
         onClick={onMapClick}
-        center={[0, 0]}
         minZoom={minZoom}
         maxZoom={maxZoom}>
           {(sidebarRef.current && mountSidebar) && ReactDOM.createPortal(
@@ -104,7 +112,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
               selectedAnnotations={props.selectedAnnotations}
               visible={sidebarVisible}
               onClose={onClose}
-              onOpen={onOpen}
+              onOpen={onPlay}
               onPrev={onPrev}
               onNext={onNext}
               changeSelection={props.changeSelection}
