@@ -79,13 +79,13 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
     <>
       <Container className="home-container">
         <Helmet>
-          <title>Glissemontre</title>
+          <title>Tesselle</title>
           <meta name="description" content="An image annotation and publishing tool" />
         </Helmet>
         <Columns>
           <Column isSize={'1/3'}>
             <Content>
-              <Title isSize={1}>Glissemontre</Title>
+              <Title isSize={1}>Tesselle</Title>
               <p><FormattedMessage {...messages.chapo} /></p>
             </Content>
             {props.slicer.total === 0
@@ -158,7 +158,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
                   {`, a research laboratory that connects social sciences with inventive methods.`}
                 </p>
                 <p>
-                  {`The source code of Glissemontre is licensed under free software license `}
+                  {`The source code of Tesselle is licensed under free software license `}
                   <a
                     target={'blank'}
                     href={'http://www.gnu.org/licenses/agpl-3.0.html'}
@@ -166,7 +166,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
                   {` and is hosted on `}
                   <a
                     target={'blank'}
-                    href={'https://github.com/medialab/glissemontre/'}
+                    href={'https://github.com/medialab/tesselle/'}
                   >Github</a>.
                 </p>
               </Content>
