@@ -1,13 +1,18 @@
 #app{
   max-height: 100vh;
+  min-height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: stretch;
 }
 
 .home-container {
   padding-left: 1.3rem;
   padding-top: 1.4rem;
   padding-top: 2rem;
+  flex: 1;
 }
 
 .home-container .list-projects__title{
