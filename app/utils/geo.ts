@@ -25,15 +25,11 @@ function circleToPolygon([lng, lat], radius, vertices) {
   const points: any[] = [];
   const crs = L.CRS.Simple as any;
   const DOUBLE_PI = Math.PI * 2;
-  let angle = 0.0;
-  let projectedCentroid;
+  const project: (point: any) => any = crs.projection.project.bind(crs.projection);
+  const unproject: (point: L.Point) => any = crs.projection.unproject.bind(crs.projection);
+  const projectedCentroid = project({lng: lng, lat: lat});
   let point: any;
-  let project: (...args: any[]) => any;
-  let unproject: (...args: any[]) => any;
-
-  project = crs.projection.project.bind(crs.projection);
-  unproject = crs.projection.unproject.bind(crs.projection);
-  projectedCentroid = project({lng: lng, lat: lat});
+  let angle = 0.0;
 
   for (let i = 0; i < vertices - 1; i++) {
     angle -= (DOUBLE_PI / vertices); // clockwise
