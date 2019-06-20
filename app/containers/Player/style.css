@@ -16,8 +16,7 @@
     height: 100%;
     padding: 1rem;
 }
-.player-map .sidebar--header-container .title{
-    color: white;
+.sidebar--header-container .title.is-stretch{
     flex: 1;
 }
 
