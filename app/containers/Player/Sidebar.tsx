@@ -139,6 +139,7 @@ interface SidebarProps {
   readonly changeSelection: changeSelection;
   readonly onPrev: () => void;
   readonly onNext: () => void;
+  readonly viewerMode?: boolean;
 }
 
 const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
@@ -181,30 +182,40 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                     onPrev={props.onPrev}>{selected.properties.content}</Control>}
             </div>
         </StretchedLayoutItem>
-        <StretchedLayoutItem>
-          <footer className="sidebar--footer-container sidebar--spacing">
-            <StretchedLayoutContainer isDirection="horizontal" style={{width: '100%'}}>
-              <StretchedLayoutItem isFlex={1}>
-                <Link
-                  to={`/editor/${props.slideshow.id}`}
-                  className="button is-fullwidth is-primary"
-                >
-                    Back to edition
-                </Link>
-              </StretchedLayoutItem>
-              <StretchedLayoutItem isFlex={1}>
-                <StretchedLayoutContainer isDirection="horizontal">
-                  <StretchedLayoutItem isFlex={1}>
-                    <Button isFullWidth isColor="info" disabled={!props.slideshow.annotations.size} >Download ↓</Button>
-                  </StretchedLayoutItem>
-                  <StretchedLayoutItem>
-                    <Button isColor="info">?</Button>
-                  </StretchedLayoutItem>
-                </StretchedLayoutContainer>
-              </StretchedLayoutItem>
-            </StretchedLayoutContainer>
-          </footer>
-        </StretchedLayoutItem>
+        {
+          !props.viewerMode &&
+          <StretchedLayoutItem>
+            <footer className="sidebar--footer-container sidebar--spacing">
+              <StretchedLayoutContainer isDirection="horizontal" style={{width: '100%'}}>
+                <StretchedLayoutItem isFlex={1}>
+                  <Link
+                    to={`/editor/${props.slideshow.id}`}
+                    className="button is-fullwidth is-primary"
+                  >
+                      Back to edition
+                  </Link>
+                </StretchedLayoutItem>
+                <StretchedLayoutItem isFlex={1}>
+                  <StretchedLayoutContainer isDirection="horizontal">
+                    <StretchedLayoutItem isFlex={1}>
+                      <Button 
+                        isFullWidth 
+                        isColor="info" 
+                        disabled={!props.slideshow.annotations.size} 
+                      >
+                        Download ↓
+                      </Button>
+                    </StretchedLayoutItem>
+                    <StretchedLayoutItem>
+                      <Button isColor="info">?</Button>
+                    </StretchedLayoutItem>
+                  </StretchedLayoutContainer>
+                </StretchedLayoutItem>
+              </StretchedLayoutContainer>
+            </footer>
+          </StretchedLayoutItem>
+        }
+
       </StretchedLayoutContainer>
     </div>
   );
