@@ -1,9 +1,5 @@
 
 
-.map .leaflet-control-attribution {
-    display: none
-}
-
 .map .leaflet-marker-icon{
     background: #ff1f4b;
     border: none;
@@ -18,8 +14,23 @@
 .map .leaflet-control-zoom{
     box-shadow: none;
     border: none;
-    margin-right: 1rem;
+    margin-right: 1.5rem;
     margin-top: 1rem;
+}
+
+.map .leaflet-control{
+    margin-right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.map .leaflet-control .buttons-container{
+    bottom: 0;
+}
+
+.map .leaflet-control-attribution {
+    display: none
 }
 
 .map .leaflet-control-zoom-in,
