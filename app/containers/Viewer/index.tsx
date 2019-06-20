@@ -34,6 +34,7 @@ function Viewer(props) {
         slideshow={slideshow}
         selectedAnnotations={selected}
         changeSelection={onChangeSelection}
+        viewerMode
       />
     );
   } else {

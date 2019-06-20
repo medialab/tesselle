@@ -7,6 +7,11 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Map, withLeaflet, ZoomControl } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
+import { Button, Icon, Title } from 'quinoa-design-library';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShare } from '@fortawesome/free-solid-svg-icons/faShare';
+import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
+import Modal from 'react-modal';
 
 import L from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
@@ -26,11 +31,14 @@ import './style.css';
 const minZoom = 1;
 const maxZoom = 20;
 
+Modal.setAppElement('#app');
+
 interface PlayerContainerProps {
   readonly slideshow: Slideshow;
   readonly selectedAnnotations: List<Annotation>;
   readonly changeSelection: changeSelection;
   readonly url?: string;
+  readonly viewerMode?: boolean;
 }
 
 interface PlayerProps extends PlayerContainerProps {
@@ -68,6 +76,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
   const selected = props.selectedAnnotations.first();
 
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
+  const [isShareHelpOpen, setShareHelpOpen] = useState<boolean>(false);
   const [sidebarVisible, onClose, onOpen] = useToggleBoolean();
   const onNext = useCallback(
     () => props.changeSelection(selectNext(selected, props.slideshow.annotations)),
@@ -80,6 +89,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
   useMousetrap('k', onNext);
   useMousetrap('j', onPrev);
   const onMapClick = useCallback((event) => props.changeSelection(), [props.changeSelection]);
+  const toggleShareHelpOpen = useCallback(() => setShareHelpOpen(!isShareHelpOpen), [isShareHelpOpen]);
   const sidebarRef = useRef<Element | null>(null);
   const sidebarReady = (domElement) => {
     sidebarRef.current = domElement;
@@ -109,17 +119,53 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
               onPrev={onPrev}
               onNext={onNext}
               changeSelection={props.changeSelection}
+              viewerMode={props.viewerMode}
             />,
             sidebarRef.current,
           )}
-          <ZoomControl position="topright" />
-          <PlayerMap
-            url={props.url}
-            playing={!sidebarVisible}
-            slideshow={props.slideshow}
-            changeSelection={props.changeSelection}
-            selectedAnnotations={props.selectedAnnotations} />
+        <ZoomControl position="topright" />
+        <PlayerMap
+          url={props.url}
+          playing={!sidebarVisible}
+          slideshow={props.slideshow}
+          changeSelection={props.changeSelection}
+          selectedAnnotations={props.selectedAnnotations}
+        />
       </Map>
+      {
+        props.viewerMode &&
+        <>
+          <div className="share-ui-container">
+            <Button onClick={toggleShareHelpOpen} isRounded>
+              <Icon><FontAwesomeIcon icon={faShare} /></Icon>
+            </Button>
+          </div>
+          <Modal
+            isOpen={isShareHelpOpen}
+            onRequestClose={toggleShareHelpOpen}
+            contentLabel="Share this document"
+          >
+            <div className="modal-content-container">
+              <div className="modal-content-header">
+                <Title isSize="3">
+                  <span>Share this document</span>
+                  <span>
+                    <Button onClick={toggleShareHelpOpen} isRounded>
+                      <Icon><FontAwesomeIcon icon={faTimes} /></Icon>
+                    </Button>
+                  </span>
+                </Title>
+              </div>
+              <div className="modal-content-body">
+                <div>Share the URL address of this document:</div>
+                <pre><code>{window.location.href}</code></pre>
+                <div>Embed this document in another page or application:</div>
+                <pre><code>{`<iframe src="${window.location.href}"></iframe>`}</code></pre>
+              </div>
+            </div>
+          </Modal>
+        </>
+      }
     </div>
   );
 };
@@ -128,5 +174,5 @@ export default enhancer(props => {
   if (props.slideshow) {
     return (<Player {...props} local />);
   }
-  return <Loader />
+  return <Loader />;
 });
