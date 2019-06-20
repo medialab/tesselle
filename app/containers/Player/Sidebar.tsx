@@ -198,10 +198,10 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                 <StretchedLayoutItem isFlex={1}>
                   <StretchedLayoutContainer isDirection="horizontal">
                     <StretchedLayoutItem isFlex={1}>
-                      <Button 
-                        isFullWidth 
-                        isColor="info" 
-                        disabled={!props.slideshow.annotations.size} 
+                      <Button
+                        isFullWidth
+                        isColor="info"
+                        disabled={!props.slideshow.annotations.size}
                       >
                         Download ↓
                       </Button>

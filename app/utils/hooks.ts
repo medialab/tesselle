@@ -74,6 +74,9 @@ export const useTools = (defaultTool): [
 };
 
 export const useUrl = (file: File): string => {
+  if (!file) {
+    throw new Error('File is empty');
+  }
   const url = useMemo(() => window.URL.createObjectURL(file), [file]);
   useEffect(() => () => window.URL.revokeObjectURL(url), [url]);
   return url;
