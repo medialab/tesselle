@@ -83,12 +83,15 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
       onNext();
     }
   }, [onOpen]);
+  const noop = undefined;
   const onNext = useCallback(
-    () => props.changeSelection(selectNext(selected, props.slideshow.annotations)),
+    props.slideshow.annotations.size > 1 ?
+      () => props.changeSelection(selectNext(selected, props.slideshow.annotations)) : noop as any,
     [selected, props.slideshow.annotations],
   );
   const onPrev = useCallback(
-    () => props.changeSelection(selectNext(selected, props.slideshow.annotations.reverse())),
+    props.slideshow.annotations.size > 1 ?
+      () => props.changeSelection(selectNext(selected, props.slideshow.annotations.reverse())) : noop as any,
     [selected, props.slideshow.annotations],
   );
   useMousetrap('k', onNext);
