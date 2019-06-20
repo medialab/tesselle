@@ -118,6 +118,7 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
             isFlex={1}>
             <Formik
               initialValues={useMemo(() => props.data.properties.toJS(), [props.data.properties])}
+              enableReinitialize={true}
               onSubmit={onSubmit}
               validate={validator}
             >{(innerProps) => {
@@ -303,7 +304,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
     values => props.onNameChange(props.slideshow.set('name', values.title)),
     [props.slideshow],
   );
-  const selected = props.selectedAnnotations.first();
+  const selected = props.selectedAnnotations.first<Annotation>();
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
       <Header onButtonClick={props.visible ? props.onClose : props.onOpen} visible={props.visible} />
