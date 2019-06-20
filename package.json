@@ -82,7 +82,6 @@
     "@types/react-redux": "^7.1.0",
     "@types/react-textarea-autosize": "^4.3.4",
     "@types/sat": "0.0.30",
-    "circle-to-polygon": "^1.0.2",
     "classnames": "^2.2.6",
     "compression": "1.7.3",
     "connected-react-router": "6.3.2",

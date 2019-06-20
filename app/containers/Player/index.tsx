@@ -74,21 +74,33 @@ export const selectNext = (selected, annotations) => {
 
 export const Player: React.SFC<PlayerContainerProps> = (props) => {
   const selected = props.selectedAnnotations.first();
-
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
   const [isShareHelpOpen, setShareHelpOpen] = useState<boolean>(false);
   const [sidebarVisible, onClose, onOpen] = useToggleBoolean();
+  const onPlay = useCallback(() => {
+    onOpen();
+    if (!selected) {
+      onNext();
+    }
+  }, [onOpen]);
+  const noop = undefined;
   const onNext = useCallback(
-    () => props.changeSelection(selectNext(selected, props.slideshow.annotations)),
+    props.slideshow.annotations.size > 1 ?
+      () => props.changeSelection(selectNext(selected, props.slideshow.annotations)) : noop as any,
     [selected, props.slideshow.annotations],
   );
   const onPrev = useCallback(
-    () => props.changeSelection(selectNext(selected, props.slideshow.annotations.reverse())),
+    props.slideshow.annotations.size > 1 ?
+      () => props.changeSelection(selectNext(selected, props.slideshow.annotations.reverse())) : noop as any,
     [selected, props.slideshow.annotations],
   );
   useMousetrap('k', onNext);
   useMousetrap('j', onPrev);
-  const onMapClick = useCallback((event) => props.changeSelection(), [props.changeSelection]);
+  const onMapClick = useCallback((event) => {
+    if (sidebarVisible) {
+      return props.changeSelection();
+    }
+  }, [sidebarVisible, props.changeSelection]);
   const toggleShareHelpOpen = useCallback(() => setShareHelpOpen(!isShareHelpOpen), [isShareHelpOpen]);
   const sidebarRef = useRef<Element | null>(null);
   const sidebarReady = (domElement) => {
@@ -106,7 +118,6 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
         zoomControl={false}
         crs={L.CRS.Simple}
         onClick={onMapClick}
-        center={[0, 0]}
         minZoom={minZoom}
         maxZoom={maxZoom}>
           {(sidebarRef.current && mountSidebar) && ReactDOM.createPortal(
@@ -115,7 +126,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
               selectedAnnotations={props.selectedAnnotations}
               visible={sidebarVisible}
               onClose={onClose}
-              onOpen={onOpen}
+              onOpen={onPlay}
               onPrev={onPrev}
               onNext={onNext}
               changeSelection={props.changeSelection}
