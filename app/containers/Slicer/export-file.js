@@ -4,7 +4,7 @@ export default `
     <style>p { color: lightblue }</style>
     <script>
       locationUrl = window.location.href.replace(window.location.protocol, '').replace('/index.html', '');
-      const url = 'http://medialab.github.io/tesselle/#/viewer/?url=' + locationUrl;
+      const url = 'http://medialab.github.io/Tesselle/#/viewer/?url=' + locationUrl;
       function setUrl () {
         const iframe = document.getElementById('iframe');
         iframe.src = url;

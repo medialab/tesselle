@@ -7,7 +7,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Map, withLeaflet, ZoomControl } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
-import {Button, Icon, Title} from 'quinoa-design-library';
+import { Button, Icon, Title } from 'quinoa-design-library';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShare } from '@fortawesome/free-solid-svg-icons/faShare';
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
@@ -74,7 +74,6 @@ export const selectNext = (selected, annotations) => {
 
 export const Player: React.SFC<PlayerContainerProps> = (props) => {
   const selected = props.selectedAnnotations.first();
-  const viewerMode = props.viewerMode !== undefined ? props.viewerMode : false;
 
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
   const [isShareHelpOpen, setShareHelpOpen] = useState<boolean>(false);
@@ -90,9 +89,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
   useMousetrap('k', onNext);
   useMousetrap('j', onPrev);
   const onMapClick = useCallback((event) => props.changeSelection(), [props.changeSelection]);
-  const toggleShareHelpOpen = () => {
-    setShareHelpOpen(!isShareHelpOpen);
-  };
+  const toggleShareHelpOpen = useCallback(() => setShareHelpOpen(!isShareHelpOpen), [isShareHelpOpen]);
   const sidebarRef = useRef<Element | null>(null);
   const sidebarReady = (domElement) => {
     sidebarRef.current = domElement;
@@ -122,26 +119,26 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
               onPrev={onPrev}
               onNext={onNext}
               changeSelection={props.changeSelection}
-              viewerMode={viewerMode}
+              viewerMode={props.viewerMode}
             />,
             sidebarRef.current,
           )}
-          <ZoomControl position="topright" />
-          <PlayerMap
-            url={props.url}
-            playing={!sidebarVisible}
-            slideshow={props.slideshow}
-            changeSelection={props.changeSelection}
-            selectedAnnotations={props.selectedAnnotations} />
-
+        <ZoomControl position="topright" />
+        <PlayerMap
+          url={props.url}
+          playing={!sidebarVisible}
+          slideshow={props.slideshow}
+          changeSelection={props.changeSelection}
+          selectedAnnotations={props.selectedAnnotations}
+        />
       </Map>
       {
-        viewerMode &&
+        props.viewerMode &&
         <>
           <div className="share-ui-container">
-              <Button onClick={toggleShareHelpOpen} isRounded>
-                <Icon><FontAwesomeIcon icon={faShare} /></Icon>
-              </Button>
+            <Button onClick={toggleShareHelpOpen} isRounded>
+              <Icon><FontAwesomeIcon icon={faShare} /></Icon>
+            </Button>
           </div>
           <Modal
             isOpen={isShareHelpOpen}
