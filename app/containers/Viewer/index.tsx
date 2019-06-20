@@ -7,6 +7,7 @@
 import React, { useState, useCallback } from 'react';
 import Slideshow from 'types/Slideshow';
 import { Player } from 'containers/Player';
+import Loader from 'components/Loader';
 import { List } from 'immutable';
 import Annotation from 'types/Annotation';
 import normalize from 'normalize-url';
@@ -33,10 +34,11 @@ function Viewer(props) {
         slideshow={slideshow}
         selectedAnnotations={selected}
         changeSelection={onChangeSelection}
+        viewerMode
       />
     );
   } else {
-    return <div>Loading</div>;
+    return <Loader />;
   }
 }
 

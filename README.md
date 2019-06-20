@@ -1,4 +1,4 @@
-# GlisseMontre
+# Tesselle
 # A picture annotation web application
 
 Project from [FORCCAST](http://controverses.org)

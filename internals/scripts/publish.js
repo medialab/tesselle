@@ -6,6 +6,6 @@ ghpages.publish('build', {dotfiles: true}, (err) => {
     console.log('An error occured while publishing.');
     console.error(err);
   } else {
-    console.log('publication is ok. Checkout https://medialab.github.io/glisseMontre');
+    console.log('publication is ok. Checkout https://medialab.github.io/tesselle');
   }
 });

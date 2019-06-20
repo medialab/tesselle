@@ -1,13 +1,36 @@
 #app{
   max-height: 100vh;
+  min-height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: stretch;
 }
 
 .home-container {
   padding-left: 1.3rem;
   padding-top: 1.4rem;
   padding-top: 2rem;
+  flex: 1;
+}
+
+.home-container .aside-column,
+.footer .logos-column
+{
+  padding-left: 3rem;
+}
+
+.home-container .app-title{
+  position: relative;
+}
+
+.home-container .app-title img{
+  position: absolute;
+  left: -3rem;
+  max-height: .7em;
+  max-width: .7em;
+  top: .2em;
 }
 
 .home-container .list-projects__title{
@@ -22,6 +45,7 @@
 
 .home-container .drop-zone{
   cursor: pointer;
+  margin-bottom: 1rem;
 }
 
 .footer .logo-img{

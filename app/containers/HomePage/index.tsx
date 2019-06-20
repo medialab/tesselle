@@ -32,6 +32,7 @@ import { slicerContainer, Loader, LoaderProps } from 'containers/Slicer';
 
 import medialabLogo from './assets/logo-medialab.svg';
 import forccastLogo from './assets/logo-forccast.svg';
+import appLogo from './assets/logo.svg';
 import Slideshow from 'types/Slideshow';
 import { importSlideshowAction } from 'containers/Slicer/actions';
 
@@ -79,13 +80,18 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
     <>
       <Container className="home-container">
         <Helmet>
-          <title>Glissemontre</title>
+          <title>
+            Tesselle
+          </title>
           <meta name="description" content="An image annotation and publishing tool" />
         </Helmet>
         <Columns>
-          <Column isSize={'1/3'}>
+          <Column className="aside-column" isSize={'1/3'}>
             <Content>
-              <Title isSize={1}>Glissemontre</Title>
+              <Title className="app-title" isSize={1}>
+                <img src={appLogo} />
+                <span>Tesselle</span>
+              </Title>
               <p><FormattedMessage {...messages.chapo} /></p>
             </Content>
             {props.slicer.total === 0
@@ -93,7 +99,12 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
                   accept={acceptedFiles}
                   onDrop={onDrop}
                 >
-                  {(props as any).loading ? 'LoadingModal...' : 'Drop a file'}
+                  {
+                    (props as any).loading ?
+                    'Loading...'
+                    :
+                    'Drop an image file (.jpg, .png, or .svg) or a tesselle project (.zip)'
+                  }
                 </DropZone>
               : <Loader {...props} />
               }
@@ -101,7 +112,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
           <Column isSize={'2/3'} className="cards-column">
             <div className="list-projects__container">
               <h4 className="list-projects__title title is-2">
-                Your slideshows
+                Your documents
               </h4>
               <ul className="cards-container">
                 {props.slideshows.map(slideshow => (
@@ -120,7 +131,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
       <Footer id={'footer'}>
         <Container>
           <Columns>
-            <Column isSize={'1/3'}>
+            <Column className="logos-column" isSize={'1/3'}>
               <div>
                 <a
                   target={'blank'}
@@ -158,7 +169,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
                   {`, a research laboratory that connects social sciences with inventive methods.`}
                 </p>
                 <p>
-                  {`The source code of Glissemontre is licensed under free software license `}
+                  {`The source code of Tesselle is licensed under free software license `}
                   <a
                     target={'blank'}
                     href={'http://www.gnu.org/licenses/agpl-3.0.html'}
@@ -166,7 +177,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
                   {` and is hosted on `}
                   <a
                     target={'blank'}
-                    href={'https://github.com/medialab/glissemontre/'}
+                    href={'https://github.com/medialab/tesselle/'}
                   >Github</a>.
                 </p>
               </Content>

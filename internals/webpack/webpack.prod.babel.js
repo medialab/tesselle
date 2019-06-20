@@ -8,7 +8,7 @@ const { HashedModuleIdsPlugin } = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 
-const publicPath = 'https://medialab.github.io/glisseMontre/';
+const publicPath = 'https://medialab.github.io/tesselle/';
 
 module.exports = require('./webpack.base.babel')({
   mode: 'production',
@@ -90,7 +90,7 @@ module.exports = require('./webpack.base.babel')({
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
-        basename: "'/glisseMontre'",
+        basename: "'/tesselle'",
       },
     }),
     // Minify and optimize the index.html

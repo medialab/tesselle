@@ -240,7 +240,7 @@ const Header: React.SFC<{
   readonly visible: boolean;
 }> = (props) => (
   <div className="sidebar--header-container sidebar--spacing">
-    <SimpleTitle isSize={5}><Link to="/"><b>Glissemontre</b></Link></SimpleTitle>
+    <SimpleTitle isSize={5}><Link to="/"><b>Tesselle</b></Link></SimpleTitle>
     <span className="minify-toggle" onClick={props.onButtonClick}>
         <Icon>
           { props.visible ?
