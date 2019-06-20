@@ -71,7 +71,7 @@ export function* removeSlideshow(action) {
       call([db, db.removeItem], key)),
     );
   }
-  yield put(removeSlideshowAction.success(action));
+  yield put(removeSlideshowAction.success(action.payload));
   // We could yield to wait for all items to be removed, but I don't see the point ATM.
 }
 
