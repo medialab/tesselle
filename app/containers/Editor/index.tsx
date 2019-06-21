@@ -72,7 +72,7 @@ interface EditorProps {
 }
 
 interface SetToolsProps {
-  setTool: (SupportedShapes) => void;
+  setTool: (shape: SupportedShapes) => void;
   tool: SupportedShapes;
 }
 

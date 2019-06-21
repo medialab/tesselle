@@ -45,7 +45,7 @@ export const annotationCirclePropertiesCreator: Record.Factory<AnnotationCircleP
   makeAnnotationCircleProperties,
 );
 
-export type AcceptedGeojsonGeometries = Point | Polygon | MultiPolygon;
+export type AcceptedGeojsonGeometries = Point | Polygon | MultiPolygon | null;
 export type AcceptedGeojsonProperties = AnnotationProperties | AnnotationCircleProperties;
 
 export default interface Annotation<

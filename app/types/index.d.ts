@@ -23,6 +23,7 @@ export declare const enum SupportedShapes {
   polygon = 'polygon',
   polyline = 'polyline',
   selector = 'selector',
+  invisible = 'invisible',
 }
 
 export interface InjectReducerParams {

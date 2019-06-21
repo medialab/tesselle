@@ -102,3 +102,6 @@ textarea.textarea {
   border: none;
   margin: 1rem .5rem;
 }
+.sidebar--menu-item__invisible {
+  padding-left: 15px;
+}

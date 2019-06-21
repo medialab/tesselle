@@ -35,6 +35,7 @@ import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 import { useDispatch } from 'react-redux';
 import { exportSlideshowActionCreator } from 'containers/Slicer/actions';
+import { addEmptyAnnotation } from 'containers/Editor/actions';
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -69,7 +70,7 @@ const validator = (values: FormikValues) => {
 };
 
 interface MenuItemProps {
-  data: Annotation;
+  data: Annotation<any, any>;
   selected: boolean;
   minified?: boolean;
   onRemove: (annotation: Annotation) => void;
@@ -102,12 +103,19 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
     props.onRemove(props.data);
   }, [props.data, props.onRemove]);
 
+  const dispatch = useDispatch();
+  const onInvisibleCreation = useCallback(() => {
+    dispatch(addEmptyAnnotation(props.data));
+  }, []);
+
   const ContainerEl = props.minified ? React.Fragment : Box;
+  const isInvisible = props.data.geometry.type === 'LineString';
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
       'sidebar--menu-item__selected': props.selected,
       'sidebar--menu-item__minified': props.minified,
+      'sidebar--menu-item__invisible': isInvisible,
     })} ref={forwardedRef} {...props.draggableProps} onClick={onClick}>
       <ContainerEl>
         <StretchedLayoutContainer isDirection="horizontal">
@@ -170,6 +178,7 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
+        {!isInvisible && <button onClick={onInvisibleCreation}>Add empty anotation</button>}
       </ContainerEl>
     </div>
   );
