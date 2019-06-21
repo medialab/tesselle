@@ -48,7 +48,7 @@ const Header: React.SFC<{
 interface MenuItemProps {
   children: React.ReactChild;
   selected: boolean;
-  annotation: Annotation;
+  annotation: Annotation<any, any>;
   onGoTo: (annotation: Annotation) => void;
   onClick: changeSelection;
 }
@@ -61,10 +61,12 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
     props.onGoTo(props.annotation);
   }, [props.annotation]);
   const onClick = useCallback(() => props.onClick(props.annotation), [props.annotation]);
+  const isInvisible = props.annotation.geometry.type === 'LineString';
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
       'sidebar--menu-item__selected': props.selected,
+      'sidebar--menu-item__invisible': isInvisible,
     })}>
       <Box onClick={onClick}>
         <StretchedLayoutContainer isDirection="horizontal">
@@ -78,9 +80,9 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
           <StretchedLayoutItem>
             <StretchedLayoutContainer isDirection="horizontal">
               <div>
-                <Button isRounded onClick={onGoTo} style={{ margin: '.3rem' }}>
+                {!isInvisible && <Button isRounded onClick={onGoTo} style={{ margin: '.3rem' }}>
                   <Icon><FontAwesomeIcon icon={faEye} /></Icon>
-                </Button>
+                </Button>}
               </div>
             </StretchedLayoutContainer>
           </StretchedLayoutItem>

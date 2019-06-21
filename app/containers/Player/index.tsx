@@ -46,8 +46,9 @@ interface PlayerProps extends PlayerContainerProps {
 }
 
 const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
-  const selected = props.selectedAnnotations.first();
-  useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image);
+  const selected = props.selectedAnnotations.first<Annotation<any, any>>();
+  const isInvisible = selected && selected.geometry.type === 'LineString';
+  useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image, isInvisible);
   return (
     <React.Fragment>
       <AnnotationLayer

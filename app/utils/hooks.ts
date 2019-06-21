@@ -106,8 +106,11 @@ export function useMapLock(map?: L.Map, image?: Cover): LatLngBounds {
   return maxBounds;
 }
 
-export const useLockEffect = (map: L.Map, image: any) => {
+export const useLockEffect = (map: L.Map, image: any, ignore: boolean = false) => {
   useEffect(() => {
+    if (ignore) {
+      return;
+    }
     if (image.height) {
       const denominator = last(scaleFactorsCreator(512, image.width, 512, image.height)) * 2;
       map.fitBounds(
