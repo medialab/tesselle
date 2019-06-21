@@ -2,6 +2,7 @@ import { call, put, select, spawn, takeLatest, all } from 'redux-saga/effects';
 import { last, groupBy, pipe, values, sort, splitAt } from 'ramda';
 import saveAs from 'save-file';
 import html from './export-file';
+import uuid from 'uuid';
 
 import { generate, scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
 import db from 'utils/db';
@@ -107,17 +108,21 @@ function* exportSlideshow(action) {
   }
 }
 
-function* importSlideshow(zip: JSzip) {
+export function* colisionDetection(slideshow) {
   const slideshows: List<Slideshow> = yield select(selectSlideshows);
+  if (slideshows.some(s => s.id === slideshow.id)) {
+    slideshow = slideshow.set('id', uuid());
+  }
+  const sameNameSlideshows = slideshows.filter(s => s.name.startsWith(slideshow.name));
+  if (sameNameSlideshows.size >= 1) {
+    slideshow = slideshow.set('name', `${sameNameSlideshows.first<Slideshow>().name} - ${sameNameSlideshows.size + 1}`);
+  }
+  return slideshow;
+}
+
+function* importSlideshow(zip: JSzip) {
   const rawSlideshow = JSON.parse(yield zip.file('slideshow.json').async('string'));
-  if (slideshows.some(s => s.id === rawSlideshow.id)) {
-    delete rawSlideshow.id;
-  }
-  const sameNameSlideshow = slideshows.find(s => s.name.startsWith(rawSlideshow.name));
-  if (sameNameSlideshow) {
-    rawSlideshow.name = `${sameNameSlideshow.name} - 2`;
-  }
-  return new Slideshow(rawSlideshow);
+  return colisionDetection(new Slideshow(rawSlideshow));
 }
 
 function* importInfos(zip: JSzip) {
