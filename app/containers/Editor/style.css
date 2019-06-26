@@ -1,4 +1,11 @@
 
+.sidebar--header-container img{
+    transition: all .3s ease;
+}
+
+.sidebar--header-container img:hover{
+   transform: rotate(-45deg);
+}
 
 .map .leaflet-marker-icon{
     background: #ff1f4b;
@@ -6,9 +13,10 @@
     border-radius: 50%;
 }
 
+.map .annotation-shape,
 .map .annotation-shape__editing{
-    stroke: black;
-    fill: black;
+    stroke: darkgrey;
+    fill: white;
 }
 
 .map .leaflet-control-zoom{

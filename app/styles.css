@@ -47,3 +47,7 @@ body {
 .button{
   text-transform: none;
 }
+
+.box,.button{
+  border-radius: 0;
+}
