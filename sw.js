@@ -6,8 +6,8 @@ var __wpo = {
       "https://medialab.github.io/tesselle/"
     ],
     "additional": [
-      "https://medialab.github.io/tesselle/vendor.b3db59081ba1fba7353a.chunk.js",
-      "https://medialab.github.io/tesselle/main.fc7aaec2fbc3a2a45317.chunk.js",
+      "https://medialab.github.io/tesselle/vendor.f5ba5f4df40b54ada04e.chunk.js",
+      "https://medialab.github.io/tesselle/main.9e55fae17b7622e71b86.chunk.js",
       "https://medialab.github.io/tesselle/3.5c932ddb32714b20246d.chunk.js",
       "https://medialab.github.io/tesselle/4.5bce229ebef2591782e1.chunk.js"
     ],
@@ -15,17 +15,17 @@ var __wpo = {
   },
   "externals": [],
   "hashesMap": {
-    "5e53ef208f3fa79a48f8374488f473c76e1233de": "https://medialab.github.io/tesselle/favicon.ico",
-    "bbcf979d065c131934b27f06e05cc21c54572cdf": "https://medialab.github.io/tesselle/vendor.b3db59081ba1fba7353a.chunk.js",
-    "a994a446523cc9861bbb5af9263fea16395aa63f": "https://medialab.github.io/tesselle/main.fc7aaec2fbc3a2a45317.chunk.js",
+    "30b0fcc2b8e05e59779c194a301a133811a5ad5c": "https://medialab.github.io/tesselle/favicon.ico",
+    "ab9c1d25d7fc7c08ab8d4962fb33daf71ef131ab": "https://medialab.github.io/tesselle/vendor.f5ba5f4df40b54ada04e.chunk.js",
+    "5a2ae5133ed5e50ca8b8f4b909d91540c2b0cb9b": "https://medialab.github.io/tesselle/main.9e55fae17b7622e71b86.chunk.js",
     "247cc925b53d5c8e7c4f2c89a641a83898bc5291": "https://medialab.github.io/tesselle/runtime~main.bb764c7dac4535b6ae9d.js",
     "d6ed9684fb89f9400128b4ec2ded0c91ba85ca92": "https://medialab.github.io/tesselle/3.5c932ddb32714b20246d.chunk.js",
     "d622d1c83cbd1e7cae0493b080994550a622468b": "https://medialab.github.io/tesselle/4.5bce229ebef2591782e1.chunk.js",
-    "23e8982eea6355d6e1a7655b4671a83d8b7370fa": "https://medialab.github.io/tesselle/"
+    "c1e0a47a985165b2d41021e4489985592bd30c48": "https://medialab.github.io/tesselle/"
   },
   "strategy": "changed",
   "responseStrategy": "cache-first",
-  "version": "2019-6-19 16:07:37",
+  "version": "2019-6-26 13:47:39",
   "name": "webpack-offline",
   "pluginVersion": "5.0.6",
   "relativePaths": false
