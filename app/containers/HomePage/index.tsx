@@ -177,7 +177,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
                   {` and is hosted on `}
                   <a
                     target={'blank'}
-                    href={'https://github.com/medialab/tesselle/'}
+                    href={'https://github.com/medialab/Tesselle/'}
                   >Github</a>.
                 </p>
               </Content>
