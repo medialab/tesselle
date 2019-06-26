@@ -2,9 +2,11 @@ import React, { useRef, useEffect, useState, useMemo, useLayoutEffect, useCallba
 
 import useMousetrap from 'react-hook-mousetrap';
 import { SupportedShapes } from 'types';
-import { LatLngBounds } from 'leaflet';
+import { LatLngBounds, LatLng } from 'leaflet';
 import Cover from 'types/Cover';
 import { annotationToBounds } from './geo';
+import { scaleFactorsCreator } from 'types/IIIFStatic';
+import { last } from 'ramda';
 
 // Hook
 export function useWhyDidYouUpdate(name, props) {
@@ -74,6 +76,9 @@ export const useTools = (defaultTool): [
 };
 
 export const useUrl = (file: File): string => {
+  if (!file) {
+    throw new Error('File is empty');
+  }
   const url = useMemo(() => window.URL.createObjectURL(file), [file]);
   useEffect(() => () => window.URL.revokeObjectURL(url), [url]);
   return url;
@@ -104,10 +109,11 @@ export function useMapLock(map?: L.Map, image?: Cover): LatLngBounds {
 export const useLockEffect = (map: L.Map, image: any) => {
   useEffect(() => {
     if (image.height) {
+      const denominator = last(scaleFactorsCreator(512, image.width, 512, image.height)) * 2;
       map.fitBounds(
         new LatLngBounds(
-          map.unproject([0, image.height * 2], map.getMaxZoom()),
-          map.unproject([image.width * 2, 0], map.getMaxZoom()),
+          new LatLng(0, 0),
+          new LatLng(-image.height / denominator, image.width / denominator),
         ),
         {animate: true},
       );

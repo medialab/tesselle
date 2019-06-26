@@ -92,8 +92,8 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
 
 const Control: React.SFC<{
   selected: Annotation;
-  onPrev: () => void;
-  onNext: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
 }> = props => (
   <div className={cx({
     'sidebar--menu-item sidebar--spacing': true,
@@ -103,7 +103,10 @@ const Control: React.SFC<{
     <>
       <StretchedLayoutContainer isDirection="horizontal" className="utils__space-between">
         <StretchedLayoutItem>
-          <Button  isRounded onClick={props.onPrev} style={{ margin: '.3rem', marginRight: '1rem' }}>
+          <Button
+            disabled={!props.onPrev}
+            isRounded onClick={props.onPrev}
+            style={{ margin: '.3rem', marginRight: '1rem' }}>
             <Icon>
               <FontAwesomeIcon icon={faCaretLeft} />
             </Icon>
@@ -119,7 +122,10 @@ const Control: React.SFC<{
           </Content>
         </StretchedLayoutItem>
         <StretchedLayoutItem>
-          <Button isRounded onClick={props.onNext} style={{ margin: '.3rem', marginLeft: '1rem' }}>
+          <Button
+            disabled={!props.onNext}
+            isRounded onClick={props.onNext}
+            style={{ margin: '.3rem', marginLeft: '1rem' }}>
             <Icon>
               <FontAwesomeIcon icon={faCaretRight} />
             </Icon>
@@ -137,8 +143,9 @@ interface SidebarProps {
   readonly slideshow: Slideshow;
   readonly selectedAnnotations: List<Annotation>;
   readonly changeSelection: changeSelection;
-  readonly onPrev: () => void;
-  readonly onNext: () => void;
+  readonly onPrev?: () => void;
+  readonly onNext?: () => void;
+  readonly viewerMode?: boolean;
 }
 
 const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
@@ -181,30 +188,40 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                     onPrev={props.onPrev}>{selected.properties.content}</Control>}
             </div>
         </StretchedLayoutItem>
-        <StretchedLayoutItem>
-          <footer className="sidebar--footer-container sidebar--spacing">
-            <StretchedLayoutContainer isDirection="horizontal" style={{width: '100%'}}>
-              <StretchedLayoutItem isFlex={1}>
-                <Link
-                  to={`/editor/${props.slideshow.id}`}
-                  className="button is-fullwidth is-primary"
-                >
-                    Back to edition
-                </Link>
-              </StretchedLayoutItem>
-              <StretchedLayoutItem isFlex={1}>
-                <StretchedLayoutContainer isDirection="horizontal">
-                  <StretchedLayoutItem isFlex={1}>
-                    <Button isFullWidth isColor="info" disabled={!props.slideshow.annotations.size} >Download ↓</Button>
-                  </StretchedLayoutItem>
-                  <StretchedLayoutItem>
-                    <Button isColor="info">?</Button>
-                  </StretchedLayoutItem>
-                </StretchedLayoutContainer>
-              </StretchedLayoutItem>
-            </StretchedLayoutContainer>
-          </footer>
-        </StretchedLayoutItem>
+        {
+          !props.viewerMode &&
+          <StretchedLayoutItem>
+            <footer className="sidebar--footer-container sidebar--spacing">
+              <StretchedLayoutContainer isDirection="horizontal" style={{width: '100%'}}>
+                <StretchedLayoutItem isFlex={1}>
+                  <Link
+                    to={`/editor/${props.slideshow.id}`}
+                    className="button is-fullwidth is-primary"
+                  >
+                      Back to edition
+                  </Link>
+                </StretchedLayoutItem>
+                <StretchedLayoutItem isFlex={1}>
+                  <StretchedLayoutContainer isDirection="horizontal">
+                    <StretchedLayoutItem isFlex={1}>
+                      <Button
+                        isFullWidth
+                        isColor="info"
+                        disabled={!props.slideshow.annotations.size}
+                      >
+                        Download ↓
+                      </Button>
+                    </StretchedLayoutItem>
+                    <StretchedLayoutItem>
+                      <Button isColor="info">?</Button>
+                    </StretchedLayoutItem>
+                  </StretchedLayoutContainer>
+                </StretchedLayoutItem>
+              </StretchedLayoutContainer>
+            </footer>
+          </StretchedLayoutItem>
+        }
+
       </StretchedLayoutContainer>
     </div>
   );

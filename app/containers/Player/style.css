@@ -24,6 +24,13 @@
     padding: 1rem;
 }
 
+.share-ui-container{
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1000;
+}
+
 .sidebar.player-sidebar .sidebar--item-field--selected.sidebar--item-field--minified {
     background: white;
     color: #363636;

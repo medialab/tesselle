@@ -51,3 +51,47 @@ body {
 .box,.button{
   border-radius: 0;
 }
+
+.ReactModal__Overlay{
+  z-index: 1000;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.ReactModal__Content{
+  position: relative!important;
+  max-width: 80vw;
+  padding: 0!important;
+}
+
+.ReactModal__Content .modal-content-header,
+.ReactModal__Content .modal-content-header .title {
+  background: var(--rgba-primary-2);
+  color: white;
+  padding: .5rem;
+}
+
+.ReactModal__Content .modal-content-header .title{
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: stretch;
+}
+
+.ReactModal__Content .modal-content-header .title span:first-of-type{
+  flex: 1;
+}
+
+.ReactModal__Content .modal-content-body{
+  padding: .5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.ReactModal__Content .modal-content-body code{
+  user-select: all;
+  -moz-user-select: all;
+  -ms-user-select: element;
+  -webkit-user-select: all;
+}

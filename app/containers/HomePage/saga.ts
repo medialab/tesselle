@@ -6,11 +6,10 @@ import Slideshow, { slideshowCreator } from 'types/Slideshow';
 import ActionTypes from 'containers/HomePage/constants';
 import { List, isImmutable } from 'immutable';
 import makeSelectSlideshows from './selectors';
-import { slice } from 'containers/Slicer/saga';
+import { slice, colisionDetection } from 'containers/Slicer/saga';
 import { push } from 'connected-react-router';
 import { setProgress } from 'containers/Slicer/actions';
 import makeSelectSlicer from 'containers/Slicer/selectors';
-import uuid from 'uuid';
 
 const selectSlideshows = makeSelectSlideshows();
 const selectSlicer = makeSelectSlicer();
@@ -23,10 +22,10 @@ export function* setSlideshows(slideshows: any) {
 }
 
 export function* duplicateSlideshow(action) {
-  const slideshow = action.payload;
+  const slideshow = yield colisionDetection(action.payload);
   const slideshows: List<Slideshow> = yield select(selectSlideshows);
   yield setSlideshows(slideshows.push(
-    slideshow.set('id', uuid()).set('name', `${slideshow.name} - duplicate`),
+    slideshow,
   ));
 }
 
@@ -72,7 +71,7 @@ export function* removeSlideshow(action) {
       call([db, db.removeItem], key)),
     );
   }
-  yield put(removeSlideshowAction.success(action));
+  yield put(removeSlideshowAction.success(action.payload));
   // We could yield to wait for all items to be removed, but I don't see the point ATM.
 }
 

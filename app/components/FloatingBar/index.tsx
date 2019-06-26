@@ -26,22 +26,22 @@ const FloatingBar: React.SFC<FloatingBarProps> = (props: FloatingBarProps) => {
     icon: icons.select,
     tool: SupportedShapes.selector,
     event: props.onSelectClick,
-    helpMessage: 'select (shortcut: escape)'
+    helpMessage: 'select (shortcut: escape)',
   }, {
     icon: icons.anchorRectangle,
     tool: SupportedShapes.rectangle,
     event: props.onRectangleClick,
-    helpMessage: 'rectangle (shortcut: r)'
+    helpMessage: 'rectangle (shortcut: r)',
   }, {
     icon: icons.anchorEllipse,
     tool: SupportedShapes.circle,
     event: props.onCircleClick,
-    helpMessage: 'circle (shortcut: c)'
+    helpMessage: 'circle (shortcut: c)',
   }, {
     icon: icons.anchorPolygon,
     tool: SupportedShapes.polygon,
     event: props.onPolygonClick,
-    helpMessage: 'polygon (shortcut: p)'
+    helpMessage: 'polygon (shortcut: p)',
   }];
 
   return (
