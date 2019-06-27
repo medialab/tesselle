@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {Link} from 'react-router-dom';
 import { withLeaflet } from 'react-leaflet';
 import Annotation from 'types/Annotation';
@@ -24,6 +24,9 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 import { faCaretLeft } from '@fortawesome/free-solid-svg-icons/faCaretLeft';
 import { faCaretRight } from '@fortawesome/free-solid-svg-icons/faCaretRight';
+
+import DownloadModalHelp from '../../components/DownloadModalHelp';
+
 
 const Header: React.SFC<{
   onButtonClick: () => void;
@@ -159,6 +162,9 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
   const onGoTo = useCallback((annotation) => {
     props.leaflet.map.fitBounds(annotationToBounds(annotation), { animate: true });
   }, [props.leaflet && props.leaflet.map]);
+  const [isDownloadModalHelp, setDownloadModalHelp] = useState(false);
+  const onCloseDownloadModalHelp = () => setDownloadModalHelp(false);
+  const onOpenDownloadModalHelp = () => setDownloadModalHelp(true);
   return (
     <div className={cx({
       'sidebar': true,
@@ -213,7 +219,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                       </Button>
                     </StretchedLayoutItem>
                     <StretchedLayoutItem>
-                      <Button isColor="info">?</Button>
+                      <Button  onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
                     </StretchedLayoutItem>
                   </StretchedLayoutContainer>
                 </StretchedLayoutItem>
@@ -223,6 +229,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
         }
 
       </StretchedLayoutContainer>
+      <DownloadModalHelp isOpen={isDownloadModalHelp} onRequestClose={onCloseDownloadModalHelp} />
     </div>
   );
 });
