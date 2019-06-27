@@ -36,6 +36,13 @@
     padding: 0;
 }
 
+.sidebar.player-sidebar .minified-nav-container{
+    justify-content: center;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    margin-top: 1rem;
+    padding-top: .5rem;
+}
+
 .player-map .player-card{
     cursor: pointer;
 }

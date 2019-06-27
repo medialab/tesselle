@@ -130,17 +130,8 @@ const Control: React.SFC<{
     'sidebar--menu-item__minified': true,
   })}>
     <>
-      <StretchedLayoutContainer isDirection="horizontal" className="utils__space-between">
-        <StretchedLayoutItem>
-          <Button
-            disabled={!props.onPrev}
-            isRounded onClick={props.onPrev}
-            style={{ margin: '.3rem', marginRight: '1rem' }}>
-            <Icon>
-              <FontAwesomeIcon icon={faCaretLeft} />
-            </Icon>
-          </Button>
-        </StretchedLayoutItem>
+      <StretchedLayoutContainer isDirection="vertical" className="utils__space-between">
+
         <StretchedLayoutItem isFlex={1}>
           <Content className={cx('sidebar--item-field', {
             'sidebar--item-field--selected': props.selected,
@@ -151,15 +142,30 @@ const Control: React.SFC<{
           </Content>
         </StretchedLayoutItem>
         <StretchedLayoutItem>
-          <Button
-            disabled={!props.onNext}
-            isRounded onClick={props.onNext}
-            style={{ margin: '.3rem', marginLeft: '1rem' }}>
-            <Icon>
-              <FontAwesomeIcon icon={faCaretRight} />
-            </Icon>
-          </Button>
+          <StretchedLayoutContainer isDirection="horizontal" className="minified-nav-container">
+            <StretchedLayoutItem>
+              <Button
+                disabled={!props.onPrev}
+                isRounded onClick={props.onPrev}
+                style={{ margin: '.2rem' }}>
+                <Icon>
+                  <FontAwesomeIcon icon={faCaretLeft} />
+                </Icon>
+              </Button>
+            </StretchedLayoutItem>
+            <StretchedLayoutItem>
+              <Button
+                disabled={!props.onNext}
+                isRounded onClick={props.onNext}
+                style={{ margin: '.2rem' }}>
+                <Icon>
+                  <FontAwesomeIcon icon={faCaretRight} />
+                </Icon>
+              </Button>
+            </StretchedLayoutItem>
+          </StretchedLayoutContainer>
         </StretchedLayoutItem>
+
       </StretchedLayoutContainer>
     </>
   </div>

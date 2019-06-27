@@ -23,6 +23,10 @@
     fill: white;
 }
 
+.map .annotation-shape__editing{
+    stroke: #009085;
+}
+
 .map .leaflet-control-zoom{
     box-shadow: none;
     border: none;
