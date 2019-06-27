@@ -46,13 +46,13 @@ textarea.textarea {
 .sidebar--wrapper{
   padding: 1rem;
   flex: 1;
-  overflow: hidden;
-  overflow-y: auto;
+  /* overflow: hidden;
+  overflow-y: auto; */
 }
 .sidebar--container {
   background: white;
   /* max-height: calc(100vh - 45px - 70px); */
-  overflow: auto;
+  /* overflow: auto; */
 }
 .sidebar--menu-item .box {
   background: white;
