@@ -1,7 +1,10 @@
 
+.sidebar--header-container img{
+    transition: all .3s ease;
+}
 
-.map .leaflet-control-attribution {
-    display: none
+.sidebar--header-container img:hover{
+   transform: rotate(-45deg);
 }
 
 .map .leaflet-marker-icon{
@@ -10,16 +13,32 @@
     border-radius: 50%;
 }
 
+.map .annotation-shape,
 .map .annotation-shape__editing{
-    stroke: black;
-    fill: black;
+    stroke: darkgrey;
+    fill: white;
 }
 
 .map .leaflet-control-zoom{
     box-shadow: none;
     border: none;
-    margin-right: 1rem;
+    margin-right: 1.5rem;
     margin-top: 1rem;
+}
+
+.map .leaflet-control{
+    margin-right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.map .leaflet-control .buttons-container{
+    bottom: 0;
+}
+
+.map .leaflet-control-attribution {
+    display: none
 }
 
 .map .leaflet-control-zoom-in,

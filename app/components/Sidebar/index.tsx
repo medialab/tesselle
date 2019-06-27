@@ -18,10 +18,11 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Formik, Form, FormikValues, FormikErrors, Field, FormikActions, FieldProps } from 'formik';
 import cx from 'classnames';
 import Textarea from 'react-textarea-autosize';
+import Tooltip from 'react-tooltip';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMinusSquare } from '@fortawesome/free-solid-svg-icons/faMinusSquare';
-import { faPlusSquare } from '@fortawesome/free-solid-svg-icons/faPlusSquare';
+import { faMinus } from '@fortawesome/free-solid-svg-icons/faMinus';
+import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
 
 import Annotation from 'types/Annotation';
 import Slideshow from 'types/Slideshow';
@@ -35,6 +36,8 @@ import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 import { useDispatch } from 'react-redux';
 import { exportSlideshowActionCreator } from 'containers/Slicer/actions';
+
+import logo from '../../images/logo.svg';
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -239,18 +242,31 @@ const Orderable: React.SFC<ListProps> = props => {
 const Header: React.SFC<{
   onButtonClick: () => void;
   readonly visible: boolean;
+  slideshow: Slideshow;
+  onNameChange: (values: TitleProps, formikActions: FormikActions<TitleProps>) => void;
 }> = (props) => (
   <div className="sidebar--header-container sidebar--spacing">
-    <SimpleTitle isSize={5}><Link to="/"><b>Tesselle</b></Link></SimpleTitle>
-    <span className="minify-toggle" onClick={props.onButtonClick}>
+    <SimpleTitle 
+      isSize={5}
+    >
+      <Link to="/">
+        <img data-tip="Back to home" data-for="tooltip" src={logo} style={{maxWidth: '2rem'}} />
+      </Link>
+    </SimpleTitle>
+    {props.visible ? 
+      <Title title={props.slideshow.name} onChange={props.onNameChange} />
+      :
+      <SimpleTitle isSize={6} className="is-stretch">{props.slideshow.name}</SimpleTitle>
+    }
+    <Button isRounded className="minify-toggle" onClick={props.onButtonClick}>
         <Icon>
           { props.visible ?
-            <FontAwesomeIcon icon={faMinusSquare} />
+            <FontAwesomeIcon icon={faMinus} />
             :
-            <FontAwesomeIcon icon={faPlusSquare} />
+            <FontAwesomeIcon icon={faPlus} />
           }
         </Icon>
-    </span>
+    </Button>
   </div>
 );
 
@@ -275,6 +291,10 @@ const Title: React.SFC<TitleProps> = (props) => {
             className="input__invisible input"
             onBlur={onBlur}
             name="title"
+            data-for="tooltip"
+            data-tip="document title"
+            data-place="bottom"
+            placeholder="document title"
           />
         </Form>
       );
@@ -307,9 +327,13 @@ const Sidebar: React.SFC<SidebarProps> = props => {
   const selected = props.selectedAnnotations.first<Annotation>();
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
-      <Header onButtonClick={props.visible ? props.onClose : props.onOpen} visible={props.visible} />
+      <Header 
+        onButtonClick={props.visible ? props.onClose : props.onOpen} 
+        visible={props.visible} 
+        onNameChange={onNameChange}
+        slideshow={props.slideshow}
+      />
       <div className="sidebar--wrapper">
-        {props.visible && <Title title={props.slideshow.name} onChange={onNameChange} />}
         <Loader />
         <div onClick={onClickSidebar} className="sidebar--container">
           {props.visible ? (
@@ -350,6 +374,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
       </footer>
+      <Tooltip id="tooltip" place="right" effect="solid" />
     </div>
   );
 };

@@ -41,8 +41,6 @@ textarea.textarea {
 .sidebar--minified-placeholder{
   height: 100%;
   width: 100%;
-  text-align: center;
-  padding: 2rem;
 }
 
 .sidebar--wrapper{
@@ -74,8 +72,6 @@ textarea.textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--rgba-primary-2);
-  color: white;
 }
 .sidebar--header-container .title{
   margin: .5rem 1rem;
@@ -87,12 +83,12 @@ textarea.textarea {
 
 .sidebar--header-container .minify-toggle{
   cursor: pointer;
+  margin-right: 1rem;
 }
 
 .sidebar--footer-container {
   display: flex;
   justify-content: space-between;
-  /* background-color: var(--rgba-primary-2); */
   color: white;
   padding: 0
 }
