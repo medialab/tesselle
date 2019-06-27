@@ -17,22 +17,48 @@ import { List } from 'immutable';
 import { annotationToBounds } from 'utils/geo';
 import 'components/Sidebar/styles.css';
 import { changeSelection, SureContextProps } from 'types';
+import Tooltip from 'react-tooltip';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
+// import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 import { faCaretLeft } from '@fortawesome/free-solid-svg-icons/faCaretLeft';
 import { faCaretRight } from '@fortawesome/free-solid-svg-icons/faCaretRight';
 
+import logo from '../../images/logo.svg';
+
+
 const Header: React.SFC<{
   onButtonClick: () => void;
   title: string;
   minified: boolean;
+  viewerMode?: boolean;
 }> = props => (
   <div className="sidebar--header-container sidebar--spacing">
-    <Title isSize={5} className="is-stretch">{props.title}</Title>
-    <Button isRounded onClick={props.onButtonClick} style={{ marginBottom: '.5rem', marginRight: '.8rem' }}>
+    <Title
+      isSize={5}
+    >
+      {
+        props.viewerMode ?
+        <a href="https://www.medialab.github.io/tesselle" target="blank" rel="noopener">
+          <img data-tip={'Made with tesselle'} data-for="tooltip" src={logo} style={{maxWidth: '2rem'}} />
+        </a>
+        :
+        <Link to="/">
+          <img data-tip={'Back to home'} data-for="tooltip" src={logo} style={{maxWidth: '2rem'}} />
+        </Link>
+      }
+
+    </Title>
+    <Title isSize={6} className="is-stretch player-title">{props.title}</Title>
+    <Button
+      isRounded
+      onClick={props.onButtonClick}
+      style={{  marginRight: '.3rem' }}
+      data-tip={props.minified ? 'Exit play mode' : 'Play sequentially'}
+      data-for="tooltip"
+    >
       <Icon>
         {
           props.minified ?
@@ -60,13 +86,16 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
     }
     props.onGoTo(props.annotation);
   }, [props.annotation]);
-  const onClick = useCallback(() => props.onClick(props.annotation), [props.annotation]);
+  const onClick = useCallback((e) => {
+    props.onClick(props.annotation);
+    onGoTo(e);
+  }, [props.annotation]);
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
       'sidebar--menu-item__selected': props.selected,
     })}>
-      <Box onClick={onClick}>
+      <Box className="player-card" onClick={onClick}>
         <StretchedLayoutContainer isDirection="horizontal">
           <StretchedLayoutItem style={{ paddingRight: '1rem' }} isFlex={1}>
             <Content className={cx('sidebar--item-field', {
@@ -77,11 +106,11 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
           </StretchedLayoutItem>
           <StretchedLayoutItem>
             <StretchedLayoutContainer isDirection="horizontal">
-              <div>
+              {/*<div>
                 <Button isRounded onClick={onGoTo} style={{ margin: '.3rem' }}>
                   <Icon><FontAwesomeIcon icon={faEye} /></Icon>
                 </Button>
-              </div>
+              </div>*/}
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
@@ -168,7 +197,12 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
       })}>
       <StretchedLayoutContainer style={{height: '100%'}}>
         <StretchedLayoutItem>
-          <Header minified={!props.visible} title={props.slideshow.name} onButtonClick={onClickToggle} />
+          <Header
+            minified={!props.visible}
+            title={props.slideshow.name}
+            onButtonClick={onClickToggle}
+            viewerMode={props.viewerMode}
+          />
         </StretchedLayoutItem>
         <StretchedLayoutItem isFlex={1} style={{overflow: 'hidden'}}>
           <div className="sidebar--container play-sidebar--container">
@@ -223,6 +257,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
         }
 
       </StretchedLayoutContainer>
+      <Tooltip id="tooltip" place="right" effect="solid" />
     </div>
   );
 });

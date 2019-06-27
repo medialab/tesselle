@@ -1,7 +1,6 @@
 
 
 .player-map .sidebar--header-container{
-    padding: .5rem;
     padding-right: 1rem;
     display: flex;
     flex-flow: row nowrap;
@@ -35,4 +34,12 @@
     background: white;
     color: #363636;
     padding: 0;
+}
+
+.player-map .player-card{
+    cursor: pointer;
+}
+
+.player-map .player-title{
+    margin: 0;
 }

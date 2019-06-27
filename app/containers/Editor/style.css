@@ -7,6 +7,10 @@
    transform: rotate(-45deg);
 }
 
+.sidebar--header-container .input{
+    margin: 0
+}
+
 .map .leaflet-marker-icon{
     background: #ff1f4b;
     border: none;
