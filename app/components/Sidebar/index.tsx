@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import { List } from 'immutable';
 import {
   Button,
@@ -35,6 +35,7 @@ import { FormattedMessage } from 'react-intl';
 import messages from './messages';
 import { useDispatch } from 'react-redux';
 import { exportSlideshowActionCreator } from 'containers/Slicer/actions';
+import DownloadModalHelp from '../DownloadModalHelp';
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -305,6 +306,9 @@ const Sidebar: React.SFC<SidebarProps> = props => {
     [props.slideshow],
   );
   const selected = props.selectedAnnotations.first<Annotation>();
+  const [isDownloadModalHelp, setDownloadModalHelp] = useState(false);
+  const onCloseDownloadModalHelp = () => setDownloadModalHelp(false);
+  const onOpenDownloadModalHelp = () => setDownloadModalHelp(true);
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
       <Header onButtonClick={props.visible ? props.onClose : props.onOpen} visible={props.visible} />
@@ -341,15 +345,17 @@ const Sidebar: React.SFC<SidebarProps> = props => {
                   onClick={exportData}
                   isFullWidth
                   isColor="info"
-                  disabled={!props.slideshow.annotations.size}>Download ↓</Button>
+                  disabled={!props.slideshow.annotations.size}>Download</Button>
               </StretchedLayoutItem>
               <StretchedLayoutItem>
-                <Button isColor="info">?</Button>
+                <Button onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
               </StretchedLayoutItem>
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
       </footer>
+
+      <DownloadModalHelp isOpen={isDownloadModalHelp} onRequestClose={onCloseDownloadModalHelp} />
     </div>
   );
 };
