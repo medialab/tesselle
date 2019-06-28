@@ -34,7 +34,7 @@ const Header: React.SFC<{
   minified: boolean;
 }> = props => (
   <div className="sidebar--header-container sidebar--spacing">
-    <Title isSize={5}>{props.title}</Title>
+    <Title isSize={5} className="is-stretch">{props.title}</Title>
     <Button isRounded onClick={props.onButtonClick} style={{ marginBottom: '.5rem', marginRight: '.8rem' }}>
       <Icon>
         {

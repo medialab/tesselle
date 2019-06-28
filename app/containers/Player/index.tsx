@@ -51,6 +51,7 @@ const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
   return (
     <React.Fragment>
       <AnnotationLayer
+        onLayerClick={props.playing ? undefined : props.changeSelection}
         data={props.slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations} />
       {props.url ?
