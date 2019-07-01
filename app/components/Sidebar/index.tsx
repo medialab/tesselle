@@ -19,6 +19,9 @@ import { Formik, Form, FormikValues, FormikErrors, Field, FormikActions, FieldPr
 import cx from 'classnames';
 import Textarea from 'react-textarea-autosize';
 import Tooltip from 'react-tooltip';
+import { DomEvent } from 'leaflet';
+import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinus } from '@fortawesome/free-solid-svg-icons/faMinus';
@@ -29,13 +32,9 @@ import Slideshow from 'types/Slideshow';
 import icons from 'quinoa-design-library/src/themes/millet/icons';
 
 import './styles.css';
-import { DomEvent } from 'leaflet';
-import { Link } from 'react-router-dom';
 import Loader from 'containers/Slicer';
-import { FormattedMessage } from 'react-intl';
+import Download from 'components/Download';
 import messages from './messages';
-import { useDispatch } from 'react-redux';
-import { exportSlideshowActionCreator } from 'containers/Slicer/actions';
 
 import logo from '../../images/logo.svg';
 
@@ -311,11 +310,6 @@ interface SidebarProps extends ListProps {
 }
 
 const Sidebar: React.SFC<SidebarProps> = props => {
-  const dispatch = useDispatch();
-  const exportData = useCallback(
-    () => dispatch(exportSlideshowActionCreator.request(props.slideshow)),
-    [dispatch, props.slideshow],
-  );
   const onClickSidebar = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
     return props.onAnnotationClick();
@@ -361,11 +355,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
           <StretchedLayoutItem isFlex={1}>
             <StretchedLayoutContainer isDirection="horizontal">
               <StretchedLayoutItem isFlex={1}>
-                <Button
-                  onClick={exportData}
-                  isFullWidth
-                  isColor="info"
-                  disabled={!props.slideshow.annotations.size}>Download ↓</Button>
+                <Download disabled={!props.slideshow.annotations.size} />
               </StretchedLayoutItem>
               <StretchedLayoutItem>
                 <Button isColor="info">?</Button>

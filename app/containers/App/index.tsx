@@ -15,8 +15,9 @@ import Editor from 'containers/Editor';
 import Player from 'containers/Player';
 import Viewer from 'containers/Viewer';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
+import { slicerContainer } from 'containers/Slicer';
 
-export default function App() {
+export default slicerContainer(function App() {
   return (
     <Switch>
       <Route exact path="/" component={HomePage} />
@@ -26,4 +27,4 @@ export default function App() {
       <Route component={NotFoundPage} />
     </Switch>
   );
-}
+});
