@@ -31,7 +31,6 @@ import { useToggleBoolean } from 'utils/hooks';
 
 import logo from '../../images/logo.svg';
 
-
 const Header: React.SFC<{
   onButtonClick: () => void;
   title: string;

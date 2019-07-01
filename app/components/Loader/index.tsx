@@ -22,7 +22,6 @@ const Loader: React.SFC<{}> = (props: {}) => {
           <span className="app-name">Tesselle</span>
         </h1>
         <h2 className="title is-3">Loading</h2>
-
       </div>
     </div>
   );

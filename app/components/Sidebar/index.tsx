@@ -32,7 +32,7 @@ import Slideshow from 'types/Slideshow';
 import icons from 'quinoa-design-library/src/themes/millet/icons';
 
 import './styles.css';
-import Loader from 'containers/Slicer';
+import Loader from 'containers/App/Loader';
 import Download from 'components/Download';
 import messages from './messages';
 import DownloadModalHelp from '../DownloadModalHelp';

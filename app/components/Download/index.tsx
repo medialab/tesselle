@@ -8,7 +8,7 @@ import * as React from 'react';
 import { Button } from 'quinoa-design-library';
 import { FormattedMessage } from 'react-intl';
 
-import { useExport } from 'containers/Slicer';
+import { useExport } from 'containers/App/hooks';
 import messages from './messages';
 
 interface OwnProps {
@@ -24,6 +24,7 @@ const Download: React.SFC<OwnProps> = (props: OwnProps) => {
       disabled={loading}
       isLoading={loading}
       isColor="info"
+      {...props}
     ><FormattedMessage {...messages.content} /></Button>
   );
 };

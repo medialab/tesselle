@@ -4,7 +4,7 @@ import { ILanguageProviderProps } from 'containers/LanguageProvider';
 import { ContainerState as EditorState } from '../containers/Editor/types';
 import { ContainerState as PlayerState } from '../containers/Player/types';
 import { ContainerState as HomePageState } from '../containers/HomePage/types';
-import { ContainerState as SlicerState } from '../containers/Slicer/types';
+import { ContainerState as SlicerState } from '../containers/App/types';
 import { ContainerState as ViewerState } from '../containers/Viewer/types';
 import Annotation from './Annotation';
 import { LeafletContext, ContextProps } from 'react-leaflet';

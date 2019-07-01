@@ -1,8 +1,17 @@
 /*
- * AppConstants
- * Each action has a corresponding type, which the reducer knows and picks up on.
- * To avoid weird typos between the reducer and the actions, we save them as
- * constants here. We prefix them with 'yourproject/YourComponent' so we avoid
- * reducers accidentally picking up actions they shouldn't.
+ *
+ * App constants
  *
  */
+
+enum ActionTypes {
+  SET_PROGRESS = 'app/App/SET_PROGRESS',
+  EXPORT_START = 'app/App/EXPORT_START',
+  EXPORT_SUCCESS = 'app/App/EXPORT_SUCCESS',
+  EXPORT_FAILURE = 'app/App/EXPORT_FAILURE',
+  IMPORT_SLIDESHOW = 'app/App/IMPORT_SLIDESHOW',
+  IMPORT_SLIDESHOW_SUCCESS = 'app/App/IMPORT_SLIDESHOW_SUCCESS',
+  IMPORT_SLIDESHOW_FAILURE = 'app/App/IMPORT_SLIDESHOW_FAILURE',
+}
+
+export default ActionTypes;
