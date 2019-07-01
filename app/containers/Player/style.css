@@ -1,7 +1,6 @@
 
 
 .player-map .sidebar--header-container{
-    padding: .5rem;
     padding-right: 1rem;
     display: flex;
     flex-flow: row nowrap;
@@ -35,4 +34,26 @@
     background: white;
     color: #363636;
     padding: 0;
+}
+
+.sidebar.player-sidebar .minified-nav-container{
+    justify-content: center;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    margin-top: 1rem;
+    padding-top: .5rem;
+}
+
+.player-map .player-card{
+    cursor: pointer;
+}
+
+.player-map .player-title{
+    margin: 0;
+}
+
+.player-map .annotation-shape.annotation-shape__editing.leaflet-interactive {
+    fill: black;
+    stroke: white;
+    pointer-events: none;
+    mix-blend-mode: darken;
 }

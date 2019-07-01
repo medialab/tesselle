@@ -19,7 +19,7 @@ import 'components/Sidebar/styles.css';
 import { changeSelection, SureContextProps } from 'types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
+// import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
 import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 import { faCaretLeft } from '@fortawesome/free-solid-svg-icons/faCaretLeft';
@@ -29,23 +29,52 @@ import Download from 'components/Download';
 import DownloadModalHelp from '../../components/DownloadModalHelp';
 import { useToggleBoolean } from 'utils/hooks';
 
+import logo from '../../images/logo.svg';
+
+
 const Header: React.SFC<{
   onButtonClick: () => void;
   title: string;
   minified: boolean;
+  viewerMode?: boolean;
+  allowPlay?: boolean;
 }> = props => (
   <div className="sidebar--header-container sidebar--spacing">
-    <Title isSize={5} className="is-stretch">{props.title}</Title>
-    <Button isRounded onClick={props.onButtonClick} style={{ marginBottom: '.5rem', marginRight: '.8rem' }}>
-      <Icon>
-        {
-          props.minified ?
-          <FontAwesomeIcon icon={faTimes} />
-          :
-          <FontAwesomeIcon icon={faPlay} />
-        }
-      </Icon>
-    </Button>
+    <Title
+      isSize={5}
+    >
+      {
+        props.viewerMode ?
+        <a href="https://www.medialab.github.io/tesselle" target="blank" rel="noopener">
+          <img data-tip={'Made with tesselle'} data-for="tooltip" src={logo} style={{maxWidth: '2rem'}} />
+        </a>
+        :
+        <Link to="/">
+          <img data-tip={'Back to home'} data-for="tooltip" src={logo} style={{maxWidth: '2rem'}} />
+        </Link>
+      }
+
+    </Title>
+    <Title isSize={6} className="is-stretch player-title">{props.title}</Title>
+    {
+      !!props.allowPlay &&
+      <Button
+        isRounded
+        onClick={props.onButtonClick}
+        style={{  marginRight: '.3rem' }}
+        data-tip={props.minified ? 'Exit play mode' : 'Play sequentially'}
+        data-for="tooltip"
+      >
+        <Icon>
+          {
+            props.minified ?
+            <FontAwesomeIcon icon={faTimes} />
+            :
+            <FontAwesomeIcon icon={faPlay} />
+          }
+        </Icon>
+      </Button>
+    }
   </div>
 );
 
@@ -64,16 +93,19 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
     }
     props.onGoTo(props.annotation);
   }, [props.annotation]);
-  const onClick = useCallback(() => props.onClick(props.annotation), [props.annotation]);
+  const onClick = useCallback((e) => {
+    props.onClick(props.annotation);
+    onGoTo(e);
+  }, [props.annotation]);
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
       'sidebar--menu-item__selected': props.selected,
     })}>
-      <Box onClick={onClick}>
+      <Box className="player-card" onClick={onClick}>
         <StretchedLayoutContainer isDirection="horizontal">
           <StretchedLayoutItem style={{ paddingRight: '1rem' }} isFlex={1}>
-            <Content className={cx('sidebar--item-field', {
+            <Content isSize={'small'} className={cx('sidebar--item-field', {
               'sidebar--item-field--selected': props.selected,
             })}>
               {props.children}
@@ -81,11 +113,11 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
           </StretchedLayoutItem>
           <StretchedLayoutItem>
             <StretchedLayoutContainer isDirection="horizontal">
-              <div>
+              {/*<div>
                 <Button isRounded onClick={onGoTo} style={{ margin: '.3rem' }}>
                   <Icon><FontAwesomeIcon icon={faEye} /></Icon>
                 </Button>
-              </div>
+              </div>*/}
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
@@ -105,36 +137,41 @@ const Control: React.SFC<{
     'sidebar--menu-item__minified': true,
   })}>
     <>
-      <StretchedLayoutContainer isDirection="horizontal" className="utils__space-between">
-        <StretchedLayoutItem>
-          <Button
-            disabled={!props.onPrev}
-            isRounded onClick={props.onPrev}
-            style={{ margin: '.3rem', marginRight: '1rem' }}>
-            <Icon>
-              <FontAwesomeIcon icon={faCaretLeft} />
-            </Icon>
-          </Button>
-        </StretchedLayoutItem>
+      <StretchedLayoutContainer isDirection="vertical" className="utils__space-between">
+
         <StretchedLayoutItem isFlex={1}>
-          <Content className={cx('sidebar--item-field', {
+          <Content isSize={'small'} className={cx('sidebar--item-field', {
             'sidebar--item-field--selected': props.selected,
             'sidebar--item-field--minified': true,
-
           })}>
             {props.children}
           </Content>
         </StretchedLayoutItem>
         <StretchedLayoutItem>
-          <Button
-            disabled={!props.onNext}
-            isRounded onClick={props.onNext}
-            style={{ margin: '.3rem', marginLeft: '1rem' }}>
-            <Icon>
-              <FontAwesomeIcon icon={faCaretRight} />
-            </Icon>
-          </Button>
+          <StretchedLayoutContainer isDirection="horizontal" className="minified-nav-container">
+            <StretchedLayoutItem>
+              <Button
+                disabled={!props.onPrev}
+                isRounded onClick={props.onPrev}
+                style={{ margin: '.2rem' }}>
+                <Icon>
+                  <FontAwesomeIcon icon={faCaretLeft} />
+                </Icon>
+              </Button>
+            </StretchedLayoutItem>
+            <StretchedLayoutItem>
+              <Button
+                disabled={!props.onNext}
+                isRounded onClick={props.onNext}
+                style={{ margin: '.2rem' }}>
+                <Icon>
+                  <FontAwesomeIcon icon={faCaretRight} />
+                </Icon>
+              </Button>
+            </StretchedLayoutItem>
+          </StretchedLayoutContainer>
         </StretchedLayoutItem>
+
       </StretchedLayoutContainer>
     </>
   </div>
@@ -173,7 +210,13 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
       })}>
       <StretchedLayoutContainer style={{height: '100%'}}>
         <StretchedLayoutItem>
-          <Header minified={!props.visible} title={props.slideshow.name} onButtonClick={onClickToggle} />
+          <Header
+            minified={!props.visible}
+            title={props.slideshow.name}
+            onButtonClick={onClickToggle}
+            viewerMode={props.viewerMode}
+            allowPlay={!!props.slideshow.annotations.size}
+          />
         </StretchedLayoutItem>
         <StretchedLayoutItem isFlex={1} style={{overflow: 'hidden'}}>
           <div className="sidebar--container play-sidebar--container">
