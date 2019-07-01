@@ -87,7 +87,7 @@ function* exportSlideshow(action) {
     zip.file('slideshow.json', JSON.stringify(slideshow));
     zip.file('_headers', `/*
     Access-Control-Allow-Origin: *`);
-    zip.file('index.html', html);
+    zip.file('index.html', html(slideshow));
     const infojson = yield db.getItem(`/info/${slideshow.image.id}.json`);
     zip.file('info.json', JSON.stringify(infojson));
     const images = zip.folder('images');
