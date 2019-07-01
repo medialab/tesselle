@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import { List } from 'immutable';
 import {
   Button,
@@ -35,6 +35,7 @@ import './styles.css';
 import Loader from 'containers/Slicer';
 import Download from 'components/Download';
 import messages from './messages';
+import DownloadModalHelp from '../DownloadModalHelp';
 
 import logo from '../../images/logo.svg';
 
@@ -319,6 +320,9 @@ const Sidebar: React.SFC<SidebarProps> = props => {
     [props.slideshow],
   );
   const selected = props.selectedAnnotations.first<Annotation>();
+  const [isDownloadModalHelp, setDownloadModalHelp] = useState(false);
+  const onCloseDownloadModalHelp = () => setDownloadModalHelp(false);
+  const onOpenDownloadModalHelp = () => setDownloadModalHelp(true);
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
       <Header
@@ -340,7 +344,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
               data={selected as Annotation}
               selected={!!selected}
               minified={props.visible !== undefined}
-             />
+            />
             ) : (
               <span className="sidebar--minified-placeholder">select or create an annotation</span>
             )
@@ -358,12 +362,13 @@ const Sidebar: React.SFC<SidebarProps> = props => {
                 <Download disabled={!props.slideshow.annotations.size} />
               </StretchedLayoutItem>
               <StretchedLayoutItem>
-                <Button isColor="info">?</Button>
+                <Button onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
               </StretchedLayoutItem>
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
       </footer>
+      <DownloadModalHelp isOpen={isDownloadModalHelp} onRequestClose={onCloseDownloadModalHelp} />
       <Tooltip id="tooltip" place="right" effect="solid" />
     </div>
   );
