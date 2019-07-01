@@ -28,13 +28,14 @@ import {
 
 import SlideshowCartouche from 'components/SlideshowCartouche';
 
-import { Loader, useSlicerState } from 'containers/Slicer';
+import { useSlicerState } from 'containers/App/hooks';
 
 import medialabLogo from './assets/logo-medialab.svg';
 import forccastLogo from './assets/logo-forccast.svg';
 import appLogo from './assets/logo.svg';
 import Slideshow from 'types/Slideshow';
-import { importSlideshowAction } from 'containers/Slicer/actions';
+import { importSlideshowAction } from 'containers/App/actions';
+import Loader from 'containers/App/Loader';
 
 interface HomePageProps {
   createSlideshow: (file: File) => void;

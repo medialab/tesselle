@@ -6,10 +6,10 @@ import Slideshow, { slideshowCreator } from 'types/Slideshow';
 import ActionTypes from 'containers/HomePage/constants';
 import { List, isImmutable } from 'immutable';
 import makeSelectSlideshows from './selectors';
-import { slice, colisionDetection } from 'containers/Slicer/saga';
+import { slice, colisionDetection } from 'containers/App/saga';
 import { push } from 'connected-react-router';
-import { setProgress } from 'containers/Slicer/actions';
-import makeSelectSlicer from 'containers/Slicer/selectors';
+import { setProgress } from 'containers/App/actions';
+import makeSelectSlicer from 'containers/App/selectors';
 
 const selectSlideshows = makeSelectSlideshows();
 const selectSlicer = makeSelectSlicer();

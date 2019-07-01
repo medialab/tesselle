@@ -5,7 +5,6 @@
  */
 
 import { action, createAsyncAction } from 'typesafe-actions';
-import {} from './types';
 
 import ActionTypes from './constants';
 import SliceState from './SliceArgs';
