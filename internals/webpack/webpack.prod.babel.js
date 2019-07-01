@@ -8,7 +8,7 @@ const { HashedModuleIdsPlugin } = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 
-const publicPath = 'https://medialab.github.io/Tesselle/';
+const publicPath = 'https://medialab.github.io/tesselle/';
 
 module.exports = require('./webpack.base.babel')({
   mode: 'production',
