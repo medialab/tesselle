@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import {Link} from 'react-router-dom';
 import { withLeaflet } from 'react-leaflet';
 import Annotation from 'types/Annotation';
@@ -27,7 +27,7 @@ import { faCaretRight } from '@fortawesome/free-solid-svg-icons/faCaretRight';
 import Download from 'components/Download';
 
 import DownloadModalHelp from '../../components/DownloadModalHelp';
-
+import { useToggleBoolean } from 'utils/hooks';
 
 const Header: React.SFC<{
   onButtonClick: () => void;
@@ -163,9 +163,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
   const onGoTo = useCallback((annotation) => {
     props.leaflet.map.fitBounds(annotationToBounds(annotation), { animate: true });
   }, [props.leaflet && props.leaflet.map]);
-  const [isDownloadModalHelp, setDownloadModalHelp] = useState(false);
-  const onCloseDownloadModalHelp = () => setDownloadModalHelp(false);
-  const onOpenDownloadModalHelp = () => setDownloadModalHelp(true);
+  const [isDownloadModalHelp, onCloseDownloadModalHelp, onOpenDownloadModalHelp] = useToggleBoolean(false);
   return (
     <div className={cx({
       'sidebar': true,
