@@ -34,6 +34,7 @@ const Header: React.SFC<{
   title: string;
   minified: boolean;
   viewerMode?: boolean;
+  allowPlay?: boolean;
 }> = props => (
   <div className="sidebar--header-container sidebar--spacing">
     <Title
@@ -52,22 +53,26 @@ const Header: React.SFC<{
 
     </Title>
     <Title isSize={6} className="is-stretch player-title">{props.title}</Title>
-    <Button
-      isRounded
-      onClick={props.onButtonClick}
-      style={{  marginRight: '.3rem' }}
-      data-tip={props.minified ? 'Exit play mode' : 'Play sequentially'}
-      data-for="tooltip"
-    >
-      <Icon>
-        {
-          props.minified ?
-          <FontAwesomeIcon icon={faTimes} />
-          :
-          <FontAwesomeIcon icon={faPlay} />
-        }
-      </Icon>
-    </Button>
+    {
+      !!props.allowPlay &&
+      <Button
+        isRounded
+        onClick={props.onButtonClick}
+        style={{  marginRight: '.3rem' }}
+        data-tip={props.minified ? 'Exit play mode' : 'Play sequentially'}
+        data-for="tooltip"
+      >
+        <Icon>
+          {
+            props.minified ?
+            <FontAwesomeIcon icon={faTimes} />
+            :
+            <FontAwesomeIcon icon={faPlay} />
+          }
+        </Icon>
+      </Button>
+    }
+    
   </div>
 );
 
@@ -207,6 +212,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
             title={props.slideshow.name}
             onButtonClick={onClickToggle}
             viewerMode={props.viewerMode}
+            allowPlay={!!props.slideshow.annotations.size}
           />
         </StretchedLayoutItem>
         <StretchedLayoutItem isFlex={1} style={{overflow: 'hidden'}}>
