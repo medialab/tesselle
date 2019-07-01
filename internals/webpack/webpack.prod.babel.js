@@ -90,7 +90,7 @@ module.exports = require('./webpack.base.babel')({
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
-        basename: "'/Tesselle'",
+        basename: "'/tesselle'",
       },
     }),
     // Minify and optimize the index.html
