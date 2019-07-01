@@ -4,57 +4,54 @@
  *
  */
 
-import React from 'react';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
+import React, { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { compose } from 'redux';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import makeSelectSlicer from './selectors';
+import makeSelectSlicer, { selectExportStatus } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import './styles.css';
 import { ContainerState } from './types';
-import { exportSlideshowActionCreator, importSlideshowAction } from './actions';
+import { exportSlideshowActionCreator } from './actions';
+import { makeSelectSlideshow } from 'containers/Editor/selectors';
 
-export interface LoaderProps {
-  slicer: ContainerState;
-}
+const selectSlideshow = makeSelectSlideshow();
+const slicerSelector = makeSelectSlicer();
 
-export function Loader(props: LoaderProps) {
-  if (props.slicer && props.slicer.total === 0) {
+export const useExport = (slideshow = useSelector(selectSlideshow)) => {
+  const dispatch = useDispatch();
+  const state = useSelector(selectExportStatus());
+  console.log('useExport#state', state);
+  const callback = useCallback(
+    () => dispatch(exportSlideshowActionCreator.request(slideshow)),
+    [dispatch, slideshow],
+  );
+  return [state, callback];
+};
+
+export const useSlicerState = () => useSelector(slicerSelector) as ContainerState;
+
+export function Loader() {
+  const slicer = useSlicerState();
+  if (slicer && slicer.total === 0) {
     return <React.Fragment />;
   }
   return (
     <div>
       <progress
         className="progress is-primary"
-        value={`${(props.slicer.present / props.slicer.total) * 100}`}
-        max="100">{Math.floor(props.slicer.present / props.slicer.total) * 100}</progress>
+        value={`${(slicer.present / slicer.total) * 100}`}
+        max="100">{Math.floor(slicer.present / slicer.total) * 100}</progress>
     </div>
   );
 }
 
-const mapStateToProps = createStructuredSelector({
-  slicer: makeSelectSlicer(),
-});
-
-const withConnect = connect(
-  mapStateToProps,
-  {
-    exportSlideshow: exportSlideshowActionCreator,
-    importSlideshow: importSlideshowAction.request,
-  },
-);
-
 const withReducer = injectReducer({ key: 'slicer', reducer: reducer });
 const withSaga = injectSaga({ key: 'slicer', saga: saga });
 
-export const slicerContainer = compose(
-  withReducer,
-  withSaga,
-  withConnect,
-);
+export const slicerContainer = compose(withReducer, withSaga);
 
-export default slicerContainer(Loader);
+export default Loader;

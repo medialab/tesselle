@@ -24,6 +24,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 import { faCaretLeft } from '@fortawesome/free-solid-svg-icons/faCaretLeft';
 import { faCaretRight } from '@fortawesome/free-solid-svg-icons/faCaretRight';
+import Download from 'components/Download';
 
 import DownloadModalHelp from '../../components/DownloadModalHelp';
 
@@ -210,13 +211,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                 <StretchedLayoutItem isFlex={1}>
                   <StretchedLayoutContainer isDirection="horizontal">
                     <StretchedLayoutItem isFlex={1}>
-                      <Button
-                        isFullWidth
-                        isColor="info"
-                        disabled={!props.slideshow.annotations.size}
-                      >
-                        Download ↓
-                      </Button>
+                      <Download disabled={!props.slideshow.annotations.size} />
                     </StretchedLayoutItem>
                     <StretchedLayoutItem>
                       <Button  onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
