@@ -17,7 +17,6 @@ import { List } from 'immutable';
 import { annotationToBounds } from 'utils/geo';
 import 'components/Sidebar/styles.css';
 import { changeSelection, SureContextProps } from 'types';
-import Tooltip from 'react-tooltip';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
@@ -25,6 +24,10 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons/faPlay';
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 import { faCaretLeft } from '@fortawesome/free-solid-svg-icons/faCaretLeft';
 import { faCaretRight } from '@fortawesome/free-solid-svg-icons/faCaretRight';
+import Download from 'components/Download';
+
+import DownloadModalHelp from '../../components/DownloadModalHelp';
+import { useToggleBoolean } from 'utils/hooks';
 
 import logo from '../../images/logo.svg';
 
@@ -72,7 +75,6 @@ const Header: React.SFC<{
         </Icon>
       </Button>
     }
-    
   </div>
 );
 
@@ -198,6 +200,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
   const onGoTo = useCallback((annotation) => {
     props.leaflet.map.fitBounds(annotationToBounds(annotation), { animate: true });
   }, [props.leaflet && props.leaflet.map]);
+  const [isDownloadModalHelp, onCloseDownloadModalHelp, onOpenDownloadModalHelp] = useToggleBoolean(false);
   return (
     <div className={cx({
       'sidebar': true,
@@ -249,16 +252,10 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                 <StretchedLayoutItem isFlex={1}>
                   <StretchedLayoutContainer isDirection="horizontal">
                     <StretchedLayoutItem isFlex={1}>
-                      <Button
-                        isFullWidth
-                        isColor="info"
-                        disabled={!props.slideshow.annotations.size}
-                      >
-                        Download ↓
-                      </Button>
+                      <Download disabled={!props.slideshow.annotations.size} />
                     </StretchedLayoutItem>
                     <StretchedLayoutItem>
-                      <Button isColor="info">?</Button>
+                      <Button  onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
                     </StretchedLayoutItem>
                   </StretchedLayoutContainer>
                 </StretchedLayoutItem>
@@ -268,7 +265,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
         }
 
       </StretchedLayoutContainer>
-      <Tooltip id="tooltip" place="right" effect="solid" />
+      <DownloadModalHelp isOpen={isDownloadModalHelp} onRequestClose={onCloseDownloadModalHelp} />
     </div>
   );
 });

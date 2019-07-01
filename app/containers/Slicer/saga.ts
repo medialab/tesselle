@@ -1,12 +1,12 @@
 import { call, put, select, spawn, takeLatest, all } from 'redux-saga/effects';
 import { last, groupBy, pipe, values, sort, splitAt } from 'ramda';
-import saveAs from 'save-file';
+import { saveAs } from 'file-saver';
 import html from './export-file';
 import uuid from 'uuid';
 
 import { generate, scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
 import db from 'utils/db';
-import { setProgress } from './actions';
+import { setProgress, exportSlideshowActionCreator } from './actions';
 import makeSelectSlicer from './selectors';
 import ActionTypes from './constants';
 import Slideshow from 'types/Slideshow';
@@ -79,6 +79,10 @@ export function* slice(img, id: string, slicing = true) {
   }
 }
 
+// const wait = (ms: number) => {
+//   return new Promise((resolve, reject) => setTimeout(resolve, ms));
+// }
+
 function* exportSlideshow(action) {
   try {
     const slideshow = action.payload as Slideshow;
@@ -87,7 +91,7 @@ function* exportSlideshow(action) {
     zip.file('slideshow.json', JSON.stringify(slideshow));
     zip.file('_headers', `/*
     Access-Control-Allow-Origin: *`);
-    zip.file('index.html', html);
+    zip.file('index.html', html(slideshow));
     const infojson = yield db.getItem(`/info/${slideshow.image.id}.json`);
     zip.file('info.json', JSON.stringify(infojson));
     const images = zip.folder('images');
@@ -96,14 +100,11 @@ function* exportSlideshow(action) {
       key.startsWith(`/${slideshow.image.id}`),
     ));
     for (const url of imageUrls) {
-      const imgFile = yield call([db, db.getItem], url);
-      images.file(url.replace(`/${slideshow.image.id}`, ''), imgFile);
+      images.file(url.replace(`/${slideshow.image.id}`, ''), yield call([db, db.getItem], url));
     }
-    zip.generateAsync({type: 'blob'}).then(content =>
-      saveAs(content, `${slideshow.name}.zip`),
-    );
+    saveAs(yield zip.generateAsync({type: 'blob'}), `${slideshow.name}.zip`);
+    yield put(exportSlideshowActionCreator.success());
   } catch (e) {
-    console.log('error');
     console.error(e);
   }
 }
@@ -122,7 +123,7 @@ export function* colisionDetection(slideshow) {
 
 function* importSlideshow(zip: JSzip) {
   const rawSlideshow = JSON.parse(yield zip.file('slideshow.json').async('string'));
-  return colisionDetection(new Slideshow(rawSlideshow));
+  return yield* colisionDetection(new Slideshow(rawSlideshow));
 }
 
 function* importInfos(zip: JSzip) {

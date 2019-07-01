@@ -59,3 +59,8 @@
 .map .leaflet-tooltip{
     display: none;
 }
+
+.map .leaflet-draw-tooltip .leaflet-draw-tooltip-subtext, 
+.map .leaflet-draw-tooltip br {
+    display: none;
+}

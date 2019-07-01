@@ -24,5 +24,11 @@ const selectSlicer = () =>
     substate => substate,
   );
 
+export const selectExportStatus = () =>
+  createSelector(
+    selectSlicerDomain,
+    (substate) => substate.exporting,
+  );
+
 export default selectSlicer;
 export { selectSlicerDomain };
