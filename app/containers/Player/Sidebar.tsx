@@ -98,7 +98,7 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
       <Box className="player-card" onClick={onClick}>
         <StretchedLayoutContainer isDirection="horizontal">
           <StretchedLayoutItem style={{ paddingRight: '1rem' }} isFlex={1}>
-            <Content className={cx('sidebar--item-field', {
+            <Content isSize={'small'} className={cx('sidebar--item-field', {
               'sidebar--item-field--selected': props.selected,
             })}>
               {props.children}
@@ -133,10 +133,9 @@ const Control: React.SFC<{
       <StretchedLayoutContainer isDirection="vertical" className="utils__space-between">
 
         <StretchedLayoutItem isFlex={1}>
-          <Content className={cx('sidebar--item-field', {
+          <Content isSize={'small'} className={cx('sidebar--item-field', {
             'sidebar--item-field--selected': props.selected,
             'sidebar--item-field--minified': true,
-
           })}>
             {props.children}
           </Content>
