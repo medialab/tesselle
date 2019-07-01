@@ -7,6 +7,10 @@
    transform: rotate(-45deg);
 }
 
+.sidebar--header-container .input{
+    margin: 0
+}
+
 .map .leaflet-marker-icon{
     background: #ff1f4b;
     border: none;
@@ -17,6 +21,10 @@
 .map .annotation-shape__editing{
     stroke: darkgrey;
     fill: white;
+}
+
+.map .annotation-shape__editing{
+    stroke: #009085;
 }
 
 .map .leaflet-control-zoom{

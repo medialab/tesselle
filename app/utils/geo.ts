@@ -20,7 +20,7 @@ import Annotation, {
 } from 'types/Annotation';
 import { SupportedShapes } from 'types';
 
-function circleToPolygon([lng, lat], radius, vertices) {
+export function circleToPolygon([lng, lat], radius, vertices) {
 
   const points: any[] = [];
   const crs = L.CRS.Simple as any;
