@@ -207,7 +207,7 @@ const Orderable: React.SFC<ListProps> = props => {
         result.destination.index,
       ),
     );
-  }, []);
+  }, [props.slideshow.annotations]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -246,14 +246,14 @@ const Header: React.SFC<{
   onNameChange: (values: TitleProps, formikActions: FormikActions<TitleProps>) => void;
 }> = (props) => (
   <div className="sidebar--header-container sidebar--spacing">
-    <SimpleTitle 
+    <SimpleTitle
       isSize={5}
     >
       <Link to="/">
         <img data-tip="Back to home" data-for="tooltip" src={logo} style={{maxWidth: '2rem'}} />
       </Link>
     </SimpleTitle>
-    {props.visible ? 
+    {props.visible ?
       <Title title={props.slideshow.name} onChange={props.onNameChange} />
       :
       <SimpleTitle isSize={6} className="is-stretch">{props.slideshow.name}</SimpleTitle>
@@ -327,10 +327,10 @@ const Sidebar: React.SFC<SidebarProps> = props => {
   const selected = props.selectedAnnotations.first<Annotation>();
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
-      <Header 
-        onButtonClick={props.visible ? props.onClose : props.onOpen} 
-        visible={props.visible} 
-        onNameChange={onNameChange}
+      <Header
+        onButtonClick={props.visible ? props.onClose : props.onOpen}
+          visible={props.visible}
+          onNameChange={onNameChange}
         slideshow={props.slideshow}
       />
       <div className="sidebar--wrapper">
