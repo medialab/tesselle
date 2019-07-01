@@ -16,7 +16,7 @@ export interface SlideshowArgs {
 
 class Slideshow extends Record({
   id: '',
-  name: 'Unnamed Slideshow',
+  name: 'Untitled document',
   annotations: List(),
   image: {},
 }) {
