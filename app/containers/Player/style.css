@@ -50,3 +50,10 @@
 .player-map .player-title{
     margin: 0;
 }
+
+.player-map .annotation-shape.annotation-shape__editing.leaflet-interactive {
+    fill: black;
+    stroke: white;
+    pointer-events: none;
+    mix-blend-mode: darken;
+}

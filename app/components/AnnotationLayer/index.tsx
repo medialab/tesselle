@@ -14,6 +14,7 @@ import './styles.css';
 
 import Annotation from 'types/Annotation';
 import AnnotationPolygon from './AnnotationPolygon';
+import AnnotationHighlight from './AnnotationHighlight';
 import AnnotationCircle from './AnnotationCircle';
 import { AnnotationShapes } from './types';
 import { editAnnotationAction } from 'containers/Editor/actions';
@@ -35,6 +36,10 @@ const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
     DomEvent.stopPropagation(event);
     return onClick && onClick(annotation);
   }, [onClick, annotation]);
+  // readonly mode, we display a "reverted" shape to highlight the zone of interest
+  if (!props.editable && props.selected) {
+    return <AnnotationHighlight {...props} onClick={onLayerClick} />;
+  }
   switch (annotation.geometry.type) {
     case 'Point':
       return <AnnotationCircle {...props} onClick={onLayerClick} />;
