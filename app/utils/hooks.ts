@@ -76,8 +76,9 @@ export const useTools = (defaultTool): [
 };
 
 export const useUrl = (file: File): string => {
-  if (!file) {
-    throw new Error('File is empty');
+  if (!file || !file.name) {
+    // throw new Error('File is empty');
+    return 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Mire_RTL.jpg';
   }
   const url = useMemo(() => window.URL.createObjectURL(file), [file]);
   useEffect(() => () => window.URL.revokeObjectURL(url), [url]);

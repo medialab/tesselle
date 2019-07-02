@@ -112,6 +112,7 @@
     "react": "16.8.6",
     "react-beautiful-dnd": "^11.0.4",
     "react-dom": "16.8.6",
+    "react-error-boundary": "^1.2.5",
     "react-file-drop": "^0.2.8",
     "react-helmet": "5.2.1",
     "react-hook-mousetrap": "^2.0.2",

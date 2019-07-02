@@ -58,7 +58,6 @@ export function* removeSlideshow(action) {
   // const slideshows: List<Slideshow> = yield select(selectSlideshows);
   const slideshow = action.payload as Slideshow;
   let slideshows = yield call([db, db.getItem], 'slideshows');
-  slideshows.forEach(slideshow => console.log(slideshow.image.id));
   const slidedhowId = slideshow.id;
   const imageId = slideshow.image.id;
   slideshows = slideshows.filter(slideshow => slideshow.id !== slidedhowId);
