@@ -218,7 +218,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
           />
         </StretchedLayoutItem>
         <StretchedLayoutItem isFlex={1} style={{overflow: 'hidden'}}>
-          <div className="sidebar--container play-sidebar--container">
+          <div className="sidebar--wrapper play-sidebar--container">
               {props.visible ?
                 props.slideshow.annotations.map((annotation: Annotation) =>
                   <MenuItem

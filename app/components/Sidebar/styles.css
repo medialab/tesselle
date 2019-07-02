@@ -46,8 +46,7 @@ textarea.textarea {
 .sidebar--wrapper{
   padding: 1rem;
   flex: 1;
-  /* overflow: hidden;
-  overflow-y: auto; */
+  overflow-y: auto;
 }
 .sidebar--container {
   background: white;
