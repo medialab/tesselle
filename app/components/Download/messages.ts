@@ -11,6 +11,6 @@ export const scope = 'app.components.Download';
 export default defineMessages({
   content: {
     id: `${scope}.content`,
-    defaultMessage: 'Download ↓!',
+    defaultMessage: 'Download',
   },
 });

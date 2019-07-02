@@ -106,7 +106,7 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
                   <InlineIcon>
                     <FontAwesomeIcon icon={faEye} />
                   </InlineIcon>
-                  read
+                  preview
                 </span>
               ),
               isDisabled: removing,
