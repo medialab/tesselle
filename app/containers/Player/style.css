@@ -57,3 +57,35 @@
     pointer-events: none;
     mix-blend-mode: darken;
 }
+
+@media print{
+    @page {
+        size: landscape;
+    }   
+    .player-map .player-actions-container,
+    .player-map .leaflet-control-zoom-in,
+    .player-map .leaflet-control-zoom-out,
+    .play-playmode-toggle
+    {
+        display: none;
+    }
+    .player-map .leaflet-container{
+        background: white;
+    }
+    /* if an annotation is selected hide the others */
+    .player-map .player-sidebar.has-selected .sidebar--menu-item:not(.sidebar--menu-item__selected) {
+        display: none;
+    }
+
+    html,
+    #app,
+    .player-map,
+    .player-sidebar,
+    .stretched-layout-container,
+    .leaflet-container,
+    .sidebar.visible
+    {
+        overflow: visible;
+        height: unset;
+    }
+}

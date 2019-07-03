@@ -63,6 +63,7 @@ const Header: React.SFC<{
         style={{  marginRight: '.3rem' }}
         data-tip={props.minified ? 'Exit play mode' : 'Play sequentially'}
         data-for="tooltip"
+        className="play-playmode-toggle"
       >
         <Icon>
           {
@@ -206,6 +207,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
       'player-sidebar': true,
       'visible': props.visible,
       'hidden': !props.visible,
+      'has-selected': props.selectedAnnotations.size > 0
       })}>
       <StretchedLayoutContainer style={{height: '100%'}}>
         <StretchedLayoutItem>
@@ -239,7 +241,11 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
           !props.viewerMode &&
           <StretchedLayoutItem>
             <footer className="sidebar--footer-container sidebar--spacing">
-              <StretchedLayoutContainer isDirection="horizontal" style={{width: '100%'}}>
+              <StretchedLayoutContainer 
+                isDirection="horizontal" 
+                style={{width: '100%'}} 
+                className="player-actions-container"
+              >
                 <StretchedLayoutItem isFlex={1}>
                   <Link
                     to={`/editor/${props.slideshow.id}`}
