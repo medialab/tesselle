@@ -6,6 +6,7 @@ interface CoverArgs {
   file?: File;
   width?: number;
   height?: number;
+  type?: string;
 }
 
 export default class Cover extends Record({
@@ -13,6 +14,7 @@ export default class Cover extends Record({
   file: {},
   width: 0,
   height: 0,
+  type: '',
 }) {
   public id!: string;
   public file!: File;

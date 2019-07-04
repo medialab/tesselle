@@ -29,6 +29,9 @@ class Slideshow extends Record({
       if (params.annotations instanceof Array) {
         params.annotations = List<Annotation>(params.annotations.map(fromJS));
       }
+      if (!(params.image instanceof Cover)) {
+        params.image = new Cover(params.image);
+      }
       if (!params.id) {
         params.id = uuid();
       }
@@ -95,6 +98,7 @@ export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElem
                 file: file,
                 width: box.width,
                 height: box.height,
+                type: 'image/svg+xml',
               }),
             }),
             svgElement,
@@ -109,6 +113,7 @@ export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElem
                 file: file,
                 width: box.width,
                 height: box.height,
+                type: 'image/svg+xml',
               }),
             }),
             svgElement,
@@ -145,6 +150,7 @@ export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElem
             file: thumbnail,
             width: img.width,
             height: img.height,
+            type: 'image/jpeg',
           }),
         });
         window.URL.revokeObjectURL(url);

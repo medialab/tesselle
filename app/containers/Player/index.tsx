@@ -51,8 +51,16 @@ const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
   useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image);
   let child;
   if (props.url) {
-    child = <DistantIiifLayer url={props.url} />;
-  } else if (isSvg(props.slideshow.image.file)) {
+    if (isSvg(props.slideshow.image)) {
+      child = (
+        <ImageOverlay
+          url={`${props.url}/../thumbnail.svg`}
+          bounds={useMemo(() => coverToBounds(props.slideshow.image), [props.slideshow.image])} />
+      );
+    } else {
+      child = <DistantIiifLayer url={props.url} />;
+    }
+  } else if (isSvg(props.slideshow.image)) {
     child = (
       <ImageOverlay
         url={useUrl(props.slideshow.image.file)}

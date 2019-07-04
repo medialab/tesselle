@@ -1,3 +1,5 @@
+import Cover from 'types/Cover';
+
 const svgType = 'image/svg+xml';
 
 const typesToExtensionsMap = {
@@ -30,6 +32,6 @@ export const extentionsToType = (key) => {
   return extensionsToTypesMap[key];
 };
 
-export const isSvg = (file: File) => {
+export const isSvg = (file: File | Cover) => {
   return file.type === svgType;
 };
