@@ -107,15 +107,21 @@ export function useMapLock(map?: L.Map, image?: Cover): LatLngBounds {
   return maxBounds;
 }
 
+export const coverToBounds = (image: Cover) => {
+  const denominator = last(scaleFactorsCreator(512, image.width, 512, image.height)) * 2;
+  return new LatLngBounds(
+    new LatLng(0, 0),
+    new LatLng(-image.height / denominator, image.width / denominator),
+  );
+};
+
 export const useLockEffect = (map: L.Map, image: any) => {
   useEffect(() => {
     if (image.height) {
-      const denominator = last(scaleFactorsCreator(512, image.width, 512, image.height)) * 2;
+      const bonbounds = coverToBounds(image);
+      // debugger
       map.fitBounds(
-        new LatLngBounds(
-          new LatLng(0, 0),
-          new LatLng(-image.height / denominator, image.width / denominator),
-        ),
+        bonbounds,
         {animate: true},
       );
     } else {

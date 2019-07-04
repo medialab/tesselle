@@ -6,6 +6,7 @@ import Annotation from 'types/Annotation';
 import Cover from './Cover';
 import { fromJS } from 'utils/geo';
 import loadImage from 'utils/imageManipulation';
+import { isSvg } from 'utils/index';
 
 export interface SlideshowArgs {
   id?: string;
@@ -52,7 +53,6 @@ interface Box {
 
 const maxX = '1000';
 const maxY = '1000';
-const svgType = 'image/svg+xml';
 
 const createObject = curry((specification, value) => map(f => f(value), specification));
 const parseWidth: () => number = pipe(nth(2), Number);
@@ -79,9 +79,9 @@ const getSvgSize = (svgElement: Element): Box | never => {
   throw new Error('No width / height nor viewBox');
 };
 
-export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
+export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
   new Promise((resolve, reject) => {
-    if (file.type === svgType) {
+    if (isSvg(file)) {
       const reader = new FileReader();
       reader.onload = () => {
         const container = document.createElement('div');
@@ -92,7 +92,7 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
           return resolve([
             new Slideshow({
               image: new Cover({
-                file: {} as any,
+                file: file,
                 width: box.width,
                 height: box.height,
               }),
@@ -106,7 +106,7 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
           return resolve([
             new Slideshow({
               image: new Cover({
-                file: {} as any,
+                file: file,
                 width: box.width,
                 height: box.height,
               }),
