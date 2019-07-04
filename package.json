@@ -112,6 +112,7 @@
     "ramda": "^0.26.1",
     "react": "16.8.6",
     "react-beautiful-dnd": "^11.0.4",
+    "react-browser-hooks": "^2.2.3",
     "react-dom": "16.8.6",
     "react-file-drop": "^0.2.8",
     "react-helmet": "5.2.1",
