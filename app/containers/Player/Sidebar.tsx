@@ -137,6 +137,7 @@ const Control: React.SFC<{
   })}>
     <>
       <StretchedLayoutContainer isDirection="vertical" className="utils__space-between">
+       
 
         <StretchedLayoutItem isFlex={1}>
           <Content isSize={'small'} className={cx('sidebar--item-field', {
@@ -146,6 +147,7 @@ const Control: React.SFC<{
             {props.children}
           </Content>
         </StretchedLayoutItem>
+
         <StretchedLayoutItem>
           <StretchedLayoutContainer isDirection="horizontal" className="minified-nav-container">
             <StretchedLayoutItem>
@@ -170,6 +172,7 @@ const Control: React.SFC<{
             </StretchedLayoutItem>
           </StretchedLayoutContainer>
         </StretchedLayoutItem>
+        
 
       </StretchedLayoutContainer>
     </>
@@ -207,7 +210,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
       'visible': props.visible,
       'hidden': !props.visible,
       })}>
-      <StretchedLayoutContainer style={{height: '100%'}}>
+      <StretchedLayoutContainer style={{height: '100%', flex: 1}}>
         <StretchedLayoutItem>
           <Header
             minified={!props.visible}
