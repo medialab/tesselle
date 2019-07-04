@@ -34,11 +34,17 @@
     padding: 1rem;
 }
 
-.share-ui-container{
+.player-actions-container{
     position: absolute;
     bottom: 1rem;
     right: 1rem;
     z-index: 1000;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.player-actions-container .button {
+    margin-bottom: .5rem;
 }
 
 .sidebar.player-sidebar .sidebar--item-field--selected.sidebar--item-field--minified {
