@@ -16,7 +16,6 @@ import { fromJS } from 'utils/geo';
 import { isImmutable, List } from 'immutable';
 import Slideshow from 'types/Slideshow';
 import Cover from 'types/Cover';
-import { SupportedShapes } from 'types';
 
 export const initialState: ContainerState = {
   slideshow: null,
@@ -69,22 +68,6 @@ export default combineReducers<ContainerState, ContainerActions>({
           return slideshow.set(
             'annotations',
             slideshow.annotations.push(fromJS(action.payload)),
-          );
-        case ActionTypes.CREATE_INVISIBLE_ANNOTATION:
-          const index = slideshow.annotations.indexOf(action.payload);
-          return slideshow.set(
-            'annotations',
-            slideshow.annotations.insert(index + 1,
-              fromJS({
-                type: 'Feature',
-                geometry: {
-                  type: 'LineString',
-                },
-                properties: {
-                  type: SupportedShapes.invisible,
-                },
-              }),
-            ),
           );
         case ActionTypes.EDIT_ANNOTATION:
           return slideshow.set(

@@ -35,8 +35,6 @@ import './styles.css';
 import Loader from 'containers/App/Loader';
 import Download from 'components/Download';
 import messages from './messages';
-import { useDispatch } from 'react-redux';
-import { addEmptyAnnotation } from 'containers/Editor/actions';
 import DownloadModalHelp from '../DownloadModalHelp';
 
 import logo from '../../images/logo.svg';
@@ -106,11 +104,6 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
     DomEvent.preventDefault(event);
     props.onRemove(props.data);
   }, [props.data, props.onRemove]);
-
-  const dispatch = useDispatch();
-  const onInvisibleCreation = useCallback(() => {
-    dispatch(addEmptyAnnotation(props.data));
-  }, []);
 
   const ContainerEl = props.minified ? React.Fragment : Box;
   const isInvisible = props.data.geometry.type === 'LineString';
@@ -182,7 +175,6 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
-        {!isInvisible && <button onClick={onInvisibleCreation}>Add empty anotation</button>}
       </ContainerEl>
     </div>
   );

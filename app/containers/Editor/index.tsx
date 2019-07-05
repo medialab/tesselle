@@ -95,7 +95,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
   const {slideshow, setTool, tool} = props;
   const map = props.leaflet.map;
   useLockEffect(map, props.slideshow.image);
-
+  const dispatch = useDispatch();
   const onSelectClick = useCallback(() => {
     lockFuturShape();
     setTool(SupportedShapes.selector);
@@ -109,6 +109,17 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
   const onPolygonClick = useCallback(() => {
     setTool(SupportedShapes.polygon);
   }, [map]);
+  const onInvisibleCreation = useCallback(() => {
+    dispatch(addAnnotationAction({
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+      },
+      properties: {
+        type: SupportedShapes.invisible,
+      },
+    } as any));
+  }, []);
 
   useEffect(() => {
     if (tool !== SupportedShapes.selector) {
@@ -127,6 +138,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
   useMousetrap('p', onPolygonClick);
   useMousetrap('r', onRectangleClick);
   useMousetrap('c', onCircleClick);
+  useMousetrap('n', onInvisibleCreation);
   useMousetrap('esc', onSelectClick);
 
   const onLayerClick = useCallback((annotation) => {
@@ -152,6 +164,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
         activeButton={tool}
         onCircleClick={onCircleClick}
         onRectangleClick={onRectangleClick}
+        onInvisibleClick={onInvisibleCreation}
         onPolygonClick={onPolygonClick} />
     </React.Fragment>
   );

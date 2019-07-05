@@ -17,10 +17,6 @@ export const addAnnotationAction = createAction(ActionTypes.CREATE_ANNOTATION, a
   return (feature: Feature<Point, any>) => action(feature);
 });
 
-export const addEmptyAnnotation = createAction(ActionTypes.CREATE_INVISIBLE_ANNOTATION, action => {
-  return (annotation: Annotation) => action(annotation);
-});
-
 export const removeAnnotationAction = createAction(
   ActionTypes.REMOVE_ANNOTATION,
   action => (annotation: Annotation) => action(annotation),

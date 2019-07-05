@@ -16,7 +16,7 @@ import Slideshow from 'types/Slideshow';
 import { List } from 'immutable';
 import { annotationToBounds } from 'utils/geo';
 import 'components/Sidebar/styles.css';
-import { changeSelection, SureContextProps } from 'types';
+import { changeSelection, SureContextProps, SupportedShapes } from 'types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
@@ -88,10 +88,12 @@ interface MenuItemProps {
 
 const MenuItem: React.SFC<MenuItemProps> = props => {
   const onGoTo = useCallback((e) => {
-    if (props.selected) {
-      e.stopPropagation();
+    if (props.annotation.properties.type !== SupportedShapes.invisible) {
+      if (props.selected) {
+        e.stopPropagation();
+      }
+      props.onGoTo(props.annotation);
     }
-    props.onGoTo(props.annotation);
   }, [props.annotation]);
   const onClick = useCallback((e) => {
     props.onClick(props.annotation);

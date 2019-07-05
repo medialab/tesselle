@@ -8,7 +8,7 @@ import { useEdit } from 'utils/hooks';
 const AnnotationHighlight: React.SFC<AnnotationShapes> = (props) => {
   const {annotation, selected} = props;
   const ref = useRef<Polygon<AddedProperties & PolygonProps>>(null);
-  const position = useMemo(() => 
+  const position = useMemo(() =>
     annotation.geometry.type === 'Point' ?
       circleToPolygon(
         annotation.geometry.coordinates,
