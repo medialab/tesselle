@@ -8,9 +8,12 @@ import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Map, withLeaflet, ZoomControl, ImageOverlay } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
 import { Button, Icon, Title } from 'quinoa-design-library';
+import { useFullScreen } from 'react-browser-hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShare } from '@fortawesome/free-solid-svg-icons/faShare';
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
+import { faExpand } from '@fortawesome/free-solid-svg-icons/faExpand';
+import Tooltip from 'react-tooltip';
 import Modal from 'react-modal';
 
 import L from 'leaflet';
@@ -99,6 +102,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
   const [isShareHelpOpen, setShareHelpOpen] = useState<boolean>(false);
   const [sidebarVisible, onClose, onOpen] = useToggleBoolean();
+  const fs = useFullScreen();
   const onPlay = useCallback(() => {
     onOpen();
     if (!selected) {
@@ -164,40 +168,45 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
           selectedAnnotations={props.selectedAnnotations}
         />
       </Map>
+      <div className="player-actions-container">
+        {
+          props.viewerMode &&
+          <Button data-for="tooltip" data-tip="share this view" onClick={toggleShareHelpOpen} isRounded>
+            <Icon><FontAwesomeIcon icon={faShare} /></Icon>
+          </Button>
+        }
+        <Button data-for="tooltip" data-tip="fullscreen mode" onClick={fs.toggle} isRounded>
+            <Icon><FontAwesomeIcon icon={faExpand} /></Icon>
+        </Button>
+      </div>
       {
         props.viewerMode &&
-        <>
-          <div className="share-ui-container">
-            <Button onClick={toggleShareHelpOpen} isRounded>
-              <Icon><FontAwesomeIcon icon={faShare} /></Icon>
-            </Button>
-          </div>
-          <Modal
-            isOpen={isShareHelpOpen}
-            onRequestClose={toggleShareHelpOpen}
-            contentLabel="Share this document"
-          >
-            <div className="modal-content-container">
-              <div className="modal-content-header">
-                <Title isSize="3">
-                  <span>Share this document</span>
-                  <span>
-                    <Button onClick={toggleShareHelpOpen} isRounded>
-                      <Icon><FontAwesomeIcon icon={faTimes} /></Icon>
-                    </Button>
-                  </span>
-                </Title>
-              </div>
-              <div className="modal-content-body">
-                <div>Share the URL address of this document:</div>
-                <pre><code>{window.location.href}</code></pre>
-                <div>Embed this document in another page or application:</div>
-                <pre><code>{`<iframe src="${window.location.href}"></iframe>`}</code></pre>
-              </div>
+        <Modal
+          isOpen={isShareHelpOpen}
+          onRequestClose={toggleShareHelpOpen}
+          contentLabel="Share this document"
+        >
+          <div className="modal-content-container">
+            <div className="modal-content-header">
+              <Title isSize="3">
+                <span>Share this document</span>
+                <span>
+                  <Button onClick={toggleShareHelpOpen} isRounded>
+                    <Icon><FontAwesomeIcon icon={faTimes} /></Icon>
+                  </Button>
+                </span>
+              </Title>
             </div>
-          </Modal>
-        </>
+            <div className="modal-content-body">
+              <div>Share the URL address of this document:</div>
+              <pre><code>{window.location.href}</code></pre>
+              <div>Embed this document in another page or application:</div>
+              <pre><code>{`<iframe src="${window.location.href}"></iframe>`}</code></pre>
+            </div>
+          </div>
+        </Modal>
       }
+      <Tooltip id="tooltip" place="left" effect="solid" />
     </div>
   );
 };
