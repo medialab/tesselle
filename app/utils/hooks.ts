@@ -126,7 +126,7 @@ export const useLockEffect = (map: L.Map, image: any, ignore: boolean = false) =
         {animate: true},
       );
     }
-  }, [map, image]);
+  }, [map, image, ignore]);
 };
 
 
