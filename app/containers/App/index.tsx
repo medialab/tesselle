@@ -1,3 +1,4 @@
+
 /**
  *
  * App.js
@@ -9,14 +10,27 @@
 
 import * as React from 'react';
 import { Switch, Route } from 'react-router-dom';
+import { compose } from 'redux';
+
+import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
 
 import HomePage from 'containers/HomePage';
 import Editor from 'containers/Editor';
 import Player from 'containers/Player';
 import Viewer from 'containers/Viewer';
+
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 
-export default function App() {
+import reducer from './reducer';
+import saga from './saga';
+
+const withReducer = injectReducer({ key: 'slicer', reducer: reducer });
+const withSaga = injectSaga({ key: 'slicer', saga: saga });
+
+const slicerContainer = compose(withReducer, withSaga);
+
+export default slicerContainer(function App() {
   return (
     <Switch>
       <Route exact path="/" component={HomePage} />
@@ -26,4 +40,4 @@ export default function App() {
       <Route component={NotFoundPage} />
     </Switch>
   );
-}
+});

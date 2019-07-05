@@ -1,9 +1,34 @@
 import { createSelector } from 'reselect';
 import { ApplicationRootState } from 'types';
+import { initialState } from './reducer';
 
-const selectRoute = (state: ApplicationRootState) => state.router;
+/**
+ * Direct selector to the slicer state domain
+ */
 
-const makeSelectLocation = () =>
-  createSelector(selectRoute, routeState => routeState.location);
+const selectSlicerDomain = (state: ApplicationRootState) => {
+  return (state && state.slicer) ? state.slicer : initialState;
+};
 
-export { makeSelectLocation };
+/**
+ * Other specific selectors
+ */
+
+/**
+ * Default selector used by Slicer
+ */
+
+const selectSlicer = () =>
+  createSelector(
+    selectSlicerDomain,
+    substate => substate,
+  );
+
+export const selectExportStatus = () =>
+  createSelector(
+    selectSlicerDomain,
+    (substate) => substate.exporting,
+  );
+
+export default selectSlicer;
+export { selectSlicerDomain };

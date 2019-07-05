@@ -28,13 +28,14 @@ import {
 
 import SlideshowCartouche from 'components/SlideshowCartouche';
 
-import { slicerContainer, Loader, LoaderProps } from 'containers/Slicer';
+import { useSlicerState } from 'containers/App/hooks';
 
 import medialabLogo from './assets/logo-medialab.svg';
 import forccastLogo from './assets/logo-forccast.svg';
 import appLogo from './assets/logo.svg';
 import Slideshow from 'types/Slideshow';
-import { importSlideshowAction } from 'containers/Slicer/actions';
+import { importSlideshowAction } from 'containers/App/actions';
+import Loader from 'containers/App/Loader';
 
 interface HomePageProps {
   createSlideshow: (file: File) => void;
@@ -64,8 +65,9 @@ const validateImportTypes: (File) => boolean = propSatisfies(
   'type',
 );
 
-function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
+function HomePage(props: HomePageProps & ContainerState) {
   const dispatch = useDispatch();
+  const slicer = useSlicerState();
   const onDrop = useCallback((files: File[]) => {
     const file = head(files);
     if (validateImageTypes(file)) {
@@ -94,7 +96,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
               </Title>
               <p><FormattedMessage {...messages.chapo} /></p>
             </Content>
-            {props.slicer.total === 0
+            {slicer.total === 0
               ? <DropZone
                   accept={acceptedFiles}
                   onDrop={onDrop}
@@ -106,7 +108,7 @@ function HomePage(props: HomePageProps & ContainerState & LoaderProps) {
                     'Drop an image file (.jpg, .png, or .svg) or a tesselle project (.zip)'
                   }
                 </DropZone>
-              : <Loader {...props} />
+              : <Loader />
               }
           </Column>
           <Column isSize={'2/3'} className="cards-column">
@@ -206,7 +208,6 @@ const withReducer = injectReducer({ key: 'homePage', reducer: reducer });
 const withSaga = injectSaga({ key: 'homePage', saga: saga });
 
 export const enhancer = compose(
-  slicerContainer,
   withReducer,
   withSaga,
   withConnect,

@@ -41,20 +41,17 @@ textarea.textarea {
 .sidebar--minified-placeholder{
   height: 100%;
   width: 100%;
-  text-align: center;
-  padding: 2rem;
 }
 
 .sidebar--wrapper{
   padding: 1rem;
   flex: 1;
-  overflow: hidden;
   overflow-y: auto;
 }
 .sidebar--container {
   background: white;
   /* max-height: calc(100vh - 45px - 70px); */
-  overflow: auto;
+  /* overflow: auto; */
 }
 .sidebar--menu-item .box {
   background: white;
@@ -74,8 +71,6 @@ textarea.textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--rgba-primary-2);
-  color: white;
 }
 .sidebar--header-container .title{
   margin: .5rem 1rem;
@@ -87,12 +82,12 @@ textarea.textarea {
 
 .sidebar--header-container .minify-toggle{
   cursor: pointer;
+  margin-right: 1rem;
 }
 
 .sidebar--footer-container {
   display: flex;
   justify-content: space-between;
-  /* background-color: var(--rgba-primary-2); */
   color: white;
   padding: 0
 }

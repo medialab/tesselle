@@ -2,9 +2,9 @@
 // import { mount } from 'enzyme';
 // import { enzymeFind } from 'styled-components/test-utils';
 
-// import { Slicer } from '../index';
+// import Download from '../index';
 
-describe('<Slicer />', () => {
+describe('<Download />', () => {
   it('Expect to have unit tests specified', () => {
     expect(true).toEqual(false);
   });

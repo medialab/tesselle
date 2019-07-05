@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import { List } from 'immutable';
 import {
   Button,
@@ -18,24 +18,28 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Formik, Form, FormikValues, FormikErrors, Field, FormikActions, FieldProps } from 'formik';
 import cx from 'classnames';
 import Textarea from 'react-textarea-autosize';
+import Tooltip from 'react-tooltip';
+import { DomEvent } from 'leaflet';
+import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMinusSquare } from '@fortawesome/free-solid-svg-icons/faMinusSquare';
-import { faPlusSquare } from '@fortawesome/free-solid-svg-icons/faPlusSquare';
+import { faMinus } from '@fortawesome/free-solid-svg-icons/faMinus';
+import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
 
 import Annotation from 'types/Annotation';
 import Slideshow from 'types/Slideshow';
 import icons from 'quinoa-design-library/src/themes/millet/icons';
 
 import './styles.css';
-import { DomEvent } from 'leaflet';
-import { Link } from 'react-router-dom';
-import Loader from 'containers/Slicer';
-import { FormattedMessage } from 'react-intl';
+import Loader from 'containers/App/Loader';
+import Download from 'components/Download';
 import messages from './messages';
 import { useDispatch } from 'react-redux';
-import { exportSlideshowActionCreator } from 'containers/Slicer/actions';
 import { addEmptyAnnotation } from 'containers/Editor/actions';
+import DownloadModalHelp from '../DownloadModalHelp';
+
+import logo from '../../images/logo.svg';
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -213,7 +217,7 @@ const Orderable: React.SFC<ListProps> = props => {
         result.destination.index,
       ),
     );
-  }, []);
+  }, [props.slideshow.annotations]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -248,18 +252,31 @@ const Orderable: React.SFC<ListProps> = props => {
 const Header: React.SFC<{
   onButtonClick: () => void;
   readonly visible: boolean;
+  slideshow: Slideshow;
+  onNameChange: (values: TitleProps, formikActions: FormikActions<TitleProps>) => void;
 }> = (props) => (
   <div className="sidebar--header-container sidebar--spacing">
-    <SimpleTitle isSize={5}><Link to="/"><b>Tesselle</b></Link></SimpleTitle>
-    <span className="minify-toggle" onClick={props.onButtonClick}>
+    <SimpleTitle
+      isSize={5}
+    >
+      <Link to="/">
+        <img data-tip="Back to home" data-for="tooltip" src={logo} style={{maxWidth: '2rem'}} />
+      </Link>
+    </SimpleTitle>
+    {props.visible ?
+      <Title title={props.slideshow.name} onChange={props.onNameChange} />
+      :
+      <SimpleTitle isSize={6} className="is-stretch">{props.slideshow.name}</SimpleTitle>
+    }
+    <Button isRounded className="minify-toggle" onClick={props.onButtonClick}>
         <Icon>
           { props.visible ?
-            <FontAwesomeIcon icon={faMinusSquare} />
+            <FontAwesomeIcon icon={faMinus} />
             :
-            <FontAwesomeIcon icon={faPlusSquare} />
+            <FontAwesomeIcon icon={faPlus} />
           }
         </Icon>
-    </span>
+    </Button>
   </div>
 );
 
@@ -284,6 +301,10 @@ const Title: React.SFC<TitleProps> = (props) => {
             className="input__invisible input"
             onBlur={onBlur}
             name="title"
+            data-for="tooltip"
+            data-tip="document title"
+            data-place="bottom"
+            placeholder="document title"
           />
         </Form>
       );
@@ -300,11 +321,6 @@ interface SidebarProps extends ListProps {
 }
 
 const Sidebar: React.SFC<SidebarProps> = props => {
-  const dispatch = useDispatch();
-  const exportData = useCallback(
-    () => dispatch(exportSlideshowActionCreator.request(props.slideshow)),
-    [dispatch, props.slideshow],
-  );
   const onClickSidebar = useCallback((event: React.SyntheticEvent) => {
     event.stopPropagation();
     return props.onAnnotationClick();
@@ -314,11 +330,18 @@ const Sidebar: React.SFC<SidebarProps> = props => {
     [props.slideshow],
   );
   const selected = props.selectedAnnotations.first<Annotation>();
+  const [isDownloadModalHelp, setDownloadModalHelp] = useState(false);
+  const onCloseDownloadModalHelp = () => setDownloadModalHelp(false);
+  const onOpenDownloadModalHelp = () => setDownloadModalHelp(true);
   return (
     <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
-      <Header onButtonClick={props.visible ? props.onClose : props.onOpen} visible={props.visible} />
+      <Header
+        onButtonClick={props.visible ? props.onClose : props.onOpen}
+          visible={props.visible}
+          onNameChange={onNameChange}
+        slideshow={props.slideshow}
+      />
       <div className="sidebar--wrapper">
-        {props.visible && <Title title={props.slideshow.name} onChange={onNameChange} />}
         <Loader />
         <div onClick={onClickSidebar} className="sidebar--container">
           {props.visible ? (
@@ -331,7 +354,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
               data={selected as Annotation}
               selected={!!selected}
               minified={props.visible !== undefined}
-             />
+            />
             ) : (
               <span className="sidebar--minified-placeholder">select or create an annotation</span>
             )
@@ -346,19 +369,17 @@ const Sidebar: React.SFC<SidebarProps> = props => {
           <StretchedLayoutItem isFlex={1}>
             <StretchedLayoutContainer isDirection="horizontal">
               <StretchedLayoutItem isFlex={1}>
-                <Button
-                  onClick={exportData}
-                  isFullWidth
-                  isColor="info"
-                  disabled={!props.slideshow.annotations.size}>Download ↓</Button>
+                <Download disabled={!props.slideshow.annotations.size} />
               </StretchedLayoutItem>
               <StretchedLayoutItem>
-                <Button isColor="info">?</Button>
+                <Button onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
               </StretchedLayoutItem>
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
       </footer>
+      <DownloadModalHelp isOpen={isDownloadModalHelp} onRequestClose={onCloseDownloadModalHelp} />
+      <Tooltip id="tooltip" place="right" effect="solid" />
     </div>
   );
 };

@@ -5,7 +5,6 @@
  */
 
 import { action, createAsyncAction } from 'typesafe-actions';
-import {} from './types';
 
 import ActionTypes from './constants';
 import SliceState from './SliceArgs';
@@ -17,7 +16,7 @@ export const exportSlideshowActionCreator = createAsyncAction(
   ActionTypes.EXPORT_START,
   ActionTypes.EXPORT_SUCCESS,
   ActionTypes.EXPORT_FAILURE,
-)<Slideshow, any, Error>();
+)<Slideshow | null, undefined, Error>();
 
 
 export const importSlideshowAction = createAsyncAction(

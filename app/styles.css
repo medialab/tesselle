@@ -48,6 +48,10 @@ body {
   text-transform: none;
 }
 
+.box,.button{
+  border-radius: 0;
+}
+
 .ReactModal__Overlay{
   z-index: 1000;
   display: flex;
@@ -91,4 +95,3 @@ body {
   -ms-user-select: element;
   -webkit-user-select: all;
 }
-

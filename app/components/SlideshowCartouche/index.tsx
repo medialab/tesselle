@@ -106,7 +106,7 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
                   <InlineIcon>
                     <FontAwesomeIcon icon={faEye} />
                   </InlineIcon>
-                  read
+                  preview
                 </span>
               ),
               isDisabled: removing,
@@ -180,7 +180,7 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
         isActive={isPendingToDelete}
         onClose={onDeleteCancel}
         headerContent="Deleting a slideshow"
-        mainContent="Are you sure you want to delete this slideshow ?"
+        mainContent="Are you sure you want to delete this document ?"
         footerContent={[
         <StretchedLayoutContainer
             style={{ width: '100%' }}
