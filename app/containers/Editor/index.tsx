@@ -193,6 +193,19 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
   }, [props.selectedAnnotations]);
   const onAnnotationChange = useCallback(pipe(editAnnotationAction, dispatch), []);
   const onOrderChange = useCallback(pipe(editOrderAction, dispatch), []);
+
+  const onInvisibleCreation = useCallback(() => {
+    dispatch(addAnnotationAction({
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+      },
+      properties: {
+        type: SupportedShapes.invisible,
+      },
+    } as any));
+  }, []);
+
   return (
     <div className="map">
       <Sidebar
@@ -203,6 +216,7 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
         selectedAnnotations={props.selectedAnnotations}
         visible={sidebarVisible}
         onClose={onClose}
+        onCommentCreation={onInvisibleCreation}
         onRemove={onRemove}
         onOpen={onOpen}
         onNameChange={onNameChange}

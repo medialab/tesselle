@@ -107,6 +107,17 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
 
   const ContainerEl = props.minified ? React.Fragment : Box;
   const isInvisible = props.data.geometry.type === 'LineString';
+
+  let iconType;
+  if (props.data.properties.type === 'circle') {
+    iconType = 'ellipse';
+  } else if (props.data.properties.type === 'rectangle') {
+    iconType = 'rectangle';
+  } else if (props.data.properties.type === 'polygon') {
+    iconType = 'polygon';
+  } else {
+    iconType = 'comment';
+  }
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
@@ -116,6 +127,13 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
     })} ref={forwardedRef} {...props.draggableProps} onClick={onClick}>
       <ContainerEl>
         <StretchedLayoutContainer isDirection="horizontal">
+          {!props.minified &&
+          <StretchedLayoutItem style={{padding: '.5rem', paddingLeft: 0}}>
+            <img
+              style={{maxWidth: '1rem'}}
+              src={require(`../../images/icons/anchor-${iconType}-${props.selected ? 'white' : 'black'}.svg`)}
+            />
+          </StretchedLayoutItem>}
           <StretchedLayoutItem
             style={{
               paddingRight: '1rem',
@@ -210,7 +228,6 @@ const Orderable: React.SFC<ListProps> = props => {
       ),
     );
   }, [props.slideshow.annotations]);
-
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="droppable">
@@ -310,6 +327,7 @@ interface SidebarProps extends ListProps {
   onNameChange: (slideshow: Slideshow) => void;
   onClose: () => void;
   onOpen: () => void;
+  onCommentCreation: () => void;
 }
 
 const Sidebar: React.SFC<SidebarProps> = props => {
@@ -337,7 +355,12 @@ const Sidebar: React.SFC<SidebarProps> = props => {
         <Loader />
         <div onClick={onClickSidebar} className="sidebar--container">
           {props.visible ? (
-            <Orderable {...props} />
+            <>
+              <Orderable {...props} />
+              <div className="add-comment-container">
+                <Button onClick={props.onCommentCreation} isColor="primary" isFullWidth>add general comment</Button>
+              </div>
+            </>
           ) : selected ? (
             <MenuItem
               onChange={props.onAnnotationChange}
