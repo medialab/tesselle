@@ -68,11 +68,17 @@ export default combineReducers<ContainerState, ContainerActions>({
             return slideshow.set(
               'annotations',
               slideshow.annotations.push(fromJS(action.payload)),
+            ).setIn(
+              ['meta', 'updatedAt'],
+              new Date(),
             );
           case ActionTypes.EDIT_ANNOTATION:
             return slideshow.set(
               'annotations',
               slideshow.annotations.map(replaceAnnotation(action)),
+            ).setIn(
+              ['meta', 'updatedAt'],
+              new Date(),
             );
           case ActionTypes.REMOVE_ANNOTATION:
             return slideshow.set(
@@ -86,7 +92,10 @@ export default combineReducers<ContainerState, ContainerActions>({
       switch (action.type) {
         case ActionTypes.EDIT_SLIDESHOW:
           if (isImmutable(action.payload)) {
-            return action.payload;
+            return action.payload.setIn(
+              ['meta', 'updatedAt'],
+              new Date(),
+            );
           }
           return new Slideshow({
             id: action.payload.id,

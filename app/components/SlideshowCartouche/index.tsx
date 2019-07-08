@@ -65,7 +65,7 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
   };
 
   const onAction = React.useCallback(
-    (id, event) => {
+    (id) => {
       switch (id) {
         case 'delete':
           return setPendingToDelete(true);
@@ -162,6 +162,14 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
                       </span>{' '}
                       annotation
                       {props.slideshow.annotations.size === 1 ? '' : 's'}
+                    </p>
+                  </Content>
+                  <Content>
+                    <p className="annotations-container">
+                      created at: {props.slideshow.meta.createdAt.toLocaleTimeString()}
+                    </p>
+                    <p className="annotations-container">
+                      edited at: {props.slideshow.meta.updatedAt.toLocaleTimeString()}
                     </p>
                   </Content>
                 </Column>
