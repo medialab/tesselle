@@ -99,7 +99,7 @@ function HomePage(props: HomePageProps & ContainerState) {
             </Content>
             {slicer.total === 0
               ? <DropZone
-                  accept={acceptedFiles}
+                  accept={acceptedFiles.join(',')}
                   onDrop={onDrop}
                 >
                   {
