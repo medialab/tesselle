@@ -45,7 +45,7 @@ const Header: React.SFC<{
     >
       {
         props.viewerMode ?
-        <a href="https://www.medialab.github.io/tesselle" target="blank" rel="noopener">
+        <a href="https://medialab.github.io/tesselle" target="blank" rel="noopener">
           <img data-tip={'Made with tesselle'} data-for="tooltip" src={logo} style={{maxWidth: '2rem'}} />
         </a>
         :
@@ -150,7 +150,6 @@ const Control: React.SFC<{
             {props.children}
           </Content>
         </StretchedLayoutItem>
-
         <StretchedLayoutItem>
           <StretchedLayoutContainer isDirection="horizontal" className="minified-nav-container">
             <StretchedLayoutItem>
@@ -255,7 +254,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                 <StretchedLayoutItem isFlex={1}>
                   <StretchedLayoutContainer isDirection="horizontal">
                     <StretchedLayoutItem isFlex={1}>
-                      <Download disabled={!props.slideshow.annotations.size} />
+                      <Download />
                     </StretchedLayoutItem>
                     <StretchedLayoutItem>
                       <Button  onClick={onOpenDownloadModalHelp} isColor="info">?</Button>

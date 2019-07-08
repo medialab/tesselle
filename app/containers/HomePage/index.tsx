@@ -12,6 +12,7 @@ import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import { propSatisfies, pipe, __, includes, head } from 'ramda';
+
 import { ContainerState } from './types';
 
 import injectSaga from 'utils/injectSaga';
@@ -98,7 +99,7 @@ function HomePage(props: HomePageProps & ContainerState) {
             </Content>
             {slicer.total === 0
               ? <DropZone
-                  accept={acceptedFiles}
+                  accept={acceptedFiles.join(',')}
                   onDrop={onDrop}
                 >
                   {

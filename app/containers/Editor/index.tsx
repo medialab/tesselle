@@ -4,13 +4,13 @@
  *
  */
 
-import React, { useCallback, useState, memo, useEffect } from 'react';
+import React, { useCallback, useState, memo, useEffect, useMemo } from 'react';
 import L from 'leaflet';
 import { connect, useDispatch } from 'react-redux';
 import { pipe } from 'ramda';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import { Map, ZoomControl, withLeaflet } from 'react-leaflet';
+import { Map, ZoomControl, withLeaflet, ImageOverlay } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
 import { Feature } from 'geojson';
 
@@ -39,8 +39,9 @@ import {
 } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
+import { useLockEffect, useUrl, coverToBounds } from 'utils/hooks';
 import { LocalIiifLayer } from 'components/IiifLayer';
-import { useLockEffect } from 'utils/hooks';
+import { isSvg } from 'utils/index';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -158,7 +159,11 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
         data={slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations}
       />
-      <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} />
+      {isSvg(slideshow.image.file) ? <ImageOverlay
+        url={useUrl(slideshow.image.file)}
+        bounds={useMemo(() => coverToBounds(slideshow.image), [slideshow.image])}
+      />
+      : <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} /> }
       <FloatinBar
         onSelectClick={onSelectClick}
         activeButton={tool}
