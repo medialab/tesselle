@@ -1,18 +1,21 @@
 import { resizeImage, calculateAspectRatioFit } from 'utils/imageManipulation';
 import { last } from 'ramda';
+import Slideshow from './Slideshow';
+import { typesToExtensions } from 'utils/';
 
-export const generateInfo = (img, scaleFactors, id) => {
+export const generateInfo = (slideshow: Slideshow, scaleFactors) => {
+
   return {
     '@context': 'http://library.stanford.edu/iiif/image-api/1.1/context.json',
-    '@id': id,
-    'formats': ['jpg'],
-    'height': img.height,
+    '@id': slideshow.image.id,
+    'formats': [typesToExtensions(slideshow.image.file.type)],
+    'height': slideshow.image.height,
     'profile': 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0',
     'qualities': ['default'],
     'scale_factors': scaleFactors,
     'tile_height': 512,
     'tile_width': 512,
-    'width': img.width,
+    'width': slideshow.image.width,
   };
 };
 

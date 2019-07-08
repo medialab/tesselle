@@ -359,7 +359,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
           <StretchedLayoutItem isFlex={1}>
             <StretchedLayoutContainer isDirection="horizontal">
               <StretchedLayoutItem isFlex={1}>
-                <Download disabled={!props.slideshow.annotations.size} />
+                <Download />
               </StretchedLayoutItem>
               <StretchedLayoutItem>
                 <Button onClick={onOpenDownloadModalHelp} isColor="info">?</Button>

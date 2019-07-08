@@ -137,8 +137,6 @@ const Control: React.SFC<{
   })}>
     <>
       <StretchedLayoutContainer isDirection="vertical" className="utils__space-between">
-       
-
         <StretchedLayoutItem isFlex={1}>
           <Content isSize={'small'} className={cx('sidebar--item-field', {
             'sidebar--item-field--selected': props.selected,
@@ -147,7 +145,6 @@ const Control: React.SFC<{
             {props.children}
           </Content>
         </StretchedLayoutItem>
-
         <StretchedLayoutItem>
           <StretchedLayoutContainer isDirection="horizontal" className="minified-nav-container">
             <StretchedLayoutItem>
@@ -172,8 +169,6 @@ const Control: React.SFC<{
             </StretchedLayoutItem>
           </StretchedLayoutContainer>
         </StretchedLayoutItem>
-        
-
       </StretchedLayoutContainer>
     </>
   </div>
@@ -254,7 +249,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                 <StretchedLayoutItem isFlex={1}>
                   <StretchedLayoutContainer isDirection="horizontal">
                     <StretchedLayoutItem isFlex={1}>
-                      <Download disabled={!props.slideshow.annotations.size} />
+                      <Download />
                     </StretchedLayoutItem>
                     <StretchedLayoutItem>
                       <Button  onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
