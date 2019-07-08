@@ -6,6 +6,7 @@ import Annotation from 'types/Annotation';
 import Cover from './Cover';
 import { fromJS } from 'utils/geo';
 import loadImage from 'utils/imageManipulation';
+import { isSvg } from 'utils/index';
 
 export interface SlideshowArgs {
   id?: string;
@@ -27,6 +28,9 @@ class Slideshow extends Record({
     if (params) {
       if (params.annotations instanceof Array) {
         params.annotations = List<Annotation>(params.annotations.map(fromJS));
+      }
+      if (!(params.image instanceof Cover)) {
+        params.image = new Cover(params.image);
       }
       if (!params.id) {
         params.id = uuid();
@@ -52,7 +56,6 @@ interface Box {
 
 const maxX = '1000';
 const maxY = '1000';
-const svgType = 'image/svg+xml';
 
 const createObject = curry((specification, value) => map(f => f(value), specification));
 const parseWidth: () => number = pipe(nth(2), Number);
@@ -79,9 +82,9 @@ const getSvgSize = (svgElement: Element): Box | never => {
   throw new Error('No width / height nor viewBox');
 };
 
-export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
+export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
   new Promise((resolve, reject) => {
-    if (file.type === svgType) {
+    if (isSvg(file)) {
       const reader = new FileReader();
       reader.onload = () => {
         const container = document.createElement('div');
@@ -92,9 +95,10 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
           return resolve([
             new Slideshow({
               image: new Cover({
-                file: {} as any,
+                file: file,
                 width: box.width,
                 height: box.height,
+                type: 'image/svg+xml',
               }),
             }),
             svgElement,
@@ -106,9 +110,10 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
           return resolve([
             new Slideshow({
               image: new Cover({
-                file: {} as any,
+                file: file,
                 width: box.width,
                 height: box.height,
+                type: 'image/svg+xml',
               }),
             }),
             svgElement,
@@ -145,6 +150,7 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
             file: thumbnail,
             width: img.width,
             height: img.height,
+            type: 'image/jpeg',
           }),
         });
         window.URL.revokeObjectURL(url);

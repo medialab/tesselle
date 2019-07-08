@@ -4,8 +4,8 @@
  *
  */
 
-import React, { useCallback, useRef, useState } from 'react';
-import { Map, withLeaflet, ZoomControl } from 'react-leaflet';
+import React, { useCallback, useRef, useState, useMemo } from 'react';
+import { Map, withLeaflet, ZoomControl, ImageOverlay } from 'react-leaflet';
 import useMousetrap from 'react-hook-mousetrap';
 import { Button, Icon, Title } from 'quinoa-design-library';
 import { useFullScreen } from 'react-browser-hooks';
@@ -20,7 +20,7 @@ import L from 'leaflet';
 import AnnotationLayer from 'components/AnnotationLayer';
 import Loader from 'components/Loader';
 import { LocalIiifLayer, DistantIiifLayer } from 'components/IiifLayer';
-import { useLockEffect, useToggleBoolean } from 'utils/hooks';
+import { useLockEffect, useToggleBoolean, useUrl, coverToBounds } from 'utils/hooks';
 import { enhancer } from 'containers/Editor';
 import ReactDOM from 'react-dom';
 import Sidebar from './Sidebar';
@@ -30,6 +30,7 @@ import Annotation from 'types/Annotation';
 import { SureContextProps, changeSelection } from 'types';
 
 import './style.css';
+import { isSvg } from 'utils/index';
 
 const minZoom = 1;
 const maxZoom = 20;
@@ -51,15 +52,34 @@ interface PlayerProps extends PlayerContainerProps {
 const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
   const selected = props.selectedAnnotations.first();
   useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image);
+  let child;
+  if (props.url) {
+    if (isSvg(props.slideshow.image)) {
+      child = (
+        <ImageOverlay
+          url={`${props.url}/../thumbnail.svg`}
+          bounds={useMemo(() => coverToBounds(props.slideshow.image), [props.slideshow.image])} />
+      );
+    } else {
+      child = <DistantIiifLayer url={props.url} />;
+    }
+  } else if (isSvg(props.slideshow.image)) {
+    child = (
+      <ImageOverlay
+        url={useUrl(props.slideshow.image.file)}
+        bounds={useMemo(() => coverToBounds(props.slideshow.image), [props.slideshow.image])}
+      />
+    );
+  } else {
+    child = <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} />;
+  }
   return (
     <React.Fragment>
       <AnnotationLayer
         onLayerClick={props.playing ? undefined : props.changeSelection}
         data={props.slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations} />
-      {props.url ?
-        <DistantIiifLayer url={props.url} /> :
-        <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} />}
+      {child}
     </React.Fragment>
   );
 });
@@ -76,6 +96,7 @@ export const selectNext = (selected, annotations) => {
   }
 };
 
+const noop = undefined;
 export const Player: React.SFC<PlayerContainerProps> = (props) => {
   const selected = props.selectedAnnotations.first();
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
@@ -88,7 +109,6 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
       onNext();
     }
   }, [onOpen]);
-  const noop = undefined;
   const onNext = useCallback(
     props.slideshow.annotations.size > 1 ?
       () => props.changeSelection(selectNext(selected, props.slideshow.annotations)) : noop as any,

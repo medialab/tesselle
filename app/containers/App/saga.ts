@@ -4,7 +4,7 @@ import { saveAs } from 'file-saver';
 import html from './export-file';
 import uuid from 'uuid';
 
-import { generate, scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
+import { generate, scaleFactorsCreator } from 'types/IIIFStatic';
 import db from 'utils/db';
 import { setProgress, exportSlideshowActionCreator } from './actions';
 import makeSelectSlicer from './selectors';
@@ -15,6 +15,7 @@ import Cover from 'types/Cover';
 import { List, isImmutable } from 'immutable';
 import makeSelectSlideshows from 'containers/HomePage/selectors';
 import { loadSlideshowsAction } from 'containers/HomePage/actions';
+import { typesToExtensions, extentionsToType } from 'utils/';
 
 const selectSlicer = makeSelectSlicer();
 const selectSlideshows = makeSelectSlideshows();
@@ -47,35 +48,31 @@ function* initializeSlicer(nbImages) {
   return slicer;
 }
 
-export function* slice(img, id: string, slicing = true) {
-  const scaleFactors = scaleFactorsCreator(
-    BASE_TILESIZE,
-    img.width,
-    BASE_TILESIZE,
-    img.height,
-  );
-  db.setItem(`/info/${id}.json`, generateInfo(img, scaleFactors, id));
-  if (slicing) {
-    try {
-      const parsedImage = Array.from(generate(
-        img,
-        {tileSize: 512, scaleFactors: scaleFactors},
-      ));
-      yield initializeSlicer(parsedImage.length);
-      const [backgroundImages, futurImages] = pipe(
-        groupBy(last),
-        values,
-        sort(matrice => last(last(matrice))),
-        splitAt(2),
-      )(parsedImage);
-      yield* rawSlice(futurImages, yield select(selectSlicer), id);
-      yield spawn(function*(images, sliceState, slideshowId) {
-        yield* rawSlice(images, sliceState, slideshowId);
-        yield put(setProgress());
-      }, backgroundImages, yield select(selectSlicer), id);
-    } catch (e) {
-      console.error(e);
-    }
+export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
+  BASE_TILESIZE,
+  img.width,
+  BASE_TILESIZE,
+  img.height,
+)) {
+  try {
+    const parsedImage = Array.from(generate(
+      img,
+      {tileSize: 512, scaleFactors: scaleFactors},
+    ));
+    yield initializeSlicer(parsedImage.length);
+    const [backgroundImages, futurImages] = pipe(
+      groupBy(last),
+      values,
+      sort(matrice => last(last(matrice))),
+      splitAt(2),
+    )(parsedImage);
+    yield* rawSlice(futurImages, yield select(selectSlicer), id);
+    yield spawn(function*(images, sliceState, slideshowId) {
+      yield* rawSlice(images, sliceState, slideshowId);
+      yield put(setProgress());
+    }, backgroundImages, yield select(selectSlicer), id);
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -87,7 +84,7 @@ function* exportSlideshow(action) {
   try {
     const slideshow = action.payload as Slideshow;
     const zip = new JSzip();
-    zip.file(slideshow.image.file.name, slideshow.image.file);
+    zip.file(`thumbnail.${typesToExtensions(slideshow.image.file.type)}`, slideshow.image.file);
     zip.file('slideshow.json', JSON.stringify(slideshow));
     zip.file('_headers', `/*
     Access-Control-Allow-Origin: *`);
@@ -133,11 +130,12 @@ function* importInfos(zip: JSzip) {
   return info;
 }
 
-function* importThumbnail(zip: JSzip) {
+function* importThumbnail(zip: JSzip, fileFormat) {
+  const name = `thumbnail.${fileFormat}`;
   return new File(
-    [yield zip.file('thumbnail.jpg').async('blob')],
-    `thumbnail.jpg`,
-    {type: 'image/jpeg'},
+    [yield zip.file(name).async('blob')],
+    name,
+    {type: extentionsToType(fileFormat)},
   );
 }
 
@@ -146,10 +144,10 @@ function* importZip(action) {
   // more files !
   yield zip.loadAsync(action.payload);
   const images = zip.filter(relativePath => relativePath.startsWith(`images`) && relativePath.endsWith('jpg'));
+  const rawInfo = yield call(importInfos, zip);
 // tslint:disable-next-line: prefer-const
-  let [rawInfo, thumbnail, slicerState, slideshow] = yield all([
-    call(importInfos, zip),
-    call(importThumbnail, zip),
+  let [thumbnail, slicerState, slideshow] = yield all([
+    call(importThumbnail, zip, rawInfo.formats[0]),
     call(initializeSlicer, images.length),
     call(importSlideshow, zip),
   ]);
@@ -162,7 +160,7 @@ function* importZip(action) {
     const file = new File(
       [yield zipEntry.async('blob')],
       `native.jpg`,
-      {type: 'image/jpeg'},
+      {type: extentionsToType(rawInfo.formats[0])},
     );
     yield db.setItem(`/${rawInfo['@id']}/${relativePath.slice(8)}`, file);
     slicerState = slicerState.set('present', slicerState.present + 1).set('level', 1);
