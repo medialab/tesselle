@@ -115,8 +115,11 @@ export const coverToBounds = (image: Cover) => {
   );
 };
 
-export const useLockEffect = (map: L.Map, image: any) => {
+export const useLockEffect = (map: L.Map, image: any, ignore: boolean = false) => {
   useEffect(() => {
+    if (ignore) {
+      return;
+    }
     if (image.height) {
       const bonbounds = coverToBounds(image);
       // debugger
@@ -130,7 +133,7 @@ export const useLockEffect = (map: L.Map, image: any) => {
         {animate: true},
       );
     }
-  }, [map, image]);
+  }, [map, image, ignore]);
 };
 
 

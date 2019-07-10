@@ -45,9 +45,7 @@ export function* createAndRedirect(action) {
     512,
     slideshow.image.height,
   );
-  console.log(scaleFactors);
   const infos = generateInfo(slideshow, scaleFactors);
-  console.log(infos);
   db.setItem(`/info/${slideshow.image.id}.json`, infos);
   if (!svg) {
     yield* slice(img, slideshow.image.id);

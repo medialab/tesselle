@@ -16,7 +16,7 @@ import Slideshow from 'types/Slideshow';
 import { List } from 'immutable';
 import { annotationToBounds } from 'utils/geo';
 import 'components/Sidebar/styles.css';
-import { changeSelection, SureContextProps } from 'types';
+import { changeSelection, SureContextProps, SupportedShapes } from 'types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
@@ -80,26 +80,21 @@ const Header: React.SFC<{
 interface MenuItemProps {
   children: React.ReactChild;
   selected: boolean;
-  annotation: Annotation;
+  annotation: Annotation<any, any>;
   onGoTo: (annotation: Annotation) => void;
   onClick: changeSelection;
 }
 
 const MenuItem: React.SFC<MenuItemProps> = props => {
-  const onGoTo = useCallback((e) => {
-    if (props.selected) {
-      e.stopPropagation();
-    }
-    props.onGoTo(props.annotation);
-  }, [props.annotation]);
   const onClick = useCallback((e) => {
     props.onClick(props.annotation);
-    onGoTo(e);
   }, [props.annotation]);
+  const isInvisible = props.annotation.properties.type === SupportedShapes.invisible;
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
       'sidebar--menu-item__selected': props.selected,
+      'sidebar--menu-item__invisible': isInvisible,
     })}>
       <Box className="player-card" onClick={onClick}>
         <StretchedLayoutContainer isDirection="horizontal">
@@ -109,15 +104,6 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
             })}>
               {props.children}
             </Content>
-          </StretchedLayoutItem>
-          <StretchedLayoutItem>
-            <StretchedLayoutContainer isDirection="horizontal">
-              {/*<div>
-                <Button isRounded onClick={onGoTo} style={{ margin: '.3rem' }}>
-                  <Icon><FontAwesomeIcon icon={faEye} /></Icon>
-                </Button>
-              </div>*/}
-            </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
       </Box>
@@ -193,10 +179,15 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
     if (!selected) {
       props.changeSelection(props.slideshow.annotations.first());
     }
-  }, [props.visible, props.slideshow.annotations]);
-  const onGoTo = useCallback((annotation) => {
-    props.leaflet.map.fitBounds(annotationToBounds(annotation), { animate: true });
-  }, [props.leaflet && props.leaflet.map]);
+  }, [props.visible, props.slideshow.annotations, selected]);
+  const onGoTo = useCallback((annotation: Annotation) => {
+    if (annotation.properties.type !== SupportedShapes.invisible) {
+      props.leaflet.map.fitBounds(
+        annotationToBounds(annotation),
+        { animate: true },
+      );
+    }
+  }, [props.leaflet.map]);
   const [isDownloadModalHelp, onCloseDownloadModalHelp, onOpenDownloadModalHelp] = useToggleBoolean(false);
   return (
     <div className={cx({

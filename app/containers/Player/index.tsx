@@ -27,7 +27,7 @@ import Sidebar from './Sidebar';
 import Slideshow from 'types/Slideshow';
 import { List } from 'immutable';
 import Annotation from 'types/Annotation';
-import { SureContextProps, changeSelection } from 'types';
+import { SureContextProps, changeSelection, SupportedShapes } from 'types';
 
 import './style.css';
 import { isSvg } from 'utils/index';
@@ -50,8 +50,9 @@ interface PlayerProps extends PlayerContainerProps {
 }
 
 const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
-  const selected = props.selectedAnnotations.first();
-  useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image);
+  const selected = props.selectedAnnotations.first<Annotation>();
+  const isInvisible = selected && selected.properties.type === SupportedShapes.invisible;
+  useLockEffect(props.leaflet.map, (selected && !isInvisible) ? selected : props.slideshow.image);
   let child;
   if (props.url) {
     if (isSvg(props.slideshow.image)) {
@@ -129,8 +130,10 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
   const toggleShareHelpOpen = useCallback(() => setShareHelpOpen(!isShareHelpOpen), [isShareHelpOpen]);
   const sidebarRef = useRef<Element | null>(null);
   const sidebarReady = (domElement) => {
-    sidebarRef.current = domElement;
-    setMountSidebar(!!domElement);
+    if (!sidebarRef.current) {
+      sidebarRef.current = domElement;
+      setMountSidebar(!!domElement);
+    }
   };
 
   return (
