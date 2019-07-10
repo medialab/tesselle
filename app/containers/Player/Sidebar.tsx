@@ -94,12 +94,11 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
       }
       props.onGoTo(props.annotation);
     }
-  }, [props.annotation]);
+  }, [props.annotation, props.selected]);
   const onClick = useCallback((e) => {
     props.onClick(props.annotation);
-    onGoTo(e);
   }, [props.annotation]);
-  const isInvisible = props.annotation.geometry.type === 'LineString';
+  const isInvisible = props.annotation.properties.type === SupportedShapes.invisible;
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
@@ -198,10 +197,15 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
     if (!selected) {
       props.changeSelection(props.slideshow.annotations.first());
     }
-  }, [props.visible, props.slideshow.annotations]);
-  const onGoTo = useCallback((annotation) => {
-    props.leaflet.map.fitBounds(annotationToBounds(annotation), { animate: true });
-  }, [props.leaflet && props.leaflet.map]);
+  }, [props.visible, props.slideshow.annotations, selected]);
+  const onGoTo = useCallback((annotation: Annotation) => {
+    if (annotation.properties.type !== SupportedShapes.invisible) {
+      props.leaflet.map.fitBounds(
+        annotationToBounds(annotation),
+        { animate: true },
+      );
+    }
+  }, [props.leaflet.map]);
   const [isDownloadModalHelp, onCloseDownloadModalHelp, onOpenDownloadModalHelp] = useToggleBoolean(false);
   return (
     <div className={cx({

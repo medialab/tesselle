@@ -91,12 +91,18 @@ textarea.textarea {
   color: white;
   padding: 0
 }
-
+.sidebar--menu-item .box {
+  background: white;
+}
+.sidebar--menu-item__selected .box {
+  background: #3849a2;
+}
 .input__invisible {
   width: calc(100% - 1rem);
   border: none;
   margin: 1rem .5rem;
 }
-.sidebar--menu-item__invisible {
-  padding-left: 15px;
+.add-comment-container{
+  padding: .5rem .25rem;
 }
+

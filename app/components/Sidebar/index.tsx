@@ -38,6 +38,7 @@ import messages from './messages';
 import DownloadModalHelp from '../DownloadModalHelp';
 
 import logo from '../../images/logo.svg';
+import { SupportedShapes } from 'types';
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -82,6 +83,19 @@ interface MenuItemProps {
   dragHandleProps?;
 }
 
+const iconToType = (type) => {
+  switch (type) {
+    case SupportedShapes.circle:
+      return 'ellipse';
+    case SupportedShapes.rectangle:
+      return 'rectangle';
+    case SupportedShapes.polygon:
+      return 'polygon';
+    default:
+      return 'comment';
+  }
+};
+
 const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
   const onClick = React.useCallback((event) => {
     event.stopPropagation();
@@ -106,7 +120,7 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
   }, [props.data, props.onRemove]);
 
   const ContainerEl = props.minified ? React.Fragment : Box;
-  const isInvisible = props.data.geometry.type === 'LineString';
+  const isInvisible = props.data.properties.type === SupportedShapes.invisible;
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
@@ -116,6 +130,15 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
     })} ref={forwardedRef} {...props.draggableProps} onClick={onClick}>
       <ContainerEl>
         <StretchedLayoutContainer isDirection="horizontal">
+        {!props.minified &&
+          <StretchedLayoutItem style={{padding: '.5rem', paddingLeft: 0}}>
+            <img
+              style={{maxWidth: '1rem'}}
+              src={require(`../../images/icons/anchor-${
+                iconToType(props.data.properties.type)
+              }-${props.selected ? 'white' : 'black'}.svg`)}
+            />
+          </StretchedLayoutItem>}
           <StretchedLayoutItem
             style={{
               paddingRight: '1rem',
@@ -310,6 +333,7 @@ interface SidebarProps extends ListProps {
   onNameChange: (slideshow: Slideshow) => void;
   onClose: () => void;
   onOpen: () => void;
+  onCommentCreation: () => void;
 }
 
 const Sidebar: React.SFC<SidebarProps> = props => {
@@ -337,7 +361,12 @@ const Sidebar: React.SFC<SidebarProps> = props => {
         <Loader />
         <div onClick={onClickSidebar} className="sidebar--container">
           {props.visible ? (
-            <Orderable {...props} />
+            <>
+              <Orderable {...props} />
+              <div className="add-comment-container">
+                <Button onClick={props.onCommentCreation} isColor="primary" isFullWidth>add general comment</Button>
+              </div>
+            </>
           ) : selected ? (
             <MenuItem
               onChange={props.onAnnotationChange}

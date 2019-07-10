@@ -32,6 +32,7 @@ import {
   editSlideshowAction,
   editAnnotationAction,
   editOrderAction,
+  addEmptyAnnotationAction,
 } from './actions';
 import {
   makeSelectSlideshow,
@@ -111,15 +112,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
     setTool(SupportedShapes.polygon);
   }, [map]);
   const onInvisibleCreation = useCallback(() => {
-    dispatch(addAnnotationAction({
-      type: 'Feature',
-      geometry: {
-        type: 'LineString',
-      },
-      properties: {
-        type: SupportedShapes.invisible,
-      },
-    } as any));
+    dispatch(addEmptyAnnotationAction());
   }, []);
 
   useEffect(() => {
@@ -201,6 +194,7 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
   return (
     <div className="map">
       <Sidebar
+        onCommentCreation={useCallback(() => dispatch(addEmptyAnnotationAction()), [])}
         onAnnotationClick={onAnnotationClick}
         onAnnotationChange={onAnnotationChange}
         onOrderChange={onOrderChange}

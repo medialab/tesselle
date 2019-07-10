@@ -28,11 +28,6 @@ const FloatingBar: React.SFC<FloatingBarProps> = (props: FloatingBarProps) => {
     event: props.onSelectClick,
     helpMessage: 'select (shortcut: escape)',
   }, {
-    icon: icons.select,
-    tool: SupportedShapes.invisible,
-    event: props.onInvisibleClick,
-    helpMessage: 'Create an empty annotation (shortcut: n)',
-  }, {
     icon: icons.anchorRectangle,
     tool: SupportedShapes.rectangle,
     event: props.onRectangleClick,
