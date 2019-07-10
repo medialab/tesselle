@@ -50,9 +50,9 @@ interface PlayerProps extends PlayerContainerProps {
 }
 
 const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
-  const selected = props.selectedAnnotations.first<any>();
+  const selected = props.selectedAnnotations.first<Annotation>();
   const isInvisible = selected && selected.properties.type === SupportedShapes.invisible;
-  useLockEffect(props.leaflet.map, (selected && props.playing) ? selected : props.slideshow.image, isInvisible);
+  useLockEffect(props.leaflet.map, (selected && !isInvisible) ? selected : props.slideshow.image);
   let child;
   if (props.url) {
     if (isSvg(props.slideshow.image)) {
@@ -100,7 +100,6 @@ export const selectNext = (selected, annotations) => {
 const noop = undefined;
 export const Player: React.SFC<PlayerContainerProps> = (props) => {
   const selected = props.selectedAnnotations.first();
-  console.log('Player#selected', selected);
   const [mountSidebar, setMountSidebar] = useState<boolean>(false);
   const [isShareHelpOpen, setShareHelpOpen] = useState<boolean>(false);
   const [sidebarVisible, onClose, onOpen] = useToggleBoolean();

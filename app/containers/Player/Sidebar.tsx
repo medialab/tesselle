@@ -30,7 +30,6 @@ import DownloadModalHelp from '../../components/DownloadModalHelp';
 import { useToggleBoolean } from 'utils/hooks';
 
 import logo from '../../images/logo.svg';
-import { faEye } from '@fortawesome/free-solid-svg-icons/faEye';
 
 const Header: React.SFC<{
   onButtonClick: () => void;
@@ -87,14 +86,6 @@ interface MenuItemProps {
 }
 
 const MenuItem: React.SFC<MenuItemProps> = props => {
-  const onGoTo = useCallback((e) => {
-    if (props.annotation.properties.type !== SupportedShapes.invisible) {
-      if (props.selected) {
-        e.stopPropagation();
-      }
-      props.onGoTo(props.annotation);
-    }
-  }, [props.annotation, props.selected]);
   const onClick = useCallback((e) => {
     props.onClick(props.annotation);
   }, [props.annotation]);
@@ -113,15 +104,6 @@ const MenuItem: React.SFC<MenuItemProps> = props => {
             })}>
               {props.children}
             </Content>
-          </StretchedLayoutItem>
-          <StretchedLayoutItem>
-            <StretchedLayoutContainer isDirection="horizontal">
-              <div>
-                {!isInvisible && <Button isRounded onClick={onGoTo} style={{ margin: '.3rem' }}>
-                  <Icon><FontAwesomeIcon icon={faEye} /></Icon>
-                </Button>}
-              </div>
-            </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
       </Box>

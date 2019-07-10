@@ -25,23 +25,23 @@ const AnnotationHighlight: React.SFC<AnnotationShapes> = (props) => {
   useEdit(ref, props.editable && selected);
 
   const outerShape = [
-        {
-            lat: -500,
-            lng: 500,
-        },
-        {
-            lat: 500,
-            lng: 500,
-        },
-        {
-            lat: 500,
-            lng: -500,
-        },
-        {
-            lat: -500,
-            lng: -500,
-        },
-    ];
+    {
+      lat: -500,
+      lng: 500,
+    },
+    {
+      lat: 500,
+      lng: 500,
+    },
+    {
+      lat: 500,
+      lng: -500,
+    },
+    {
+      lat: -500,
+      lng: -500,
+    },
+  ];
   return (
     <Polygon
       key={props.className}
