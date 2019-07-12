@@ -45,11 +45,22 @@ export function* createAndRedirect(action) {
     512,
     slideshow.image.height,
   );
-  const infos = generateInfo(slideshow, scaleFactors);
-  db.setItem(`/info/${slideshow.image.id}.json`, infos);
   if (!svg) {
-    yield* slice(img, slideshow.image.id);
+    try {
+      yield* slice(img, slideshow.image.id);
+    } catch (error) {
+      const allKeys = yield db.keys();
+      yield all(allKeys.filter((key: string): boolean =>
+        key.startsWith(`/${slideshow.image.id}`),
+      ).map(key =>
+        call([db, db.removeItem], key)),
+      );
+      yield put(setProgress(new SliceState()));
+      throw error;
+    }
   }
+  const infos = generateInfo(slideshow, scaleFactors);
+  yield call([db, db.setItem], `/info/${slideshow.image.id}.json`, infos);
   const slideshows: List<Slideshow> = yield select(selectSlideshows);
   yield setSlideshows(slideshows.push(slideshow));
   yield put(setProgress(new SliceState()));

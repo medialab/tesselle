@@ -1,6 +1,6 @@
 /*
  *
- * Slicer actions
+ * App actions
  *
  */
 

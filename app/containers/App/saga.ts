@@ -1,5 +1,5 @@
 import { call, put, select, spawn, takeLatest, all } from 'redux-saga/effects';
-import { last, groupBy, pipe, values, sort, splitAt } from 'ramda';
+import { last, equals, pipe, nth, sort, splitWhen } from 'ramda';
 import { saveAs } from 'file-saver';
 import html from './export-file';
 import uuid from 'uuid';
@@ -30,15 +30,12 @@ export function* setSlideshows(slideshows: any) {
 }
 
 function* rawSlice(images, sliceState, slideshowId) {
-  for (const imagesByScaleFactor of images) {
-    const sf = last(last(imagesByScaleFactor));
-    for (const [url, launchFileParsing] of imagesByScaleFactor) {
-      sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
-      yield put(setProgress(sliceState));
-      yield call([db, db.setItem], '/' + slideshowId + url, launchFileParsing());
-    }
+  for (const [url, launchFileParsing, sf] of images) {
+    sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
     yield put(setProgress(sliceState));
+    yield call([db, db.setItem], '/' + slideshowId + url, launchFileParsing());
   }
+  yield put(setProgress(sliceState));
 }
 
 function* initializeSlicer(nbImages) {
@@ -54,31 +51,29 @@ export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
   BASE_TILESIZE,
   img.height,
 )) {
+  let toCancel;
   try {
     const parsedImage = Array.from(generate(
       img,
       {tileSize: 512, scaleFactors: scaleFactors},
     ));
-    yield initializeSlicer(parsedImage.length);
-    const [backgroundImages, futurImages] = pipe(
-      groupBy(last),
-      values,
-      sort(matrice => last(last(matrice))),
-      splitAt(2),
+    toCancel = yield initializeSlicer(parsedImage.length);
+    const compareTo = nth(-3, scaleFactors);
+    const [futurImages, backgroundImages] = pipe(
+      sort(matrice => -last(matrice)),
+      splitWhen(dup => equals(compareTo, last(dup))),
     )(parsedImage);
-    yield* rawSlice(futurImages, yield select(selectSlicer), id);
-    yield spawn(function*(images, sliceState, slideshowId) {
+    toCancel = yield* rawSlice(futurImages, yield select(selectSlicer), id);
+    toCancel = yield spawn(function*(images, sliceState, slideshowId) {
       yield* rawSlice(images, sliceState, slideshowId);
       yield put(setProgress());
     }, backgroundImages, yield select(selectSlicer), id);
-  } catch (e) {
-    console.error(e);
+    throw new Error('what');
+  } catch (error) {
+    toCancel.cancel();
+    throw error;
   }
 }
-
-// const wait = (ms: number) => {
-//   return new Promise((resolve, reject) => setTimeout(resolve, ms));
-// }
 
 function* exportSlideshow(action) {
   try {
@@ -126,7 +121,7 @@ function* importSlideshow(zip: JSzip) {
 function* importInfos(zip: JSzip) {
   let info = zip.file('info.json');
   info = JSON.parse(yield call([info, info.async], 'string'));
-  db.setItem(`/info/${info['@id']}.json`, info);
+  yield db.setItem(`/info/${info['@id']}.json`, info);
   return info;
 }
 
