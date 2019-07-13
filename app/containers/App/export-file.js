@@ -67,7 +67,7 @@ export default function(slideshow) {
       }
   </style>
   <body>
-    <iframe id="iframe"></iframe>
+    <iframe allowfullscreen id="iframe"></iframe>
   </body>
 </html>
 `;
