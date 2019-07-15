@@ -19,6 +19,7 @@ import 'leaflet/dist/leaflet.css';
 import 'quinoa-design-library/themes/millet/style.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import './styles.css';
+import ReduxToastr from 'react-redux-toastr/lib';
 
 // Import root app
 import App from 'containers/App';
@@ -45,9 +46,20 @@ const render = (messages, Component = App) => {
     (
       <Provider store={store}>
         <LanguageProvider messages={messages}>
-          <ConnectedRouter history={history}>
-            <Component />
-          </ConnectedRouter>
+          <>
+            <ReduxToastr
+            timeOut={4000}
+            newestOnTop={false}
+            preventDuplicates
+            position="top-left"
+            transitionIn="fadeIn"
+            transitionOut="fadeOut"
+            progressBar
+            closeOnToastrClick/>
+            <ConnectedRouter history={history}>
+              <Component />
+            </ConnectedRouter>
+          </>
         </LanguageProvider>
       </Provider>
     ),

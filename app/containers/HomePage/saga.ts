@@ -1,5 +1,5 @@
 import { put, takeLatest, select, all, call } from 'redux-saga/effects';
-// import { push } from 'connected-react-router';
+import { toastr } from 'react-redux-toastr/lib';
 import db from 'utils/db';
 import { loadSlideshowsAction, removeSlideshowAction } from './actions';
 import Slideshow, { slideshowCreator } from 'types/Slideshow';
@@ -56,6 +56,7 @@ export function* createAndRedirect(action) {
         call([db, db.removeItem], key)),
       );
       yield put(setProgress(new SliceState()));
+      toastr.error('wow', 'déso le bug');
       throw error;
     }
   }
