@@ -2,6 +2,8 @@ import React, { useCallback } from 'react';
 import {Link} from 'react-router-dom';
 import { withLeaflet } from 'react-leaflet';
 import Annotation from 'types/Annotation';
+import ReactMarkdown from 'react-markdown';
+
 import cx from 'classnames';
 import {
   Box,
@@ -215,7 +217,8 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                     onClick={props.changeSelection}
                     annotation={annotation}
                     key={annotation.properties.id}
-                    selected={props.selectedAnnotations.includes(annotation)}>{annotation.properties.content}
+                    selected={props.selectedAnnotations.includes(annotation)}>
+                      <ReactMarkdown source={annotation.properties.content} />
                   </MenuItem>,
                 )
                 : <Control

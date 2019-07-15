@@ -68,7 +68,6 @@ export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
       yield* rawSlice(images, sliceState, slideshowId);
       yield put(setProgress());
     }, backgroundImages, yield select(selectSlicer), id);
-    throw new Error('what');
   } catch (error) {
     toCancel.cancel();
     throw error;
