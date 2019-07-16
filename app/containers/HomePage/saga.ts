@@ -56,7 +56,7 @@ export function* createAndRedirect(action) {
         call([db, db.removeItem], key)),
       );
       yield put(setProgress(new SliceState()));
-      toastr.error('wow', 'déso le bug');
+      toastr.error('Sorry, an error occured while importing the image', 'Try again or with another image format');
       throw error;
     }
   }
@@ -102,6 +102,7 @@ export default function* homePageSaga() {
     yield setSlideshows(rawSlideshows);
   } catch (e) {
     console.error('Could not retrive slideshows');
+    toastr.error('Sorry, could not retrive the list of existing documents', 'Maybe a disk space problem?');
     console.error(e);
   }
 }
