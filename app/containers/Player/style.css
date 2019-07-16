@@ -53,6 +53,19 @@
     padding: 0;
 }
 
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified),
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h1,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h2,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h3,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h4,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h5,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h6,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) blockquote
+{
+    color : white;
+    background: transparent;
+}
+
 .player-map .sidebar.hidden .sidebar--wrapper{
     overflow: hidden;
 }

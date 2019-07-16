@@ -224,7 +224,10 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                 : <Control
                     selected={selected}
                     onNext={props.onNext}
-                    onPrev={props.onPrev}>{selected.properties.content}</Control>}
+                    onPrev={props.onPrev}>
+                      <ReactMarkdown source={selected.properties.content} />
+                    </Control>
+                }
             </div>
         </StretchedLayoutItem>
         {
