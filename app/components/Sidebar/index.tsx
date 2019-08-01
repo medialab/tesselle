@@ -24,8 +24,8 @@ import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMinus } from '@fortawesome/free-solid-svg-icons/faMinus';
-import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons/faChevronDown';
+import { faChevronUp } from '@fortawesome/free-solid-svg-icons/faChevronUp';
 
 import Annotation from 'types/Annotation';
 import Slideshow from 'types/Slideshow';
@@ -186,7 +186,7 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
               {props.dragHandleProps && <div {...props.dragHandleProps}>
                 <div
                   className="button is-lock-status-open"
-                  style={{marginBottom: '.5rem'}}
+                  style={{marginBottom: '.5rem', cursor: 'move'}}
                   data-for="card-action"
                   data-tip={'drag to change annotation order'}
                 >
@@ -283,12 +283,18 @@ const Header: React.SFC<{
       :
       <SimpleTitle isSize={6} className="is-stretch">{props.slideshow.name}</SimpleTitle>
     }
-    <Button isRounded className="minify-toggle" onClick={props.onButtonClick}>
+    <Button
+      isRounded
+      className="minify-toggle"
+      onClick={props.onButtonClick}
+      data-for="tooltip"
+      data-tip={props.visible ? 'Fold pannel' : 'Unfold pannel'}
+    >
         <Icon>
           { props.visible ?
-            <FontAwesomeIcon icon={faMinus} />
+            <FontAwesomeIcon icon={faChevronDown} />
             :
-            <FontAwesomeIcon icon={faPlus} />
+            <FontAwesomeIcon icon={faChevronUp} />
           }
         </Icon>
     </Button>
@@ -317,9 +323,9 @@ const Title: React.SFC<TitleProps> = (props) => {
             onBlur={onBlur}
             name="title"
             data-for="tooltip"
-            data-tip="document title"
+            data-tip="image title"
             data-place="bottom"
-            placeholder="document title"
+            placeholder="image title"
           />
         </Form>
       );
@@ -350,7 +356,12 @@ const Sidebar: React.SFC<SidebarProps> = props => {
   const onCloseDownloadModalHelp = () => setDownloadModalHelp(false);
   const onOpenDownloadModalHelp = () => setDownloadModalHelp(true);
   return (
-    <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
+    <div className={
+      cx({
+        sidebar: true,
+        visible: props.visible,
+        hidden: !props.visible,
+      })}>
       <Header
         onButtonClick={props.visible ? props.onClose : props.onOpen}
           visible={props.visible}
@@ -393,7 +404,12 @@ const Sidebar: React.SFC<SidebarProps> = props => {
                 <Download />
               </StretchedLayoutItem>
               <StretchedLayoutItem>
-                <Button onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
+                <Button
+                  data-for="tooltip"
+                  data-tip="How to archive and publish your image"
+                  onClick={onOpenDownloadModalHelp}
+                  isColor="info"
+                >?</Button>
               </StretchedLayoutItem>
             </StretchedLayoutContainer>
           </StretchedLayoutItem>

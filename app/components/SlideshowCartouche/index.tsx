@@ -196,8 +196,8 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
       <ModalCard
         isActive={isPendingToDelete}
         onClose={onDeleteCancel}
-        headerContent="Deleting a slideshow"
-        mainContent="Are you sure you want to delete this document ?"
+        headerContent="Deleting an image"
+        mainContent="Are you sure you want to delete this image ?"
         footerContent={[
         <StretchedLayoutContainer
             style={{ width: '100%' }}

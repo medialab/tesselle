@@ -12,7 +12,7 @@
 }
 
 .map .leaflet-marker-icon{
-    background: #ff1f4b;
+    background: #3849a2;
     border: none;
     border-radius: 50%;
 }
@@ -24,7 +24,7 @@
 }
 
 .map .annotation-shape__editing{
-    stroke: #009085;
+    stroke: #3849a2;
 }
 
 .map .leaflet-control-zoom{

@@ -94,7 +94,7 @@ export const slideshowCreator = (file: File, name: string): Promise<[Slideshow, 
           const box: Box = getSvgSize(svgElement);
           return resolve([
             new Slideshow({
-              name,
+              name: name,
               image: new Cover({
                 file: file,
                 width: box.width,
@@ -110,7 +110,7 @@ export const slideshowCreator = (file: File, name: string): Promise<[Slideshow, 
           const box: Box = getSvgSize(svgElement);
           return resolve([
             new Slideshow({
-              name,
+              name: name,
               image: new Cover({
                 file: file,
                 width: box.width,
@@ -148,7 +148,7 @@ export const slideshowCreator = (file: File, name: string): Promise<[Slideshow, 
         });
 
         const slideshow = new Slideshow({
-          name,
+          name: name,
           image: new Cover({
             file: thumbnail,
             width: img.width,

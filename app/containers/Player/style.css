@@ -19,7 +19,6 @@
     padding-top: 0;
 }
 .player-map .sidebar.hidden{
-    height: unset;
     max-height: calc(100% - 4rem);
 }
 
@@ -32,6 +31,16 @@
 
 .player-map .sidebar--menu-item.sidebar--spacing .content{
     padding: 1rem;
+}
+
+.player-map .player-sidebar.viewer-mode.empty{
+    background: transparent;
+}
+.player-map .player-sidebar.viewer-mode.empty .sidebar--header-container{
+    background: white;
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
 }
 
 .player-actions-container{
