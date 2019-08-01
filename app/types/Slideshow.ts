@@ -17,7 +17,7 @@ export interface SlideshowArgs {
 
 class Slideshow extends Record({
   id: '',
-  name: 'Untitled document',
+  name: 'Untitled image',
   annotations: List(),
   image: {},
 }) {
@@ -82,7 +82,7 @@ const getSvgSize = (svgElement: Element): Box | never => {
   throw new Error('No width / height nor viewBox');
 };
 
-export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
+export const slideshowCreator = (file: File, name: string): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
   new Promise((resolve, reject) => {
     if (isSvg(file)) {
       const reader = new FileReader();
@@ -94,6 +94,7 @@ export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElem
           const box: Box = getSvgSize(svgElement);
           return resolve([
             new Slideshow({
+              name,
               image: new Cover({
                 file: file,
                 width: box.width,
@@ -109,6 +110,7 @@ export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElem
           const box: Box = getSvgSize(svgElement);
           return resolve([
             new Slideshow({
+              name,
               image: new Cover({
                 file: file,
                 width: box.width,
@@ -146,6 +148,7 @@ export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElem
         });
 
         const slideshow = new Slideshow({
+          name,
           image: new Cover({
             file: thumbnail,
             width: img.width,
