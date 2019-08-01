@@ -7,6 +7,7 @@ import { List } from 'immutable';
 
 /* --- STATE --- */
 interface EditorState {
+  readonly helpModalOpen?: boolean;
   readonly slideshow: Slideshow | null;
   readonly selectedAnnotations: List<Annotation>;
 }

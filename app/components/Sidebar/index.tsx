@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
 import { List } from 'immutable';
 import {
   Button,
@@ -37,8 +37,13 @@ import Download from 'components/Download';
 import messages from './messages';
 import DownloadModalHelp from '../DownloadModalHelp';
 
+import {makeHelpModalStatusSelector} from 'containers/App/selectors';
+
 import logo from '../../images/logo.svg';
 import { SupportedShapes } from 'types';
+import { useSelector, useDispatch } from 'react-redux';
+import {setHelpModalStatus} from 'containers/App/actions';
+
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -352,9 +357,11 @@ const Sidebar: React.SFC<SidebarProps> = props => {
     [props.slideshow],
   );
   const selected = props.selectedAnnotations.first<Annotation>();
-  const [isDownloadModalHelp, setDownloadModalHelp] = useState(false);
-  const onCloseDownloadModalHelp = () => setDownloadModalHelp(false);
-  const onOpenDownloadModalHelp = () => setDownloadModalHelp(true);
+  const helpModalOpen = useSelector(makeHelpModalStatusSelector());
+  const dispatch = useDispatch();
+
+  const onCloseDownloadModalHelp = () => dispatch(setHelpModalStatus(false));
+  const onOpenDownloadModalHelp = () => dispatch(setHelpModalStatus(true));
   return (
     <div className={
       cx({
@@ -415,7 +422,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
       </footer>
-      <DownloadModalHelp isOpen={isDownloadModalHelp} onRequestClose={onCloseDownloadModalHelp} />
+      <DownloadModalHelp isOpen={helpModalOpen} onRequestClose={onCloseDownloadModalHelp} />
       <Tooltip id="tooltip" place="right" effect="solid" />
     </div>
   );
