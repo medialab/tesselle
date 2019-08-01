@@ -191,7 +191,6 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
   }, [props.selectedAnnotations]);
   const onAnnotationChange = useCallback(pipe(editAnnotationAction, dispatch), []);
   const onOrderChange = useCallback(pipe(editOrderAction, dispatch), []);
-  console.log(props);
   return (
     <div className="map">
       <Sidebar
