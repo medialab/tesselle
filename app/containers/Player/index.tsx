@@ -135,7 +135,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
       setMountSidebar(!!domElement);
     }
   };
-  const viewerMode = {viewerMode: viewerMode} = props;
+  const {viewerMode} = props;
 
   return (
     <div className="map player-map">
