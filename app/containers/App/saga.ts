@@ -1,4 +1,4 @@
-import { call, put, select, spawn, takeLatest, all } from 'redux-saga/effects';
+import { call, put, select, spawn, takeLatest, all, delay } from 'redux-saga/effects';
 import { last, equals, pipe, nth, sort, splitWhen } from 'ramda';
 import { saveAs } from 'file-saver';
 import html from './export-file';
@@ -64,6 +64,7 @@ export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
       splitWhen(dup => equals(compareTo, last(dup))),
     )(parsedImage);
     toCancel = yield* rawSlice(futurImages, yield select(selectSlicer), id);
+    yield delay(500);
     toCancel = yield spawn(function*(images, sliceState, slideshowId) {
       yield* rawSlice(images, sliceState, slideshowId);
       yield put(setProgress());
