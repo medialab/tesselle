@@ -95,7 +95,6 @@ const lockFuturShape = (instance?) => {
 
 const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(props => {
   const {slideshow, setTool, tool} = props;
-  console.log(slideshow);
   const map = props.leaflet.map;
   useLockEffect(map, props.slideshow.image);
   const dispatch = useDispatch();

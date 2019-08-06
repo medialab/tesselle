@@ -14,7 +14,7 @@ import Annotation from 'types/Annotation';
 import { when } from 'ramda';
 import { fromJS } from 'utils/geo';
 import { isImmutable, List } from 'immutable';
-import Slideshow from 'types/Slideshow';
+import Slideshow, { Meta } from 'types/Slideshow';
 import Cover from 'types/Cover';
 
 export const initialState: ContainerState = {
@@ -92,16 +92,14 @@ export default combineReducers<ContainerState, ContainerActions>({
     switch (action.type) {
       case ActionTypes.EDIT_SLIDESHOW:
         if (isImmutable(action.payload)) {
-          return action.payload.setIn(
-            ['meta', 'updatedAt'],
-            new Date(),
-          );
+          return action.payload;
         }
         return new Slideshow({
           id: action.payload.id,
           name: action.payload.name,
           image: new Cover(action.payload.image),
           annotations: action.payload.annotations.map(fromJS),
+          meta: new Meta(action.payload.meta),
         });
       }
     return slideshow;

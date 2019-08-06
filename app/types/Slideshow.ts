@@ -9,7 +9,7 @@ import { fromJS } from 'utils/geo';
 import loadImage from 'utils/imageManipulation';
 import { isSvg } from 'utils/index';
 
-class Meta extends Record({
+export class Meta extends Record({
   createdAt: new Date(),
   updatedAt: new Date(),
 }) {
@@ -22,6 +22,7 @@ export interface SlideshowArgs {
   name?: string;
   annotations?: List<Annotation>;
   image?: Cover;
+  meta?: Meta;
 }
 
 class Slideshow extends Record({
