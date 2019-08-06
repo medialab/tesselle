@@ -1,6 +1,6 @@
 /*
  *
- * Slicer actions
+ * App actions
  *
  */
 
@@ -24,3 +24,5 @@ export const importSlideshowAction = createAsyncAction(
   ActionTypes.IMPORT_SLIDESHOW_SUCCESS,
   ActionTypes.IMPORT_SLIDESHOW_FAILURE,
 )<any, Slideshow, Error>();
+
+export const setHelpModalStatus = (status: boolean) => action(ActionTypes.SET_HELP_MODAL_STATUS, status);

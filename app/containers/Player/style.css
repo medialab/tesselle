@@ -7,9 +7,9 @@
     justify-content: stretch;
 }
 
-.player-map .player-sidebar{
+/* .player-map .player-sidebar{
     min-height: 16rem;
-}
+} */
 
 .player-map .play-sidebar--container{
     height: 100%;
@@ -19,7 +19,6 @@
     padding-top: 0;
 }
 .player-map .sidebar.hidden{
-    height: unset;
     max-height: calc(100% - 4rem);
 }
 
@@ -32,6 +31,24 @@
 
 .player-map .sidebar--menu-item.sidebar--spacing .content{
     padding: 1rem;
+}
+
+.player-map .sidebar.hidden .sidebar--menu-item .content {
+    max-height: 50vh;
+    transition: all .5s ease;
+}
+
+.player-map .player-sidebar.viewer-mode.empty{
+    background: transparent;
+    pointer-events: none;
+}
+.player-map .player-sidebar.viewer-mode.empty .sidebar--header-container{
+    background: white;
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    max-width: calc(100% - 4rem);
+    pointer-events: all;
 }
 
 .player-actions-container{
@@ -53,8 +70,22 @@
     padding: 0;
 }
 
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified),
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h1,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h2,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h3,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h4,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h5,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h6,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) blockquote
+{
+    color : white;
+    background: transparent;
+}
+
 .player-map .sidebar.hidden .sidebar--wrapper{
     overflow: hidden;
+    padding-bottom: 0.5rem;
 }
 
 .sidebar--menu-item__minified{
@@ -102,7 +133,7 @@
     }
 }
 
-@media screen and (max-width: 769px) {
+@media screen and (max-width: 800px) {
     .sidebar{
         width: 40%;
         max-width: unset;
@@ -119,23 +150,60 @@
     .player-map .sidebar.hidden{
         max-height: 40%;
     }
+    .player-map .sidebar.hidden .sidebar--menu-item .content {
+        max-height: 4rem;
+    }
+
 }
 
 @media screen and (max-width: 500px) {
-    .player-map .sidebar:not(.hidden) .player-title{
-        display: none;
+    .player-map .sidebar {
+        width: 100%;
+        max-width: 100%;
+        height: 50%;
+        bottom: 0;
     }
-    .player-map .sidebar:not(.hidden) .sidebar--header-container .title:first-of-type{
-        display: none;
+    .player-map .sidebar
+    .player-map .sidebar.hidden{
+        bottom: 1rem;
+        height: unset;
     }
+ 
     .player-map .sidebar:not(.hidden) .sidebar--header-container .button{
         margin-left: 1rem;
     }
     .player-map .sidebar.hidden{
         width: calc(100% - 4rem);
-    }
-    .player-map .player-card .content{
-        display: none;
+        max-width: calc(100vw - 4rem);
+        bottom: 2rem;
+        height: auto;
     }
 
+    .player-map .player-actions-container {
+        top: 1rem;
+        left: 2rem;
+        pointer-events: none;
+    }
+    .player-map .player-actions-container .button{
+        max-width: 3rem;
+        pointer-events: all;
+    }
+}
+
+@media screen and (max-width: 300px) {
+    .player-map .sidebar--header-container,
+    .player-map .sidebar
+    {
+        display: none;
+    }
+    .player-map .player-actions-container {
+        top: 1rem;
+        left: 1rem;
+    }
+}
+
+@media screen and (max-height: 300px) {
+    .player-map .sidebar {
+        display: none;
+    }
 }

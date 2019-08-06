@@ -11,6 +11,6 @@ export const scope = 'app.components.DownloadModalHelp';
 export default defineMessages({
   header: {
     id: `${scope}.header`,
-    defaultMessage: 'Download help',
+    defaultMessage: 'How to archive and publish your image',
   },
 });

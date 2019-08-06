@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
 import { List } from 'immutable';
 import {
   Button,
@@ -24,8 +24,8 @@ import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMinus } from '@fortawesome/free-solid-svg-icons/faMinus';
-import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons/faChevronDown';
+import { faChevronUp } from '@fortawesome/free-solid-svg-icons/faChevronUp';
 
 import Annotation from 'types/Annotation';
 import Slideshow from 'types/Slideshow';
@@ -37,7 +37,13 @@ import Download from 'components/Download';
 import messages from './messages';
 import DownloadModalHelp from '../DownloadModalHelp';
 
+import {makeHelpModalStatusSelector} from 'containers/App/selectors';
+
 import logo from '../../images/logo.svg';
+import { SupportedShapes } from 'types';
+import { useSelector, useDispatch } from 'react-redux';
+import {setHelpModalStatus} from 'containers/App/actions';
+
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
@@ -72,7 +78,7 @@ const validator = (values: FormikValues) => {
 };
 
 interface MenuItemProps {
-  data: Annotation;
+  data: Annotation<any, any>;
   selected: boolean;
   minified?: boolean;
   onRemove: (annotation: Annotation) => void;
@@ -81,6 +87,19 @@ interface MenuItemProps {
   draggableProps?;
   dragHandleProps?;
 }
+
+const iconToType = (type) => {
+  switch (type) {
+    case SupportedShapes.circle:
+      return 'ellipse';
+    case SupportedShapes.rectangle:
+      return 'rectangle';
+    case SupportedShapes.polygon:
+      return 'polygon';
+    default:
+      return 'comment';
+  }
+};
 
 const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
   const onClick = React.useCallback((event) => {
@@ -106,14 +125,25 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
   }, [props.data, props.onRemove]);
 
   const ContainerEl = props.minified ? React.Fragment : Box;
+  const isInvisible = props.data.properties.type === SupportedShapes.invisible;
   return (
     <div className={cx({
       'sidebar--menu-item sidebar--spacing': true,
       'sidebar--menu-item__selected': props.selected,
       'sidebar--menu-item__minified': props.minified,
+      'sidebar--menu-item__invisible': isInvisible,
     })} ref={forwardedRef} {...props.draggableProps} onClick={onClick}>
       <ContainerEl>
         <StretchedLayoutContainer isDirection="horizontal">
+        {!props.minified &&
+          <StretchedLayoutItem style={{padding: '.5rem', paddingLeft: 0}}>
+            <img
+              style={{maxWidth: '1rem'}}
+              src={require(`../../images/icons/anchor-${
+                iconToType(props.data.properties.type)
+              }-${props.selected ? 'white' : 'black'}.svg`)}
+            />
+          </StretchedLayoutItem>}
           <StretchedLayoutItem
             style={{
               paddingRight: '1rem',
@@ -161,7 +191,7 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
               {props.dragHandleProps && <div {...props.dragHandleProps}>
                 <div
                   className="button is-lock-status-open"
-                  style={{marginBottom: '.5rem'}}
+                  style={{marginBottom: '.5rem', cursor: 'move'}}
                   data-for="card-action"
                   data-tip={'drag to change annotation order'}
                 >
@@ -258,12 +288,18 @@ const Header: React.SFC<{
       :
       <SimpleTitle isSize={6} className="is-stretch">{props.slideshow.name}</SimpleTitle>
     }
-    <Button isRounded className="minify-toggle" onClick={props.onButtonClick}>
+    <Button
+      isRounded
+      className="minify-toggle"
+      onClick={props.onButtonClick}
+      data-for="tooltip"
+      data-tip={props.visible ? 'Fold pannel' : 'Unfold pannel'}
+    >
         <Icon>
           { props.visible ?
-            <FontAwesomeIcon icon={faMinus} />
+            <FontAwesomeIcon icon={faChevronDown} />
             :
-            <FontAwesomeIcon icon={faPlus} />
+            <FontAwesomeIcon icon={faChevronUp} />
           }
         </Icon>
     </Button>
@@ -292,9 +328,9 @@ const Title: React.SFC<TitleProps> = (props) => {
             onBlur={onBlur}
             name="title"
             data-for="tooltip"
-            data-tip="document title"
+            data-tip="image title"
             data-place="bottom"
-            placeholder="document title"
+            placeholder="image title"
           />
         </Form>
       );
@@ -308,6 +344,7 @@ interface SidebarProps extends ListProps {
   onNameChange: (slideshow: Slideshow) => void;
   onClose: () => void;
   onOpen: () => void;
+  onCommentCreation: () => void;
 }
 
 const Sidebar: React.SFC<SidebarProps> = props => {
@@ -320,11 +357,18 @@ const Sidebar: React.SFC<SidebarProps> = props => {
     [props.slideshow],
   );
   const selected = props.selectedAnnotations.first<Annotation>();
-  const [isDownloadModalHelp, setDownloadModalHelp] = useState(false);
-  const onCloseDownloadModalHelp = () => setDownloadModalHelp(false);
-  const onOpenDownloadModalHelp = () => setDownloadModalHelp(true);
+  const helpModalOpen = useSelector(makeHelpModalStatusSelector());
+  const dispatch = useDispatch();
+
+  const onCloseDownloadModalHelp = () => dispatch(setHelpModalStatus(false));
+  const onOpenDownloadModalHelp = () => dispatch(setHelpModalStatus(true));
   return (
-    <div className={cx({sidebar: true, visible: props.visible, hidden: !props.visible})}>
+    <div className={
+      cx({
+        sidebar: true,
+        visible: props.visible,
+        hidden: !props.visible,
+      })}>
       <Header
         onButtonClick={props.visible ? props.onClose : props.onOpen}
           visible={props.visible}
@@ -335,7 +379,12 @@ const Sidebar: React.SFC<SidebarProps> = props => {
         <Loader />
         <div onClick={onClickSidebar} className="sidebar--container">
           {props.visible ? (
-            <Orderable {...props} />
+            <>
+              <Orderable {...props} />
+              <div className="add-comment-container">
+                <Button onClick={props.onCommentCreation} isColor="primary" isFullWidth>add general comment</Button>
+              </div>
+            </>
           ) : selected ? (
             <MenuItem
               onChange={props.onAnnotationChange}
@@ -362,13 +411,18 @@ const Sidebar: React.SFC<SidebarProps> = props => {
                 <Download />
               </StretchedLayoutItem>
               <StretchedLayoutItem>
-                <Button onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
+                <Button
+                  data-for="tooltip"
+                  data-tip="How to archive and publish your image"
+                  onClick={onOpenDownloadModalHelp}
+                  isColor="info"
+                >?</Button>
               </StretchedLayoutItem>
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
       </footer>
-      <DownloadModalHelp isOpen={isDownloadModalHelp} onRequestClose={onCloseDownloadModalHelp} />
+      <DownloadModalHelp isOpen={helpModalOpen} onRequestClose={onCloseDownloadModalHelp} />
       <Tooltip id="tooltip" place="right" effect="solid" />
     </div>
   );

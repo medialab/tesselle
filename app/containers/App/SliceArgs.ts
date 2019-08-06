@@ -31,6 +31,7 @@ interface SliceArgs {
   present?: number;
   level?: number;
   exporting?: boolean;
+  helpModalStatus?: boolean;
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -39,10 +40,12 @@ export default class SliceState extends Record<SliceArgs>({
   present: 0,
   level: 1,
   exporting: false,
+  helpModalStatus: false,
 }) {
   public readonly total!: number;
   public readonly present!: number;
   public readonly info: Info = new Info();
   public readonly level!: number;
   public readonly exporting!: boolean;
+  public readonly helpModalStatus!: boolean;
 }

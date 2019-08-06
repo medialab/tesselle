@@ -4,7 +4,7 @@
  *
  */
 
-import { createAction } from 'typesafe-actions';
+import { createAction, action } from 'typesafe-actions';
 import {} from './types';
 
 import ActionTypes from './constants';
@@ -12,10 +12,22 @@ import Slideshow from 'types/Slideshow';
 import Annotation from 'types/Annotation';
 import { List } from 'immutable';
 import { Feature, Point } from 'geojson';
+import { SupportedShapes } from 'types';
 
 export const addAnnotationAction = createAction(ActionTypes.CREATE_ANNOTATION, action => {
   return (feature: Feature<Point, any>) => action(feature);
 });
+
+export const addEmptyAnnotationAction = () => action(ActionTypes.CREATE_ANNOTATION, {
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+    },
+    properties: {
+      type: SupportedShapes.invisible,
+    },
+  } as any,
+);
 
 export const removeAnnotationAction = createAction(
   ActionTypes.REMOVE_ANNOTATION,

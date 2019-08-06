@@ -55,55 +55,55 @@ export default combineReducers<ContainerState, ContainerActions>({
     return selectedAnnotations;
   },
   slideshow: (slideshow = initialState.slideshow, action) => {
-      if (slideshow) {
-        switch (action.type) {
-          case HomePageActionTypes.LOAD_SLIDESHOWS as any:
-            return initialState.slideshow;
-          case ActionTypes.CHANGE_ORDER:
-            return slideshow.set(
-              'annotations',
-              action.payload,
-            );
-          case ActionTypes.CREATE_ANNOTATION:
-            return slideshow.set(
-              'annotations',
-              slideshow.annotations.push(fromJS(action.payload)),
-            ).setIn(
-              ['meta', 'updatedAt'],
-              new Date(),
-            );
-          case ActionTypes.EDIT_ANNOTATION:
-            return slideshow.set(
-              'annotations',
-              slideshow.annotations.map(replaceAnnotation(action)),
-            ).setIn(
-              ['meta', 'updatedAt'],
-              new Date(),
-            );
-          case ActionTypes.REMOVE_ANNOTATION:
-            return slideshow.set(
-              'annotations',
-              slideshow.annotations.remove(
-                slideshow.annotations.indexOf(action.payload),
-              ),
-            );
-        }
-    }
+    if (slideshow) {
       switch (action.type) {
-        case ActionTypes.EDIT_SLIDESHOW:
-          if (isImmutable(action.payload)) {
-            return action.payload.setIn(
-              ['meta', 'updatedAt'],
-              new Date(),
-            );
-          }
-          return new Slideshow({
-            id: action.payload.id,
-            name: action.payload.name,
-            image: new Cover(action.payload.image),
-            annotations: action.payload.annotations.map(fromJS),
-          });
+        case HomePageActionTypes.LOAD_SLIDESHOWS as any:
+          return initialState.slideshow;
+        case ActionTypes.CHANGE_ORDER:
+          return slideshow.set(
+            'annotations',
+            action.payload,
+          );
+        case ActionTypes.CREATE_ANNOTATION:
+          return slideshow.set(
+            'annotations',
+            slideshow.annotations.push(fromJS(action.payload)),
+          ).setIn(
+            ['meta', 'updatedAt'],
+            new Date(),
+          );
+        case ActionTypes.EDIT_ANNOTATION:
+          return slideshow.set(
+            'annotations',
+            slideshow.annotations.map(replaceAnnotation(action)),
+          ).setIn(
+            ['meta', 'updatedAt'],
+            new Date(),
+          );
+        case ActionTypes.REMOVE_ANNOTATION:
+          return slideshow.set(
+            'annotations',
+            slideshow.annotations.remove(
+              slideshow.annotations.indexOf(action.payload),
+            ),
+          );
+      }
+    }
+    switch (action.type) {
+      case ActionTypes.EDIT_SLIDESHOW:
+        if (isImmutable(action.payload)) {
+          return action.payload.setIn(
+            ['meta', 'updatedAt'],
+            new Date(),
+          );
         }
-      return slideshow;
+        return new Slideshow({
+          id: action.payload.id,
+          name: action.payload.name,
+          image: new Cover(action.payload.image),
+          annotations: action.payload.annotations.map(fromJS),
+        });
+      }
+    return slideshow;
   },
 });

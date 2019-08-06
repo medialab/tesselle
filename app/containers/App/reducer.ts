@@ -19,6 +19,8 @@ function slicerReducer(state: ContainerState = initialState, action: ContainerAc
     case ActionTypes.EXPORT_SUCCESS:
     case ActionTypes.EXPORT_FAILURE:
       return state.set('exporting', false);
+    case ActionTypes.SET_HELP_MODAL_STATUS:
+      return state.set('helpModalStatus', action.payload);
     default:
       return state;
   }

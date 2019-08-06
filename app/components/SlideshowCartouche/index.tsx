@@ -30,6 +30,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useUrl } from 'utils/hooks';
 import { push } from 'connected-react-router';
+
 import messages from './messages';
 
 import './style.css';
@@ -46,17 +47,21 @@ interface OwnProps {
   onDuplicate: (toDuplicate: Slideshow) => void;
 }
 
-const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
+const useOnAction = (
+  slideshow: Slideshow,
+  onDelete: (slideshow: Slideshow) => void,
+  onDuplicate: (slideshow: Slideshow) => void,
+) => {
   const dispatch = useDispatch();
-  const goToEditor = React.useCallback(() => dispatch(push(`/editor/${props.slideshow.id}`)), [props.slideshow]);
-  const goToPlayer = React.useCallback(() => dispatch(push(`/player/${props.slideshow.id}`)), [props.slideshow]);
+  const goToEditor = React.useCallback(() => dispatch(push(`/editor/${slideshow.id}`)), [slideshow]);
+  const goToPlayer = React.useCallback(() => dispatch(push(`/player/${slideshow.id}`)), [slideshow]);
 
   const [removing, setRemoving] = React.useState<boolean>(false);
   const [isPendingToDelete, setPendingToDelete] = React.useState<boolean>(false);
 
   const onRemove = () => {
     setRemoving(true);
-    props.onDelete(props.slideshow);
+    onDelete(slideshow);
     setPendingToDelete(false);
   };
 
@@ -74,12 +79,24 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
         case 'read':
           return goToPlayer();
         case 'duplicate':
-            return props.onDuplicate(props.slideshow);
+            return onDuplicate(slideshow);
       }
     },
-    [props.slideshow],
+    [slideshow],
   );
+  return {
+    onAction: onAction,
+    removing: removing,
+    isPendingToDelete: isPendingToDelete,
+    onDeleteCancel: onDeleteCancel,
+    onRemove: onRemove,
+  };
+};
 
+const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
+  const {
+    onAction, removing, isPendingToDelete, onDeleteCancel, onRemove,
+  } = useOnAction(props.slideshow, props.onDelete, props.onDuplicate);
   const thumbnail = useUrl(props.slideshow.image.file);
   return (
     <Level className="SlideshowCartouche">
@@ -187,8 +204,8 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
       <ModalCard
         isActive={isPendingToDelete}
         onClose={onDeleteCancel}
-        headerContent="Deleting a slideshow"
-        mainContent="Are you sure you want to delete this document ?"
+        headerContent="Deleting an image"
+        mainContent="Are you sure you want to delete this image ?"
         footerContent={[
         <StretchedLayoutContainer
             style={{ width: '100%' }}

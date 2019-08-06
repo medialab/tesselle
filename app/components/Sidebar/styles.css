@@ -12,8 +12,7 @@ textarea.textarea {
   display: flex;
   flex-flow: column nowrap;
   justify-content: stretch;
-  height: 30%;
-  min-height: 200px;
+  /* min-height: 200px; */
   transition: all .5s ease;
 }
 .sidebar.visible {
@@ -22,8 +21,8 @@ textarea.textarea {
   height: 100%;
 }
 .sidebar.hidden {
-  bottom: 25px;
-  left: 25px;
+  bottom: 2rem;
+  left: 2rem;
 }
 .textarea:not([rows]) {
   max-height: initial;
@@ -91,9 +90,18 @@ textarea.textarea {
   color: white;
   padding: 0
 }
-
+.sidebar--menu-item .box {
+  background: white;
+}
+.sidebar--menu-item__selected .box {
+  background: #3849a2;
+}
 .input__invisible {
   width: calc(100% - 1rem);
   border: none;
   margin: 1rem .5rem;
 }
+.add-comment-container{
+  padding: .5rem .25rem;
+}
+

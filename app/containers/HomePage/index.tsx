@@ -5,13 +5,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { Columns, Column, Content, Container, DropZone, Footer, Title } from 'quinoa-design-library';
+import { Columns, Column, Content, Container, DropZone, Footer, Title, Notification } from 'quinoa-design-library';
 import { connect, useDispatch } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import { propSatisfies, pipe, __, includes, head } from 'ramda';
+
 import { ContainerState } from './types';
 
 import injectSaga from 'utils/injectSaga';
@@ -98,7 +99,7 @@ function HomePage(props: HomePageProps & ContainerState) {
             </Content>
             {slicer.total === 0
               ? <DropZone
-                  accept={acceptedFiles}
+                  accept={acceptedFiles.join(',')}
                   onDrop={onDrop}
                 >
                   {
@@ -114,17 +115,41 @@ function HomePage(props: HomePageProps & ContainerState) {
           <Column isSize={'2/3'} className="cards-column">
             <div className="list-projects__container">
               <h4 className="list-projects__title title is-2">
-                Your documents
+                Your images
               </h4>
               <ul className="cards-container">
-                {props.slideshows.map(slideshow => (
-                  <li className="card-wrapper" key={slideshow.id}>
-                    <SlideshowCartouche
-                      onDelete={onDelete}
-                      slideshow={slideshow}
-                      onDuplicate={props.duplicateSlideshow} />
-                  </li>
-                ))}
+                {props.slideshows.size ?
+                  props.slideshows.map(slideshow => (
+                    <li className="card-wrapper" key={slideshow.id}>
+                      <SlideshowCartouche
+                        onDelete={onDelete}
+                        slideshow={slideshow}
+                        onDuplicate={props.duplicateSlideshow} />
+                    </li>
+                  ))
+                  :
+                  <>
+                  <Notification style={{marginTop: '2rem'}} isColor="primary">
+                      <Title>
+                          {`Welcome to Tesselle, `}
+                          <a
+                            target="blank"
+                            rel="noopener"
+                            href="https://medialab.sciencespo.fr"
+                          >médialab</a>'s
+                          {` image annotation and publication tool`}
+                        </Title>
+                      <Content>
+                        All the data you will input in this tool will be stored in this browser local storage
+                        and therefore stay entirely private.
+                      </Content>
+                      <Content>
+                        You have no image projects on this browser yet.
+                        Drag and drop an image in the left column box to start annotating !
+                      </Content>
+                  </Notification>
+                  </>
+                }
               </ul>
             </div>
           </Column>
