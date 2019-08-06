@@ -5,7 +5,7 @@ import * as React from 'react';
  */
 
 import { createMemoryHistory } from 'history';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { identity } from 'lodash';
 
 import configureStore from '../../configureStore';
@@ -41,7 +41,7 @@ describe('injectReducer decorator', () => {
   });
 
   it('should inject a given reducer', () => {
-    shallow(<ComponentWithReducer />, { context: { store: store } });
+    mount(<ComponentWithReducer />, { context: { store: store } });
 
     expect(injectors.injectReducer).toHaveBeenCalledTimes(1);
     expect(injectors.injectReducer).toHaveBeenCalledWith('test', reducer);
@@ -56,7 +56,7 @@ describe('injectReducer decorator', () => {
 
   it('should propagate props', () => {
     const props = { testProp: 'test' };
-    const renderedComponent = shallow(<ComponentWithReducer {...props} />, {
+    const renderedComponent = mount(<ComponentWithReducer {...props} />, {
       context: { store: store },
     });
 

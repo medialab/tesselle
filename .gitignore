@@ -9,4 +9,5 @@ stats.json
 npm-debug.log
 .idea
 .awcache
+.vscode
 static/*

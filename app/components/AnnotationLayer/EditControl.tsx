@@ -1,5 +1,5 @@
 import 'leaflet-draw'; // eslint-disable-line
-import isEqual from 'lodash-es/isEqual';
+import equals from 'ramda/es/equals';
 import L, { Control } from 'leaflet';
 
 import { MapControl, withLeaflet, MapControlProps } from 'react-leaflet';
@@ -126,8 +126,7 @@ class EditControl extends MapControl<EditControlProps & MapControlProps> {
           this.props.leaflet.map.on(eventHandlers[key], this.props[key]);
         }
       }
-
-      if (isEqual(this.props.draw, prevProps.draw) || this.props.position !== prevProps.position) {
+      if (equals(this.props.draw, prevProps.draw) || this.props.position !== prevProps.position) {
         return false;
       }
       this.leafletElement.remove();

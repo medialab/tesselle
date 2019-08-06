@@ -23,7 +23,7 @@ export default function hocWithSaga<P>({ key, saga, mode }: InjectSagaParams) {
     // dont wanna give access to HOC. Child only
     const InjectSaga: React.SFC<any> = (props) => {
       const context = React.useContext(ReactReduxContext);
-      React.useEffect(() => {
+      React.useLayoutEffect(() => {
         const injectors = getInjectors(context.store as any);
         injectors.injectSaga(key, { saga: saga, mode: mode }, props);
         return () => {

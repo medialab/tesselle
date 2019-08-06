@@ -1,7 +1,8 @@
-import conformsTo from 'lodash/conformsTo';
-import isFunction from 'lodash/isFunction';
-import isObject from 'lodash/isObject';
 import invariant from 'invariant';
+import { where, is } from 'ramda';
+
+const isFunction = is(Function);
+const isObject = is(Object);
 
 /**
  * Validate the shape of redux store
@@ -17,7 +18,7 @@ export default function checkStore(store) {
     injectedSagas: isObject,
   };
   invariant(
-    conformsTo(store, shape),
+    where(shape, store),
     '(app/utils...) injectors: Expected a valid redux store',
   );
 }
