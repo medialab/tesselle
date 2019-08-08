@@ -137,6 +137,7 @@ export const slideshowCreator = (file: File, name: string): Promise<[Slideshow, 
       reader.onerror = reject;
     } else {
       const url = window.URL.createObjectURL(file);
+      console.log('url', url)
       const img = new Image();
       img.onload = async () => {
         if (img.width === 0) {
