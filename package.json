@@ -1,18 +1,21 @@
 {
-  "name": "react-boilerplate",
-  "version": "3.7.0",
-  "description": "A highly scalable, offline-first foundation with the best DX and a focus on performance and best practices",
+  "name": "fonio",
+  "version": "0.1",
+  "description": "an image annotation and publication tool",
   "repository": {
     "type": "git",
-    "url": "git://github.com/react-boilerplate/react-boilerplate.git"
+    "url": "git://github.com/medialab/tesselle.git"
   },
   "homepage": "https://medialab.github.io/tesselle",
   "engines": {
     "npm": ">=5",
     "node": ">=8.10.0"
   },
-  "author": "Max Stoiber",
-  "license": "MIT",
+  "author": "Arnaud Pichon",
+  "contributors": [
+    "Robin de Mourat"
+  ],
+  "license": "AGPL-3.0",
   "scripts": {
     "analyze:clean": "rimraf stats.json",
     "preanalyze": "npm run analyze:clean",
@@ -88,7 +91,7 @@
     "classnames": "^2.2.6",
     "compression": "1.7.3",
     "connected-react-router": "6.3.2",
-    "cross-env": "5.2.0",
+    "cross-env": "^5.2.0",
     "express": "^4.16.4",
     "file-saver": "^2.0.2",
     "fontfaceobserver": "2.1.0",
