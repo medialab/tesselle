@@ -20,7 +20,7 @@ interface SagaDescriptor {
 const checkDescriptor = (descriptor: SagaDescriptor) => {
   const shape = {
     saga: isFunction,
-    mode: (mode: SagaDescriptor['mode']) => isString(mode) && allowedModes.includes(mode),
+    mode: (mode: SagaDescriptor['mode']) => isString(mode) && allowedModes.includes(mode as string),
   };
   invariant(conformsTo(descriptor, shape), '(app/utils...) injectSaga: Expected a valid saga descriptor');
 };

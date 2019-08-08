@@ -63,7 +63,19 @@ body {
 .ReactModal__Content{
   position: relative!important;
   max-width: 80vw;
+  max-height: 80vh;
+  overflow: hidden!important;
+  inset: unset!important;
   padding: 0!important;
+}
+
+.ReactModal__Content .modal-content-container {
+  overflow: hidden;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: stretch;
+  max-height: 80vh;
+  position: relative;
 }
 
 .ReactModal__Content .modal-content-header,
@@ -87,6 +99,9 @@ body {
   padding: .5rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  flex: 1;
+  overflow: auto;
+  max-height: calc(100% - 4rem);
 }
 
 .ReactModal__Content .modal-content-body code{

@@ -1,3 +1,4 @@
+// tslint:disable: max-classes-per-file
 import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
 import uuid from 'uuid';
@@ -6,19 +7,30 @@ import Annotation from 'types/Annotation';
 import Cover from './Cover';
 import { fromJS } from 'utils/geo';
 import loadImage from 'utils/imageManipulation';
+import { isSvg } from 'utils/index';
+
+export class Meta extends Record({
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}) {
+  public createdAt!: Date;
+  public updatedAt!: Date;
+}
 
 export interface SlideshowArgs {
   id?: string;
   name?: string;
   annotations?: List<Annotation>;
   image?: Cover;
+  meta?: Meta;
 }
 
 class Slideshow extends Record({
   id: '',
-  name: 'Untitled document',
+  name: 'Untitled image',
   annotations: List(),
   image: {},
+  meta: new Meta(),
 }) {
   public readonly name!: string;
   public readonly annotations!: List<Annotation>;
@@ -27,6 +39,9 @@ class Slideshow extends Record({
     if (params) {
       if (params.annotations instanceof Array) {
         params.annotations = List<Annotation>(params.annotations.map(fromJS));
+      }
+      if (!(params.image instanceof Cover)) {
+        params.image = new Cover(params.image);
       }
       if (!params.id) {
         params.id = uuid();
@@ -52,7 +67,6 @@ interface Box {
 
 const maxX = '1000';
 const maxY = '1000';
-const svgType = 'image/svg+xml';
 
 const createObject = curry((specification, value) => map(f => f(value), specification));
 const parseWidth: () => number = pipe(nth(2), Number);
@@ -79,9 +93,9 @@ const getSvgSize = (svgElement: Element): Box | never => {
   throw new Error('No width / height nor viewBox');
 };
 
-export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
+export const slideshowCreator = (file: File, name: string): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
   new Promise((resolve, reject) => {
-    if (file.type === svgType) {
+    if (isSvg(file)) {
       const reader = new FileReader();
       reader.onload = () => {
         const container = document.createElement('div');
@@ -91,10 +105,12 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
           const box: Box = getSvgSize(svgElement);
           return resolve([
             new Slideshow({
+              name: name,
               image: new Cover({
-                file: {} as any,
+                file: file,
                 width: box.width,
                 height: box.height,
+                type: 'image/svg+xml',
               }),
             }),
             svgElement,
@@ -105,10 +121,12 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
           const box: Box = getSvgSize(svgElement);
           return resolve([
             new Slideshow({
+              name: name,
               image: new Cover({
-                file: {} as any,
+                file: file,
                 width: box.width,
                 height: box.height,
+                type: 'image/svg+xml',
               }),
             }),
             svgElement,
@@ -141,10 +159,12 @@ export const slideshowCreator = (file: File, slicing): Promise<[Slideshow, (HTML
         });
 
         const slideshow = new Slideshow({
+          name: name,
           image: new Cover({
             file: thumbnail,
             width: img.width,
             height: img.height,
+            type: 'image/jpeg',
           }),
         });
         window.URL.revokeObjectURL(url);

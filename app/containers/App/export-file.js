@@ -44,7 +44,7 @@ export default function(slideshow) {
     <style>p { color: lightblue }</style>
     <script>
       locationUrl = window.location.href.replace(window.location.protocol, '').replace('/index.html', '');
-      const url = 'http://medialab.github.io/tesselle/#/viewer/?url=' + locationUrl;
+      const url = 'https://medialab.github.io/tesselle/#/viewer/?url=' + locationUrl;
       function setUrl () {
         const iframe = document.getElementById('iframe');
         iframe.src = url;
@@ -67,7 +67,7 @@ export default function(slideshow) {
       }
   </style>
   <body>
-    <iframe id="iframe"></iframe>
+    <iframe allowfullscreen id="iframe"></iframe>
   </body>
 </html>
 `;

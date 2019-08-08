@@ -7,13 +7,23 @@
     justify-content: stretch;
 }
 
-.player-map .player-sidebar{
-    min-height: 300px;
-}
+/* .player-map .player-sidebar{
+    min-height: 16rem;
+} */
 
 .player-map .play-sidebar--container{
     height: 100%;
     padding: 1rem;
+}
+.player-map .sidebar.hidden .play-sidebar--container{
+    padding-top: 0;
+}
+.player-map .sidebar.hidden{
+    max-height: calc(100% - 4rem);
+}
+
+.player-map .sidebar.hidden .sidebar--item-field{
+    overflow: auto;
 }
 .sidebar--header-container .title.is-stretch{
     flex: 1;
@@ -23,17 +33,76 @@
     padding: 1rem;
 }
 
-.share-ui-container{
+.player-map .sidebar.hidden .sidebar--menu-item .content {
+    max-height: 50vh;
+    transition: all .5s ease;
+}
+
+.player-map .player-sidebar.viewer-mode.empty{
+    background: transparent;
+    pointer-events: none;
+}
+.player-map .player-sidebar.viewer-mode.empty .sidebar--header-container{
+    background: white;
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    max-width: calc(100% - 4rem);
+    pointer-events: all;
+}
+
+.player-actions-container{
     position: absolute;
     bottom: 1rem;
     right: 1rem;
     z-index: 1000;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.player-actions-container .button {
+    margin-bottom: .5rem;
 }
 
 .sidebar.player-sidebar .sidebar--item-field--selected.sidebar--item-field--minified {
     background: white;
     color: #363636;
     padding: 0;
+}
+
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified),
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h1,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h2,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h3,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h4,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h5,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) h6,
+.sidebar.player-sidebar .sidebar--item-field--selected:not(.sidebar--item-field--minified) blockquote
+{
+    color : white;
+    background: transparent;
+}
+
+.player-map .sidebar.hidden .sidebar--wrapper{
+    overflow: hidden;
+    padding-bottom: 0.5rem;
+}
+
+.sidebar--menu-item__minified{
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: stretch;
+}
+
+.sidebar--menu-item__minified > .stretched-layout-container{
+    flex: 1;
+    justify-content: stretch;
+    max-height: 100%;
+}
+.sidebar--menu-item__minified > .stretched-layout-container > .stretched-layout-item:first-of-type{
+    overflow: auto;
 }
 
 .sidebar.player-sidebar .minified-nav-container{
@@ -57,6 +126,88 @@
     pointer-events: none;
     mix-blend-mode: darken;
 }
+
+@media screen and (max-width: 1024px) {
+    .sidebar--footer-container > .stretched-layout-container {
+        flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .sidebar{
+        width: 40%;
+        max-width: unset;
+    }
+
+    .player-map .sidebar--header-container .title{
+        margin-right: 0.5rem;
+    }
+
+    .player-map .sidebar--header-container .title img{
+        max-height: 1rem;
+    }
+
+    .player-map .sidebar.hidden{
+        max-height: 40%;
+    }
+    .player-map .sidebar.hidden .sidebar--menu-item .content {
+        max-height: 4rem;
+    }
+
+}
+
+@media screen and (max-width: 500px) {
+    .player-map .sidebar {
+        width: 100%;
+        max-width: 100%;
+        height: 50%;
+        bottom: 0;
+    }
+    .player-map .sidebar
+    .player-map .sidebar.hidden{
+        bottom: 1rem;
+        height: unset;
+    }
+ 
+    .player-map .sidebar:not(.hidden) .sidebar--header-container .button{
+        margin-left: 1rem;
+    }
+    .player-map .sidebar.hidden{
+        width: calc(100% - 4rem);
+        max-width: calc(100vw - 4rem);
+        bottom: 2rem;
+        height: auto;
+    }
+
+    .player-map .player-actions-container {
+        top: 1rem;
+        left: 2rem;
+        pointer-events: none;
+    }
+    .player-map .player-actions-container .button{
+        max-width: 3rem;
+        pointer-events: all;
+    }
+}
+
+@media screen and (max-width: 300px) {
+    .player-map .sidebar--header-container,
+    .player-map .sidebar
+    {
+        display: none;
+    }
+    .player-map .player-actions-container {
+        top: 1rem;
+        left: 1rem;
+    }
+}
+
+@media screen and (max-height: 300px) {
+    .player-map .sidebar {
+        display: none;
+    }
+}
+
 
 @media print{
     @page {

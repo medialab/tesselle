@@ -17,11 +17,11 @@ interface FloatingBarProps {
   onCircleClick: (event: any) => any;
   onSelectClick: (event: any) => any;
   onPolygonClick: (event: any) => any;
+  onInvisibleClick: (event: any) => any;
   activeButton: SupportedShapes;
 }
 
 const FloatingBar: React.SFC<FloatingBarProps> = (props: FloatingBarProps) => {
-
   const buttons = [{
     icon: icons.select,
     tool: SupportedShapes.selector,

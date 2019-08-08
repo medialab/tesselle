@@ -30,5 +30,11 @@ export const selectExportStatus = () =>
     (substate) => substate.exporting,
   );
 
+export const makeHelpModalStatusSelector = () =>
+  createSelector(
+    selectSlicerDomain,
+    (substate) => substate.helpModalStatus,
+  );
+
 export default selectSlicer;
 export { selectSlicerDomain };

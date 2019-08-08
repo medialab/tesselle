@@ -32,12 +32,13 @@ interface AnnotationLayerProps {
 
 const GuessComponent: React.SFC<AnnotationShapes> = (props) => {
   const {annotation, onClick} = props;
+  const isInvisible = annotation.properties.type === SupportedShapes.invisible;
   const onLayerClick = useCallback((event) => {
     DomEvent.stopPropagation(event);
     return onClick && onClick(annotation);
   }, [onClick, annotation]);
   // readonly mode, we display a "reverted" shape to highlight the zone of interest
-  if (!props.editable && props.selected) {
+  if (!props.editable && props.selected && !isInvisible) {
     return <AnnotationHighlight {...props} onClick={onLayerClick} />;
   }
   switch (annotation.geometry.type) {

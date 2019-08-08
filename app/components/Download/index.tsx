@@ -12,7 +12,7 @@ import { useExport } from 'containers/App/hooks';
 import messages from './messages';
 
 interface OwnProps {
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 const Download: React.SFC<OwnProps> = (props: OwnProps) => {
