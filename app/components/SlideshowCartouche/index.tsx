@@ -160,17 +160,16 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
             <Link to={`/editor/${props.slideshow.id}`}>
               <Columns>
                 <Column
-                  isSize={'1/4'}
+                  isSize={'1/3'}
                   className="thumbnail-container"
-                  style={{ marginRight: '1rem' }}
                   >
                   <img
                     src={thumbnail}
                     style={{ width: 'auto', height: 'auto' }}
                   />
                 </Column>
-                <Column isSize="3/4">
-                  <Title>
+                <Column isSize="2/3">
+                  <Title isSize={4}>
                     <b>{props.slideshow.name}</b>
                   </Title>
                   <Content className="stats-info">

@@ -3,8 +3,9 @@
 .SlideshowCartouche .thumbnail-container {
     display: flex;
     flex-flow: row nowrap;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-right: 1rem;
 }
 
 .SlideshowCartouche .content{
