@@ -1,3 +1,4 @@
+// tslint:disable: max-classes-per-file
 import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
 import uuid from 'uuid';
@@ -8,11 +9,20 @@ import { fromJS } from 'utils/geo';
 import loadImage from 'utils/imageManipulation';
 import { isSvg } from 'utils/index';
 
+export class Meta extends Record({
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}) {
+  public createdAt!: Date;
+  public updatedAt!: Date;
+}
+
 export interface SlideshowArgs {
   id?: string;
   name?: string;
   annotations?: List<Annotation>;
   image?: Cover;
+  meta?: Meta;
 }
 
 class Slideshow extends Record({
@@ -20,6 +30,7 @@ class Slideshow extends Record({
   name: 'Untitled image',
   annotations: List(),
   image: {},
+  meta: new Meta(),
 }) {
   public readonly name!: string;
   public readonly annotations!: List<Annotation>;

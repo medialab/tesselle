@@ -14,7 +14,7 @@ import Annotation from 'types/Annotation';
 import { when } from 'ramda';
 import { fromJS } from 'utils/geo';
 import { isImmutable, List } from 'immutable';
-import Slideshow from 'types/Slideshow';
+import Slideshow, { Meta } from 'types/Slideshow';
 import Cover from 'types/Cover';
 
 export const initialState: ContainerState = {
@@ -68,11 +68,17 @@ export default combineReducers<ContainerState, ContainerActions>({
           return slideshow.set(
             'annotations',
             slideshow.annotations.push(fromJS(action.payload)),
+          ).setIn(
+            ['meta', 'updatedAt'],
+            new Date(),
           );
         case ActionTypes.EDIT_ANNOTATION:
           return slideshow.set(
             'annotations',
             slideshow.annotations.map(replaceAnnotation(action)),
+          ).setIn(
+            ['meta', 'updatedAt'],
+            new Date(),
           );
         case ActionTypes.REMOVE_ANNOTATION:
           return slideshow.set(
@@ -82,7 +88,7 @@ export default combineReducers<ContainerState, ContainerActions>({
             ),
           );
       }
-  }
+    }
     switch (action.type) {
       case ActionTypes.EDIT_SLIDESHOW:
         if (isImmutable(action.payload)) {
@@ -93,6 +99,7 @@ export default combineReducers<ContainerState, ContainerActions>({
           name: action.payload.name,
           image: new Cover(action.payload.image),
           annotations: action.payload.annotations.map(fromJS),
+          meta: new Meta(action.payload.meta),
         });
       }
     return slideshow;

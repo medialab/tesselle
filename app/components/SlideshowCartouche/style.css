@@ -31,3 +31,11 @@
     justify-content: center;
     margin-right: .5rem;
 }
+
+.SlideshowCartouche .stats-info {
+    margin-bottom: .5rem;
+}
+
+.SlideshowCartouche .dates-info{
+    padding-left: 2rem;
+}

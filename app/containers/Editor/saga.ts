@@ -12,9 +12,6 @@ import { editSlideshowAction } from './actions';
 const selectSlideshow = makeSelectSlideshow();
 
 export function* setSlideshow(slideshow: Slideshow) {
-  if (isImmutable(slideshow)) {
-    yield db.setItem('slideshow', slideshow.toJS());
-  }
   yield put(
     editSlideshowAction(slideshow),
   );

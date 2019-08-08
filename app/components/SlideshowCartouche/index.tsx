@@ -29,6 +29,7 @@ import Slideshow from 'types/Slideshow';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useUrl } from 'utils/hooks';
+import { displayDate } from 'utils/index';
 import { push } from 'connected-react-router';
 
 import messages from './messages';
@@ -70,7 +71,7 @@ const useOnAction = (
   };
 
   const onAction = React.useCallback(
-    (id, event) => {
+    (id) => {
       switch (id) {
         case 'delete':
           return setPendingToDelete(true);
@@ -172,7 +173,7 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
                   <Title>
                     <b>{props.slideshow.name}</b>
                   </Title>
-                  <Content>
+                  <Content className="stats-info">
                     <p className="annotations-container">
                       <span className="annotations-number">
                         {props.slideshow.annotations.size}
@@ -180,6 +181,11 @@ const SlideshowCartouche: React.SFC<OwnProps> = (props: OwnProps) => {
                       annotation
                       {props.slideshow.annotations.size === 1 ? '' : 's'}
                     </p>
+                  </Content>
+                  <Content isSize={'small'} className={'dates-info'}>
+                      {'creation '}{displayDate(props.slideshow.meta.createdAt)}
+                      <br />
+                      {'last edition '}{displayDate(props.slideshow.meta.updatedAt)}
                   </Content>
                 </Column>
               </Columns>
