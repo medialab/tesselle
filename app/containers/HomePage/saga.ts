@@ -102,8 +102,8 @@ export default function* homePageSaga() {
     }
     yield setSlideshows(rawSlideshows);
   } catch (e) {
-    console.error('Tesselle could not retrieve slideshows');
-    toastr.error('Sorry, Tesselle could not retrieve the list of existing documents', 'Maybe a disk space problem?');
+    console.error('Tesselle could not retrieve images');
     console.error(e);
+    toastr.error('Sorry, Tesselle could not retrieve the list of existing images', 'Maybe a disk space problem?');
   }
 }

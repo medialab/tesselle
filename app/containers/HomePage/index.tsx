@@ -8,6 +8,7 @@ import React, { useCallback } from 'react';
 import { Columns, Column, Content, Container, DropZone, Footer, Title, Notification } from 'quinoa-design-library';
 import { connect, useDispatch } from 'react-redux';
 import { Helmet } from 'react-helmet';
+import { toastr } from 'react-redux-toastr/lib';
 import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
@@ -71,11 +72,15 @@ function HomePage(props: HomePageProps & ContainerState) {
   const slicer = useSlicerState();
   const onDrop = useCallback((files: File[]) => {
     const file = head(files);
-    if (validateImageTypes(file)) {
+    if (!file) {
+      toastr.error(`Invalid file extension`, 'You tried to import a file which are not handled by Tesselle.');
+    } else if (validateImageTypes(file)) {
       return props.createSlideshow(file);
     }
-    if (validateImportTypes(file)) {
+    else if (validateImportTypes(file)) {
       return props.importSlideshow(file);
+    } else {
+      toastr.error(`Tesselle could not import the file ${file.name}`, 'It can be because of corrupted data.');
     }
   }, [props.createSlideshow, props.importSlideshow]);
   const onDelete = useCallback(pipe(removeSlideshowAction.request, dispatch), []);
