@@ -80,7 +80,7 @@ function HomePage(props: HomePageProps & ContainerState) {
     else if (validateImportTypes(file)) {
       return props.importSlideshow(file);
     } else {
-      toastr.error(`Tesselle could not import the file ${file.name}`, 'It can be because of corrupted data.');
+      toastr.error(`Tesselle could not import the file ${file.name}`, 'It can be due to corrupted data or to insufficient disk space.');
     }
   }, [props.createSlideshow, props.importSlideshow]);
   const onDelete = useCallback(pipe(removeSlideshowAction.request, dispatch), []);
