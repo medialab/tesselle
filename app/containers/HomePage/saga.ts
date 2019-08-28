@@ -35,10 +35,11 @@ export function* duplicateSlideshow(action) {
 export function* createAndRedirect(action) {
   // sagas: createSlideshow
   const svg = isSvg(action.payload);
+  const name = action.payload.name.split('.').reverse().slice(1).reverse().join('.');
   const sliceState = yield select(selectSlicer);
   const nexd = sliceState.set('total', 500);
   yield put(setProgress(nexd));
-  const [slideshow, img]: [Slideshow, (HTMLImageElement | SVGElement)] = yield slideshowCreator(action.payload);
+  const [slideshow, img]: [Slideshow, (HTMLImageElement | SVGElement)] = yield slideshowCreator(action.payload, name);
   const scaleFactors = scaleFactorsCreator(
     512,
     slideshow.image.width,
@@ -56,7 +57,7 @@ export function* createAndRedirect(action) {
         call([db, db.removeItem], key)),
       );
       yield put(setProgress(new SliceState()));
-      toastr.error('wow', 'déso le bug');
+      toastr.error('Sorry, an error occured while importing the image', 'Try again or with another image format');
       throw error;
     }
   }
@@ -101,7 +102,8 @@ export default function* homePageSaga() {
     }
     yield setSlideshows(rawSlideshows);
   } catch (e) {
-    console.error('Could not retrive slideshows');
+    console.error('Tesselle could not retrieve images');
     console.error(e);
+    toastr.error('Sorry, Tesselle could not retrieve the list of existing images', 'Maybe a disk space problem?');
   }
 }

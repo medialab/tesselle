@@ -35,3 +35,12 @@ export const extentionsToType = (key) => {
 export const isSvg = (file: File | Cover) => {
   return file.type === svgType;
 };
+
+export const displayDate = date => {
+  const now = new Date().toLocaleDateString();
+  let formatted = date.toLocaleDateString();
+  if (now === formatted) {
+    formatted = date.toLocaleTimeString();
+  }
+  return formatted;
+};

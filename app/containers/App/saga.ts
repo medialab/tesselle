@@ -1,4 +1,4 @@
-import { call, put, select, spawn, takeLatest, all } from 'redux-saga/effects';
+import { call, put, select, spawn, takeLatest, all, delay } from 'redux-saga/effects';
 import { last, equals, pipe, nth, sort, splitWhen } from 'ramda';
 import { saveAs } from 'file-saver';
 import html from './export-file';
@@ -6,7 +6,7 @@ import uuid from 'uuid';
 
 import { generate, scaleFactorsCreator } from 'types/IIIFStatic';
 import db from 'utils/db';
-import { setProgress, exportSlideshowActionCreator } from './actions';
+import { setProgress, exportSlideshowActionCreator, setHelpModalStatus } from './actions';
 import makeSelectSlicer from './selectors';
 import ActionTypes from './constants';
 import Slideshow from 'types/Slideshow';
@@ -64,6 +64,7 @@ export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
       splitWhen(dup => equals(compareTo, last(dup))),
     )(parsedImage);
     toCancel = yield* rawSlice(futurImages, yield select(selectSlicer), id);
+    yield delay(500);
     toCancel = yield spawn(function*(images, sliceState, slideshowId) {
       yield* rawSlice(images, sliceState, slideshowId);
       yield put(setProgress());
@@ -165,9 +166,22 @@ function* importZip(action) {
   yield put(setProgress());
 }
 
+function * openModal(action) {
+  if (
+    localStorage.getItem('tesselle/show-help-at-each-download') === 'true'
+    || localStorage.getItem('tesselle/has-already-downloaded') !== 'true'
+  ) {
+    if (localStorage.getItem('tesselle/has-already-downloaded') !== 'true') {
+      localStorage.setItem('tesselle/has-already-downloaded', 'true');
+    }
+    yield put(setHelpModalStatus(true));
+  }
+}
+
 // Individual exports for testing
 export default function* slicerSaga() {
   // See example in containers/HomePage/saga.js
   yield takeLatest(ActionTypes.EXPORT_START, exportSlideshow);
   yield takeLatest(ActionTypes.IMPORT_SLIDESHOW, importZip);
+  yield takeLatest(ActionTypes.EXPORT_SUCCESS, openModal);
 }

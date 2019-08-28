@@ -10,6 +10,7 @@ import {
   StretchedLayoutItem,
   StretchedLayoutContainer,
   Content,
+  Notification,
   Button,
   Icon,
   Title,
@@ -191,12 +192,15 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
     }
   }, [props.leaflet.map]);
   const [isDownloadModalHelp, onCloseDownloadModalHelp, onOpenDownloadModalHelp] = useToggleBoolean(false);
+  const isEmpty = !props.slideshow.annotations.size;
   return (
     <div className={cx({
       'sidebar': true,
       'player-sidebar': true,
       'visible': props.visible,
       'hidden': !props.visible,
+      'empty': isEmpty,
+      'viewer-mode': props.viewerMode,
       })}>
       <StretchedLayoutContainer style={{height: '100%', flex: 1}}>
         <StretchedLayoutItem>
@@ -211,20 +215,35 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
         <StretchedLayoutItem isFlex={1} style={{overflow: 'hidden'}}>
           <div className="sidebar--wrapper play-sidebar--container">
               {props.visible ?
-                props.slideshow.annotations.map((annotation: Annotation) =>
-                  <MenuItem
-                    onGoTo={onGoTo}
-                    onClick={props.changeSelection}
-                    annotation={annotation}
-                    key={annotation.properties.id}
-                    selected={props.selectedAnnotations.includes(annotation)}>
-                      <ReactMarkdown source={annotation.properties.content} />
-                  </MenuItem>,
-                )
+                <>
+                  {
+                    isEmpty && !props.viewerMode ?
+                    <Notification isColor="warning">
+                      No annotations yet.
+                      <br/>
+                      {`You can download this image as a simple viewer or add annotations in `}
+                      <Link to={`/editor/${props.slideshow.id}`}>edition mode</Link>.
+                    </Notification>
+                    :
+                    props.slideshow.annotations.map((annotation: Annotation) =>
+                      <MenuItem
+                        onGoTo={onGoTo}
+                        onClick={props.changeSelection}
+                        annotation={annotation}
+                        key={annotation.properties.id}
+                        selected={props.selectedAnnotations.includes(annotation)}>
+                          <ReactMarkdown source={annotation.properties.content} />
+                      </MenuItem>,
+                  )
+                  }
+                </>
                 : <Control
                     selected={selected}
                     onNext={props.onNext}
-                    onPrev={props.onPrev}>{selected.properties.content}</Control>}
+                    onPrev={props.onPrev}>
+                      <ReactMarkdown source={selected.properties.content} />
+                    </Control>
+                }
             </div>
         </StretchedLayoutItem>
         {

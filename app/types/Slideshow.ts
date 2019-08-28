@@ -1,3 +1,4 @@
+// tslint:disable: max-classes-per-file
 import { Record, List } from 'immutable';
 import { split, nth, curry, map, pipe } from 'ramda';
 import uuid from 'uuid';
@@ -8,18 +9,28 @@ import { fromJS } from 'utils/geo';
 import loadImage from 'utils/imageManipulation';
 import { isSvg } from 'utils/index';
 
+export class Meta extends Record({
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}) {
+  public createdAt!: Date;
+  public updatedAt!: Date;
+}
+
 export interface SlideshowArgs {
   id?: string;
   name?: string;
   annotations?: List<Annotation>;
   image?: Cover;
+  meta?: Meta;
 }
 
 class Slideshow extends Record({
   id: '',
-  name: 'Untitled document',
+  name: 'Untitled image',
   annotations: List(),
   image: {},
+  meta: new Meta(),
 }) {
   public readonly name!: string;
   public readonly annotations!: List<Annotation>;
@@ -82,7 +93,7 @@ const getSvgSize = (svgElement: Element): Box | never => {
   throw new Error('No width / height nor viewBox');
 };
 
-export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
+export const slideshowCreator = (file: File, name: string): Promise<[Slideshow, (HTMLImageElement | SVGElement)]> =>
   new Promise((resolve, reject) => {
     if (isSvg(file)) {
       const reader = new FileReader();
@@ -94,6 +105,7 @@ export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElem
           const box: Box = getSvgSize(svgElement);
           return resolve([
             new Slideshow({
+              name: name,
               image: new Cover({
                 file: file,
                 width: box.width,
@@ -109,6 +121,7 @@ export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElem
           const box: Box = getSvgSize(svgElement);
           return resolve([
             new Slideshow({
+              name: name,
               image: new Cover({
                 file: file,
                 width: box.width,
@@ -146,6 +159,7 @@ export const slideshowCreator = (file: File): Promise<[Slideshow, (HTMLImageElem
         });
 
         const slideshow = new Slideshow({
+          name: name,
           image: new Cover({
             file: thumbnail,
             width: img.width,

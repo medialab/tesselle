@@ -5,9 +5,10 @@
  */
 
 import React, { useCallback } from 'react';
-import { Columns, Column, Content, Container, DropZone, Footer, Title } from 'quinoa-design-library';
+import { Columns, Column, Content, Container, DropZone, Footer, Title, Notification } from 'quinoa-design-library';
 import { connect, useDispatch } from 'react-redux';
 import { Helmet } from 'react-helmet';
+import { toastr } from 'react-redux-toastr/lib';
 import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
@@ -71,11 +72,15 @@ function HomePage(props: HomePageProps & ContainerState) {
   const slicer = useSlicerState();
   const onDrop = useCallback((files: File[]) => {
     const file = head(files);
-    if (validateImageTypes(file)) {
+    if (!file) {
+      toastr.error(`Invalid file extension`, 'You tried to import a file which are not handled by Tesselle.');
+    } else if (validateImageTypes(file)) {
       return props.createSlideshow(file);
     }
-    if (validateImportTypes(file)) {
+    else if (validateImportTypes(file)) {
       return props.importSlideshow(file);
+    } else {
+      toastr.error(`Tesselle could not import the file ${file.name}`, 'It can be due to corrupted data or to insufficient disk space.');
     }
   }, [props.createSlideshow, props.importSlideshow]);
   const onDelete = useCallback(pipe(removeSlideshowAction.request, dispatch), []);
@@ -115,17 +120,41 @@ function HomePage(props: HomePageProps & ContainerState) {
           <Column isSize={'2/3'} className="cards-column">
             <div className="list-projects__container">
               <h4 className="list-projects__title title is-2">
-                Your documents
+                Your images
               </h4>
               <ul className="cards-container">
-                {props.slideshows.map(slideshow => (
-                  <li className="card-wrapper" key={slideshow.id}>
-                    <SlideshowCartouche
-                      onDelete={onDelete}
-                      slideshow={slideshow}
-                      onDuplicate={props.duplicateSlideshow} />
-                  </li>
-                ))}
+                {props.slideshows.size ?
+                  props.slideshows.map(slideshow => (
+                    <li className="card-wrapper" key={slideshow.id}>
+                      <SlideshowCartouche
+                        onDelete={onDelete}
+                        slideshow={slideshow}
+                        onDuplicate={props.duplicateSlideshow} />
+                    </li>
+                  ))
+                  :
+                  <>
+                  <Notification style={{marginTop: '2rem'}} isColor="primary">
+                      <Title>
+                          {`Welcome to Tesselle, `}
+                          <a
+                            target="blank"
+                            rel="noopener"
+                            href="https://medialab.sciencespo.fr"
+                          >médialab</a>'s
+                          {` image annotation and publication tool`}
+                        </Title>
+                      <Content>
+                        All the data you will input in this tool will be stored in this browser local storage
+                        and therefore stay entirely private.
+                      </Content>
+                      <Content>
+                        You have no image projects on this browser yet.
+                        Drag and drop an image in the left column box to start annotating !
+                      </Content>
+                  </Notification>
+                  </>
+                }
               </ul>
             </div>
           </Column>

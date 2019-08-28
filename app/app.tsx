@@ -48,13 +48,12 @@ const render = (messages, Component = App) => {
         <LanguageProvider messages={messages}>
           <>
             <ReduxToastr
-            timeOut={4000}
-            newestOnTop={false}
+            timeOut={5000}
+            newestOnTop
             preventDuplicates
-            position="top-left"
+            position="top-right"
             transitionIn="fadeIn"
             transitionOut="fadeOut"
-            progressBar
             closeOnToastrClick/>
             <ConnectedRouter history={history}>
               <Component />

@@ -135,6 +135,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
       setMountSidebar(!!domElement);
     }
   };
+  const {viewerMode} = props;
 
   return (
     <div className="map player-map">
@@ -158,7 +159,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
               onPrev={onPrev}
               onNext={onNext}
               changeSelection={props.changeSelection}
-              viewerMode={props.viewerMode}
+              viewerMode={viewerMode}
             />,
             sidebarRef.current,
           )}
@@ -173,7 +174,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
       </Map>
       <div className="player-actions-container">
         {
-          props.viewerMode &&
+          viewerMode &&
           <Button data-for="tooltip" data-tip="share this view" onClick={toggleShareHelpOpen} isRounded>
             <Icon><FontAwesomeIcon icon={faShare} /></Icon>
           </Button>
@@ -183,7 +184,7 @@ export const Player: React.SFC<PlayerContainerProps> = (props) => {
         </Button>
       </div>
       {
-        props.viewerMode &&
+        viewerMode &&
         <Modal
           isOpen={isShareHelpOpen}
           onRequestClose={toggleShareHelpOpen}

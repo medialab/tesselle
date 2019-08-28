@@ -164,7 +164,8 @@ export const useFetchJson: <Model> (...args) => Model = (url: RequestInfo, onLoa
     if (onLoad) {
       request = request.then(onLoad);
     }
-    request.then(setResponse);
+    request.then(data => setResponse({status: 'success', data: data}));
+    request.catch(error => setResponse({status: 'error', error: error}));
   }, []);
   return response;
 };
