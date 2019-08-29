@@ -76,11 +76,13 @@ function HomePage(props: HomePageProps & ContainerState) {
       toastr.error(`Invalid file extension`, 'You tried to import a file which are not handled by Tesselle.');
     } else if (validateImageTypes(file)) {
       return props.createSlideshow(file);
-    }
-    else if (validateImportTypes(file)) {
+    } else if (validateImportTypes(file)) {
       return props.importSlideshow(file);
     } else {
-      toastr.error(`Tesselle could not import the file ${file.name}`, 'It can be due to corrupted data or to insufficient disk space.');
+      toastr.error(
+        `Tesselle could not import the file ${file.name}`,
+        'It can be due to corrupted data or to insufficient disk space.',
+      );
     }
   }, [props.createSlideshow, props.importSlideshow]);
   const onDelete = useCallback(pipe(removeSlideshowAction.request, dispatch), []);

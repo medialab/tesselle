@@ -14,31 +14,10 @@ import Annotation from 'types/Annotation';
 import normalize from 'normalize-url';
 import { useFetchJson } from 'utils/hooks';
 
-interface FetchResponse {
-  slideshow: Slideshow;
-  status: string;
-}
 function Viewer(props) {
   const params = new URLSearchParams(props.location.search);
   const base = normalize(window.location.protocol + params.get('url') as string);
-  const response = useFetchJson<FetchResponse>(
-    `${params.get('url')}/slideshow.json`,
-    response => {
-      console.log('response', response);
-      if (response.status === 'success') {
-        return {slideshow: new Slideshow(response.data), status: 'success'};
-      } else {
-        console.error('oups');
-        return { status: 'error' };
-      }
-    },
-  );
-  let slideshow;
-  let status;
-  if (response) {
-    slideshow = response.slideshow;
-    status = response.status;
-  }
+  const response = useFetchJson<Slideshow>(`${params.get('url')}/slideshow.json`);
   const [selected, setSelected] = useState<List<Annotation>>(List([]));
   const onChangeSelection = useCallback((annotation: Annotation) => {
     const newSelection = annotation ? List([annotation]) : List([]);
@@ -46,21 +25,21 @@ function Viewer(props) {
       return setSelected(newSelection);
     }
   }, [selected]);
-  if (status === 'error') {
-    return <Viewer404 URL={base} />;
-  } else if (slideshow) {
+  if (response) {
+    if (response.status === 'error') {
+      return <Viewer404 URL={base} />;
+    }
     return (
       <Player
         url={`${base}/info.json`}
-        slideshow={slideshow}
+        slideshow={new Slideshow(response.data)}
         selectedAnnotations={selected}
         changeSelection={onChangeSelection}
         viewerMode
       />
     );
-  } else {
-    return <Loader />;
   }
+  return <Loader />;
 }
 
 export default Viewer;

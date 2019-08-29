@@ -10,8 +10,6 @@ import logo from './assets/logo.svg';
 
 import './style.css';
 
-// import styled from 'styles/styled-components';
-
 interface Props {
   URL: string;
 }
@@ -19,7 +17,7 @@ const Viewer404: React.SFC<Props> = (props) => {
   return (
     <div className="viewer404-container">
       <div className="viewer404-content">
-        <a 
+        <a
           className="title is-1 viewer404-title-container"
           href="https://medialab.github.io/tesselle"
           target="blank"
