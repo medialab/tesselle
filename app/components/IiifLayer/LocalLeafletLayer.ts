@@ -1,5 +1,5 @@
   // tslint:disable: variable-name
-import L, { DomEvent, Util, TileLayerOptions } from 'leaflet';
+import L, { DomEvent, TileLayerOptions } from 'leaflet';
 import db from 'utils/db';
 import Base from 'components/IiifLayer/base';
 
@@ -38,29 +38,39 @@ const Iiif = Base.extend({
 
   createTile: function(coords, done) {
     const tile = document.createElement('img');
-    DomEvent.on(tile, 'load', Util.bind(this._tileOnLoad, this, done, tile));
-    DomEvent.on(tile, 'error', Util.bind(this._tileOnError, this, done, tile));
-
+    DomEvent.on(tile, 'load', (event) => {
+      this._tileOnLoad(done, tile);
+      if (event.target && (event.target as HTMLImageElement).width === 0) {
+        // This is the worst fix I ever wrote.
+        // For IDK wich reason, leaflet sets the top left image's size to 0.
+        // So we have to set it back to null.
+        (event.target as any).style.width = '';
+        (event.target as any).style.height = '';
+      }
+    });
+    DomEvent.on(tile, 'error', (error) => {
+      this._tileOnError(done, tile, error);
+    });
     if (this.options.crossOrigin || this.options.crossOrigin === '') {
       tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
     }
     tile.alt = '';
     tile.setAttribute('role', 'presentation');
     const inMemory = this.getTileUrl(coords);
-    db.getItem(inMemory).then((file: File) => {
-      if (file) {
-        if (!this.urls.has(inMemory)) {
-          this.urls.set(inMemory, window.URL.createObjectURL(file));
+    if (this.urls.has(inMemory)) {
+      tile.src = this.urls.get(inMemory);
+    } else {
+      db.getItem(inMemory).then((file: File) => {
+        if (file) {
+          const url = window.URL.createObjectURL(file);
+          this.urls.set(inMemory, url);
+          tile.src = url;
+        } else {
+          console.log('🔥', inMemory, '🔥');
+          done(new Error('not in memory: ' + inMemory));
         }
-        tile.src = this.urls.get(inMemory);
-        tile.onload = () => {
-          done(null, tile);
-        };
-      } else {
-        console.log('🔥', inMemory, '🔥');
-        done(new Error('not in memory: ' + inMemory));
-      }
-    });
+      });
+    }
     return tile;
   },
 
