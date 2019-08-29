@@ -2,6 +2,7 @@
 import L, { DomEvent, TileLayerOptions } from 'leaflet';
 import db from 'utils/db';
 import Base from 'components/IiifLayer/base';
+import LRUCache from 'mnemonist/lru-cache';
 
 // https://github.com/mejackreed/Leaflet-IIIF/blob/master/leaflet-iiif.js
 
@@ -34,7 +35,7 @@ interface Iiif extends L.TileLayer {
 
 const Iiif = Base.extend({
   _baseUrl: '/{id}/{region}/{size}/{rotation}/{quality}.{format}',
-  urls: new Map(),
+  urls: new LRUCache(72),
 
   createTile: function(coords, done) {
     const tile = document.createElement('img');

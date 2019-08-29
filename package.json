@@ -112,6 +112,7 @@
     "localforage": "^1.7.3",
     "lodash": "^4.17.15",
     "minimist": "1.2.0",
+    "mnemonist": "^0.30.0",
     "normalize-url": "^4.3.0",
     "quinoa-design-library": "^0.1.9",
     "ramda": "^0.26.1",
