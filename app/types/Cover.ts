@@ -20,15 +20,11 @@ export default class Cover extends Record({
   public file!: File;
   public width!: number;
   public height!: number;
-  constructor(params?: CoverArgs) {
-    if (params) {
-      if (!params.id) {
-        params.id = uuid();
-      }
-      super(params);
-    } else {
-      super();
+  constructor(params: CoverArgs = {}) {
+    if (!params.id) {
+      params.id = uuid();
     }
+    super(params);
   }
   public with(values: CoverArgs) {
     return this.merge(values) as this;

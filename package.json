@@ -1,5 +1,5 @@
 {
-  "name": "fonio",
+  "name": "tesselle",
   "version": "0.1.0",
   "description": "an image annotation and publication tool",
   "repository": {
@@ -104,6 +104,7 @@
     "intl": "1.2.5",
     "invariant": "2.2.4",
     "ip": "^1.1.5",
+    "jest": "^24.9.0",
     "jszip": "^3.2.1",
     "leaflet": "^1.5.1",
     "leaflet-draw": "^1.0.4",
@@ -215,6 +216,7 @@
     "image-webpack-loader": "^4.6.0",
     "immutablediff": "^0.4.4",
     "imports-loader": "0.8.0",
+    "jest-canvas-mock": "^2.1.1",
     "jest-cli": "24.4.0",
     "lint-staged": "8.1.5",
     "ngrok": "3.1.1",
