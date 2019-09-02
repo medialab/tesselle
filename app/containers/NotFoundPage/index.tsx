@@ -5,15 +5,18 @@
  */
 
 import * as React from 'react';
-import { FormattedMessage } from 'react-intl';
+// import { FormattedMessage } from 'react-intl';
 
-import messages from './messages';
+import Viewer404 from '../../components/Viewer404'
+
+// import messages from './messages';
 
 export default function NotFound() {
   return (
     <article>
       <h1>
-        <FormattedMessage {...messages.header} />
+        {/* <FormattedMessage {...messages.header} /> */}
+        <Viewer404 />
       </h1>
     </article>
   );

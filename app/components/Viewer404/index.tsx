@@ -11,7 +11,7 @@ import logo from './assets/logo.svg';
 import './style.css';
 
 interface Props {
-  URL: string;
+  URL?: string;
 }
 const Viewer404: React.SFC<Props> = (props) => {
   return (
@@ -27,9 +27,9 @@ const Viewer404: React.SFC<Props> = (props) => {
             <span className="app-name">Tesselle</span>
         </a>
         <div className="content">
-          {'The data you are trying to visualize with '}
+          {'The data you are trying to access with '}
           <a href="https://medialab.github.io/tesselle" target="blank" rel="noopener">Tesselle</a>
-          {` does not exist (anymore ?) at the address ${props.URL}.`}
+          {props.URL ? ` does not exist (anymore ?) at the address ${props.URL}.` : ' does not exist (anymore ?).'}
         </div>
       </div>
     </div>
