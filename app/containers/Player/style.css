@@ -207,3 +207,53 @@
         display: none;
     }
 }
+
+@media print{
+    @page {
+        size: landscape;
+    }   
+    .player-map .player-footer-container,
+    .player-map .leaflet-control-zoom-in,
+    .player-map .leaflet-control-zoom-out,
+    .play-playmode-toggle,
+    .minified-nav-container
+    {
+        display: none;
+    }
+    .player-map .leaflet-container{
+        background: white;
+    }
+    /* if an annotation is selected hide the others */
+    .player-map .player-sidebar.has-selected .sidebar--menu-item:not(.sidebar--menu-item__selected) {
+        display: none;
+    }
+
+     html,
+    #app,
+    .player-map,
+    .player-sidebar,
+    .stretched-layout-container,
+    .leaflet-container,
+    .sidebar.visible
+    {
+        overflow: visible;
+        height: unset;
+    }
+    .sidebar.visible{
+        height: 100%;
+    }
+
+     .player-map .annotation-shape.annotation-shape__editing.leaflet-interactive{
+        fill-opacity: 0;
+        stroke: black;
+    }
+    .sidebar.has-selected{
+        position: fixed;
+        bottom: 1rem;
+        left: 1rem;
+    }
+    .box.player-card {
+        box-shadow: none;
+        padding: 1rem;
+    }
+}
