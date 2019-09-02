@@ -216,7 +216,8 @@
     .player-map .player-actions-container,
     .player-map .leaflet-control-zoom-in,
     .player-map .leaflet-control-zoom-out,
-    .play-playmode-toggle
+    .play-playmode-toggle,
+    .minified-nav-container
     {
         display: none;
     }
@@ -238,5 +239,22 @@
     {
         overflow: visible;
         height: unset;
+    }
+    .sidebar.visible{
+        height: 100%;
+    }
+
+    .player-map .annotation-shape.annotation-shape__editing.leaflet-interactive{
+        fill-opacity: 0;
+        stroke: black;
+    }
+    .sidebar.has-selected{
+        position: fixed;
+        bottom: 1rem;
+        left: 1rem;
+    }
+    .box.player-card {
+        box-shadow: none;
+        padding: 1rem;
     }
 }
