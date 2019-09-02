@@ -157,14 +157,22 @@ export function useToggleBoolean(initialState: boolean = true): [boolean, () => 
   ];
 }
 
-export const useFetchJson: <Model> (...args) => Model = (url: RequestInfo, onLoad: (...args) => any) => {
+interface FetchResponse<S> {
+  data: S;
+  status: string;
+}
+export const useFetchJson: <Model> (
+  url: RequestInfo,
+  onLoad?: (...args) => any,
+) => FetchResponse<Model> = (url, onLoad) => {
   const [response, setResponse] = useState();
   useEffect(() => {
     let request = window.fetch(url).then(res => res.json());
+    request.then(data => setResponse({status: 'success', data: data}));
     if (onLoad) {
       request = request.then(onLoad);
     }
-    request.then(setResponse);
+    request.catch(error => setResponse({status: 'error', error: error}));
   }, []);
   return response;
 };

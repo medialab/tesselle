@@ -4,7 +4,8 @@
  *
  */
 
-import React, { useCallback, useState, memo, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, memo, useEffect, useMemo, useRef } from 'react';
+import { RouterProps } from 'react-router';
 import L from 'leaflet';
 import { connect, useDispatch } from 'react-redux';
 import { pipe } from 'ramda';
@@ -43,6 +44,7 @@ import saga from './saga';
 import { useLockEffect, useUrl, coverToBounds } from 'utils/hooks';
 import { LocalIiifLayer } from 'components/IiifLayer';
 import { isSvg } from 'utils/index';
+import Viewer404 from 'components/Viewer404';
 
 const mapStateToProps = createStructuredSelector({
   slideshow: makeSelectSlideshow(),
@@ -222,9 +224,26 @@ const Editor: React.SFC<EditorProps> = memo((props) => {
   );
 });
 
-export default enhancer((props: EditorProps) => {
+export default enhancer((props: EditorProps & RouterProps) => {
+  const [notFound, setNotFound] = useState<boolean>(false);
+  const ref = useRef<number>();
+  useEffect(() => {
+    ref.current = setTimeout(() => {
+      setNotFound(true);
+    }, 1000) as any;
+  }, []);
+
+  useEffect(() => {
+    if (props.slideshow && ref.current) {
+      clearTimeout(ref.current);
+    }
+  }, [props.slideshow]);
+
   if (props.slideshow) {
     return <Editor {...props} />;
+  }
+  if (notFound) {
+    return <Viewer404 URL={props.history.location.pathname} />;
   }
   return <Loader/>;
 });

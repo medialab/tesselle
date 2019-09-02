@@ -29,30 +29,28 @@ class Slideshow extends Record({
   id: '',
   name: 'Untitled image',
   annotations: List(),
-  image: {},
+  image: new Cover(),
   meta: new Meta(),
 }) {
   public readonly name!: string;
   public readonly annotations!: List<Annotation>;
   public readonly image!: Cover;
-  constructor(params?: SlideshowArgs) {
-    if (params) {
-      if (params.annotations instanceof Array) {
-        params.annotations = List<Annotation>(params.annotations.map(fromJS));
-      }
-      if (!(params.image instanceof Cover)) {
-        params.image = new Cover(params.image);
-      }
-      if (!params.id) {
-        params.id = uuid();
-      }
-      super(params);
-    } else {
-      const defaultParams = {
-        id: uuid() as string,
-      };
-      super(defaultParams);
+  constructor(params: SlideshowArgs = {
+    id: uuid(),
+    annotations: List([]),
+    image: new Cover(),
+    meta: new Meta(),
+  }) {
+    if (params.annotations instanceof Array) {
+      params.annotations = List<Annotation>(params.annotations.map(fromJS));
     }
+    if (!(params.image instanceof Cover)) {
+      params.image = new Cover(params.image);
+    }
+    if (!(params.meta instanceof Meta)) {
+      params.meta = new Meta(params.meta);
+    }
+    super(params);
   }
   public with(values: SlideshowArgs) {
     return this.merge(values) as this;

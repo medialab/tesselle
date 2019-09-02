@@ -1,0 +1,44 @@
+
+
+.viewer404-container{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 1rem;
+}
+
+.viewer404-content{
+    text-align: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    max-width: 30rem;
+}
+
+.viewer404-title-container{
+    display: flex;
+    flex-flow: row nowrap;
+    font-weight: bold;
+    padding-bottom: 0;
+    margin-bottom: 0;
+
+}
+
+.viewer404-content .logo{
+    max-height: 2rem;
+    margin-right: 1rem;
+    position: relative;
+    top: .7rem;
+}
+
+.viewer404-content .content{
+    margin-left: 3.5rem;
+    text-align: left;
+}

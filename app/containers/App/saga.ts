@@ -1,5 +1,5 @@
-import { call, put, select, spawn, takeLatest, all, delay } from 'redux-saga/effects';
-import { last, equals, pipe, nth, sort, splitWhen } from 'ramda';
+import { call, put, select, takeLatest, all } from 'redux-saga/effects';
+// import { last, equals, pipe, nth, sort, splitWhen } from 'ramda';
 import { saveAs } from 'file-saver';
 import html from './export-file';
 import uuid from 'uuid';
@@ -58,17 +58,16 @@ export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
       {tileSize: 512, scaleFactors: scaleFactors},
     ));
     toCancel = yield initializeSlicer(parsedImage.length);
-    const compareTo = nth(-3, scaleFactors);
-    const [futurImages, backgroundImages] = pipe(
-      sort(matrice => -last(matrice)),
-      splitWhen(dup => equals(compareTo, last(dup))),
-    )(parsedImage);
-    toCancel = yield* rawSlice(futurImages, yield select(selectSlicer), id);
-    yield delay(500);
-    toCancel = yield spawn(function*(images, sliceState, slideshowId) {
-      yield* rawSlice(images, sliceState, slideshowId);
-      yield put(setProgress());
-    }, backgroundImages, yield select(selectSlicer), id);
+    // const compareTo = nth(-3, scaleFactors);
+    // const [futurImages, backgroundImages] = pipe(
+    //   sort(matrice => -last(matrice)),
+    //   splitWhen(dup => equals(compareTo, last(dup))),
+    // )(parsedImage);
+    toCancel = yield* rawSlice(parsedImage, yield select(selectSlicer), id);
+    // toCancel = yield spawn(function*(images, sliceState, slideshowId) {
+    //   yield* rawSlice(images, sliceState, slideshowId);
+    //   yield put(setProgress());
+    // }, backgroundImages, yield select(selectSlicer), id);
   } catch (error) {
     toCancel.cancel();
     throw error;
