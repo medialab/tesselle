@@ -13,4 +13,8 @@ export default defineMessages({
     id: `${scope}.annotationPlaceholder`,
     defaultMessage: 'Write an annotation about this image part',
   },
+  commentPlaceholder: {
+    id: `${scope}.annotationPlaceholder`,
+    defaultMessage: 'Write an annotation about the whole image',
+  },
 });

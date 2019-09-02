@@ -47,6 +47,7 @@ import {setHelpModalStatus} from 'containers/App/actions';
 
 const CustomTextarea: React.SFC<FieldProps & {
   readonly selected: boolean;
+  readonly isInvisible: boolean;
 }> = ({field, form: {touched, errors}, ...props}) => {
   const ref = useRef<any>(null);
   useEffect(() => {
@@ -56,7 +57,7 @@ const CustomTextarea: React.SFC<FieldProps & {
   }, [props.selected]);
   return (
     <div>
-      <FormattedMessage {...messages.annotationPlaceholder}>{
+      <FormattedMessage {...(props.isInvisible ? messages.commentPlaceholder : messages.annotationPlaceholder)}>{
         msg => (
           <>
             <Textarea inputRef={ref} autoFocus={props.selected} {...field} {...props} placeholder={msg as string} />
@@ -171,6 +172,7 @@ const MenuItem = React.forwardRef<any, MenuItemProps>((props, forwardedRef) => {
                       'sidebar--item-field--minified': props.minified ,
                     })}
                     name="content"
+                    isInvisible={isInvisible}
                     component={CustomTextarea}
                   />
                 </Form>
