@@ -5,7 +5,7 @@ import Slideshow from 'types/Slideshow';
 
 const createSlidehow = (...args) => new Slideshow(...args);
 describe('homePageReducer', () => {
-  
+
   const firstSlideshow = createSlidehow();
   const secondSlideshow = createSlidehow();
   it('returns the initial state', () => {

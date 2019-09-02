@@ -1,6 +1,6 @@
-import Slideshow, { Meta } from "types/Slideshow";
-import { List } from "immutable";
-import Cover from "types/Cover";
+import Slideshow, { Meta } from 'types/Slideshow';
+import { List } from 'immutable';
+import Cover from 'types/Cover';
 
 describe('homePageReducer', () => {
   it('should create an empty slideshow instance', () => {
