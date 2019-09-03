@@ -10,8 +10,8 @@ import loadImage from 'utils/imageManipulation';
 import { isSvg } from 'utils/index';
 
 export const createMeta: (args?) => Meta = ({
-  createdAt,
-  updatedAt,
+  createdAt = new Date(),
+  updatedAt = new Date(),
 } = {}) => new Meta({
   createdAt: new Date(createdAt),
   updatedAt: new Date(updatedAt),
@@ -43,25 +43,32 @@ class Slideshow extends Record({
   public readonly name!: string;
   public readonly annotations!: List<Annotation>;
   public readonly image!: Cover;
-  constructor(params: SlideshowArgs = {
-    id: uuid(),
-    annotations: List([]),
-    image: new Cover(),
-    meta: createMeta(),
-  }) {
-    if (!params.id || params.id === '') {
-      params.id = uuid();
+  constructor({
+    id = uuid(),
+    name = 'Untitled image',
+    annotations = List(),
+    image = new Cover(),
+    meta = createMeta(),
+  } = {}) {
+    if (!id || id === '') {
+      id = uuid();
     }
-    if (params.annotations instanceof Array) {
-      params.annotations = List<Annotation>(params.annotations.map(fromJS));
+    if (annotations instanceof Array) {
+      annotations = List<Annotation>(annotations.map(fromJS));
     }
-    if (!(params.image instanceof Cover)) {
-      params.image = new Cover(params.image);
+    if (!(image instanceof Cover)) {
+      image = new Cover(image);
     }
-    if (!(params.meta instanceof Meta)) {
-      params.meta = createMeta(params.meta);
+    if (!(meta instanceof Meta)) {
+      meta = createMeta(meta);
     }
-    super(params);
+    super({
+      id: id,
+      name: name,
+      annotations: annotations,
+      image: image,
+      meta: meta,
+    });
   }
   public with(values: SlideshowArgs) {
     return this.merge(values) as this;
