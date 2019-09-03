@@ -14,7 +14,7 @@ import Annotation from 'types/Annotation';
 import { when } from 'ramda';
 import { fromJS } from 'utils/geo';
 import { isImmutable, List } from 'immutable';
-import Slideshow, { Meta } from 'types/Slideshow';
+import Slideshow, { createMeta } from 'types/Slideshow';
 import Cover from 'types/Cover';
 
 export const initialState: ContainerState = {
@@ -99,7 +99,7 @@ export default combineReducers<ContainerState, ContainerActions>({
           name: action.payload.name,
           image: new Cover(action.payload.image),
           annotations: action.payload.annotations.map(fromJS),
-          meta: new Meta(action.payload.meta),
+          meta: createMeta(action.payload.meta),
         });
       }
     return slideshow;

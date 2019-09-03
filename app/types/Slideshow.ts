@@ -9,6 +9,14 @@ import { fromJS } from 'utils/geo';
 import loadImage from 'utils/imageManipulation';
 import { isSvg } from 'utils/index';
 
+export const createMeta: (args?) => Meta = ({
+  createdAt,
+  updatedAt,
+} = {}) => new Meta({
+  createdAt: new Date(createdAt),
+  updatedAt: new Date(updatedAt),
+});
+
 export class Meta extends Record({
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -30,7 +38,7 @@ class Slideshow extends Record({
   name: 'Untitled image',
   annotations: List(),
   image: new Cover(),
-  meta: new Meta(),
+  meta: createMeta(),
 }) {
   public readonly name!: string;
   public readonly annotations!: List<Annotation>;
@@ -39,8 +47,11 @@ class Slideshow extends Record({
     id: uuid(),
     annotations: List([]),
     image: new Cover(),
-    meta: new Meta(),
+    meta: createMeta(),
   }) {
+    if (!params.id || params.id === '') {
+      params.id = uuid();
+    }
     if (params.annotations instanceof Array) {
       params.annotations = List<Annotation>(params.annotations.map(fromJS));
     }
@@ -48,7 +59,7 @@ class Slideshow extends Record({
       params.image = new Cover(params.image);
     }
     if (!(params.meta instanceof Meta)) {
-      params.meta = new Meta(params.meta);
+      params.meta = createMeta(params.meta);
     }
     super(params);
   }
@@ -155,7 +166,6 @@ export const slideshowCreator = (file: File, name: string): Promise<[Slideshow, 
           right: img.width,
           name: 'thumbnail.jpg',
         });
-
         const slideshow = new Slideshow({
           name: name,
           image: new Cover({
