@@ -5,7 +5,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { Columns, Column, Content, Container, DropZone, Footer, Title, Notification } from 'quinoa-design-library';
+import { Button,
+  Columns,
+  Column,
+  Content,
+  Container,
+  DropZone,
+  Footer,
+  Title,
+  Notification,
+} from 'quinoa-design-library';
 import { connect, useDispatch } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import { toastr } from 'react-redux-toastr/lib';
@@ -38,6 +47,7 @@ import appLogo from './assets/logo.svg';
 import Slideshow from 'types/Slideshow';
 import { importSlideshowAction } from 'containers/App/actions';
 import Loader from 'containers/App/Loader';
+import { useVideoModale } from 'components/Modal';
 
 interface HomePageProps {
   createSlideshow: (file: File) => void;
@@ -86,6 +96,10 @@ function HomePage(props: HomePageProps & ContainerState) {
     }
   }, [props.createSlideshow, props.importSlideshow]);
   const onDelete = useCallback(pipe(removeSlideshowAction.request, dispatch), []);
+  const [opener, modale] = useVideoModale({
+    title: 'How does it work ?',
+    urls: ['/chargement_zoom_titre_Tesselle.mp4'],
+  });
   return (
     <>
       <Container className="home-container">
@@ -103,6 +117,8 @@ function HomePage(props: HomePageProps & ContainerState) {
                 <span>Tesselle</span>
               </Title>
               <p><FormattedMessage {...messages.chapo} /></p>
+              <Button onClick={opener}>How does it work ?</Button>
+              {modale}
             </Content>
             {slicer.total === 0
               ? <DropZone
@@ -136,16 +152,16 @@ function HomePage(props: HomePageProps & ContainerState) {
                   ))
                   :
                   <>
-                  <Notification style={{marginTop: '2rem'}} isColor="primary">
+                    <Notification style={{marginTop: '2rem'}} isColor="primary">
                       <Title>
-                          {`Welcome to Tesselle, `}
-                          <a
-                            target="blank"
-                            rel="noopener"
-                            href="https://medialab.sciencespo.fr"
-                          >médialab</a>'s
-                          {` image annotation and publication tool`}
-                        </Title>
+                        {`Welcome to Tesselle, `}
+                        <a
+                          target="blank"
+                          rel="noopener"
+                          href="https://medialab.sciencespo.fr"
+                        >médialab</a>'s
+                        {` image annotation and publication tool`}
+                      </Title>
                       <Content>
                         All the data you will input in this tool will be stored in this browser local storage
                         and therefore stay entirely private.
@@ -154,7 +170,7 @@ function HomePage(props: HomePageProps & ContainerState) {
                         You have no image projects on this browser yet.
                         Drag and drop an image in the left column box to start annotating !
                       </Content>
-                  </Notification>
+                    </Notification>
                   </>
                 }
               </ul>

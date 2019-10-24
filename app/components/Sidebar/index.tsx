@@ -42,7 +42,8 @@ import {makeHelpModalStatusSelector} from 'containers/App/selectors';
 import logo from '../../images/logo.svg';
 import { SupportedShapes } from 'types';
 import { useSelector, useDispatch } from 'react-redux';
-import {setHelpModalStatus} from 'containers/App/actions';
+import { setHelpModalStatus } from 'containers/App/actions';
+import { useHowToModal } from 'components/HowToModal';
 
 
 const CustomTextarea: React.SFC<FieldProps & {
@@ -297,13 +298,13 @@ const Header: React.SFC<{
       data-for="tooltip"
       data-tip={props.visible ? 'Fold pannel' : 'Unfold pannel'}
     >
-        <Icon>
-          { props.visible ?
-            <FontAwesomeIcon icon={faChevronDown} />
-            :
-            <FontAwesomeIcon icon={faChevronUp} />
-          }
-        </Icon>
+      <Icon>
+        { props.visible ?
+          <FontAwesomeIcon icon={faChevronDown} />
+          :
+          <FontAwesomeIcon icon={faChevronUp} />
+        }
+      </Icon>
     </Button>
   </div>
 );
@@ -361,9 +362,10 @@ const Sidebar: React.SFC<SidebarProps> = props => {
   const selected = props.selectedAnnotations.first<Annotation>();
   const helpModalOpen = useSelector(makeHelpModalStatusSelector());
   const dispatch = useDispatch();
+  const [modalButton, helpModale] = useHowToModal();
 
-  const onCloseDownloadModalHelp = () => dispatch(setHelpModalStatus(false));
-  const onOpenDownloadModalHelp = () => dispatch(setHelpModalStatus(true));
+  const onCloseDownloadModalHelp = useCallback(() => dispatch(setHelpModalStatus(false)), []);
+  const onOpenDownloadModalHelp = useCallback(() => dispatch(setHelpModalStatus(true)), []);
   return (
     <div className={
       cx({
@@ -379,6 +381,8 @@ const Sidebar: React.SFC<SidebarProps> = props => {
       />
       <div className="sidebar--wrapper">
         <Loader />
+        {modalButton}
+        {helpModale}
         <div onClick={onClickSidebar} className="sidebar--container">
           {props.visible ? (
             <>
