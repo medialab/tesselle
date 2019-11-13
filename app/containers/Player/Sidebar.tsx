@@ -284,15 +284,9 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                         data-tip="Learn how to publish your image online"
                         onClick={onOpenDownloadModalHelp}
                         isColor="warning"
+                        isFullWidth
                       >Publish</Button>
                     </StretchedLayoutItem>
-
-                    {/* <StretchedLayoutItem isFlex={1}>
-                      <Download />
-                    </StretchedLayoutItem>
-                    <StretchedLayoutItem>
-                      <Button  onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
-                    </StretchedLayoutItem> */}
                   </StretchedLayoutContainer>
                 </StretchedLayoutItem>
               </StretchedLayoutContainer>

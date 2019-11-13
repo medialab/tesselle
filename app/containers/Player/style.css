@@ -127,8 +127,9 @@
     mix-blend-mode: darken;
 }
 
-@media screen and (max-width: 1024px) {
-    .sidebar--footer-container > .stretched-layout-container {
+/* @media screen and (max-width: 1024px) { */
+@media screen and (max-width: 1300px) {
+    .sidebar--footer-container .stretched-layout-container {
         flex-direction: column;
     }
 }

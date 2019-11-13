@@ -426,6 +426,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
                   data-tip="Learn how to publish your image online"
                   onClick={onOpenDownloadModalHelp}
                   isColor="warning"
+                  isFullWidth
                 >Publish</Button>
               </StretchedLayoutItem>
 
