@@ -89,7 +89,7 @@ export const useHowToModal = () => {
       data-for="tooltip"
       data-tip="Learn how to use Tesselle"
       onClick={openModal}
-      isColor="warning"
+      isColor="info"
       isFullWidth
     >Learn</Button>
   );

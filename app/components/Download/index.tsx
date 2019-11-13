@@ -22,6 +22,8 @@ const Download: React.SFC<OwnProps> = (props: OwnProps) => {
       isFullWidth
       onClick={exportCallback}
       disabled={loading}
+      data-for="tooltip"
+      data-tip="Download this image project"
       isLoading={loading}
       isColor="info"
       {...props}

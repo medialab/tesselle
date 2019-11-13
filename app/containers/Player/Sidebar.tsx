@@ -195,7 +195,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
   }, [props.leaflet.map]);
   const [isDownloadModalHelp, onCloseDownloadModalHelp, onOpenDownloadModalHelp] = useToggleBoolean(false);
   const isEmpty = !props.slideshow.annotations.size;
-  const [modalButton] = useHowToModal();
+  const [modalButton, modal] = useHowToModal();
 
   return (
     <div className={cx({
@@ -283,7 +283,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                         data-for="tooltip"
                         data-tip="Learn how to publish your image online"
                         onClick={onOpenDownloadModalHelp}
-                        isColor="warning"
+                        isColor="info"
                         isFullWidth
                       >Publish</Button>
                     </StretchedLayoutItem>
@@ -295,6 +295,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
         }
 
       </StretchedLayoutContainer>
+      {modal}
       <DownloadModalHelp isOpen={isDownloadModalHelp} onRequestClose={onCloseDownloadModalHelp} />
     </div>
   );
