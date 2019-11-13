@@ -24,23 +24,28 @@ import {
 const accordiable = [{
   title: messages.load,
   text: messages.loadDescription,
+  vimeoId: '372868240',
   url: '/chargement_zoom_titre_Tesselle.mp4',
 }, {
   title: messages.globalComment,
   text: messages.globalCommentDescription,
+  vimeoId: '372868373',
   url: '/commentaireGeneral_Tesselle.mp4',
 }, {
   title: messages.annotation,
   text: messages.annotationDescription,
+  vimeoId: '372868393',
   url: '/commentaireSpecifique_Tesselle.mp4',
 }, {
   title: messages.preview,
   text: messages.previewDescription,
+  vimeoId: '372868540',
   url: '/Preview_Tesselle.mp4',
 }, {
   title: messages.export,
   text: messages.exportDescription,
   url: '/download_and_reload_Tesselle1.mp4',
+  vimeoId: '372868484',
 }];
 
 export const useHowToModal = () => {
@@ -67,9 +72,11 @@ export const useHowToModal = () => {
                 </AccordionItemButton>
               </AccordionItemHeading>
               <AccordionItemPanel>
-                <video controls>
-                  <source src={etage.url} />
-                </video>
+              <iframe
+                src={`https://player.vimeo.com/video/${etage.vimeoId}?title=0&byline=0&portrait=0`}
+                allow="autoplay; fullscreen"
+                allowFullScreen
+              />
               </AccordionItemPanel>
             </AccordionItem>
           );
@@ -78,7 +85,13 @@ export const useHowToModal = () => {
     </Modal>
   );
   const openButton = (
-    <Button onClick={openModal} isRounded >?</Button>
+    <Button
+      data-for="tooltip"
+      data-tip="Learn how to use Tesselle"
+      onClick={openModal}
+      isColor="warning"
+      isFullWidth
+    >Learn</Button>
   );
   return [
     openButton,

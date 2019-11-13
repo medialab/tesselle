@@ -381,8 +381,7 @@ const Sidebar: React.SFC<SidebarProps> = props => {
       />
       <div className="sidebar--wrapper">
         <Loader />
-        {modalButton}
-        {helpModale}
+
         <div onClick={onClickSidebar} className="sidebar--container">
           {props.visible ? (
             <>
@@ -416,18 +415,26 @@ const Sidebar: React.SFC<SidebarProps> = props => {
               <StretchedLayoutItem isFlex={1}>
                 <Download />
               </StretchedLayoutItem>
-              <StretchedLayoutItem>
+
+              <StretchedLayoutItem isFlex={1}>
+                {modalButton}
+              </StretchedLayoutItem>
+
+              <StretchedLayoutItem isFlex={1}>
                 <Button
                   data-for="tooltip"
-                  data-tip="How to archive and publish your image"
+                  data-tip="Learn how to publish your image online"
                   onClick={onOpenDownloadModalHelp}
-                  isColor="info"
-                >?</Button>
+                  isColor="warning"
+                >Publish</Button>
               </StretchedLayoutItem>
+
             </StretchedLayoutContainer>
           </StretchedLayoutItem>
         </StretchedLayoutContainer>
       </footer>
+      {helpModale}
+
       <DownloadModalHelp isOpen={helpModalOpen} onRequestClose={onCloseDownloadModalHelp} />
       <Tooltip id="tooltip" place="right" effect="solid" />
     </div>

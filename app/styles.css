@@ -110,3 +110,9 @@ body {
   -ms-user-select: element;
   -webkit-user-select: all;
 }
+
+.modal-content-body iframe{
+  min-width: 50vw;
+  min-height: 50vh;
+  width: 100%;
+}

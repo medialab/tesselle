@@ -97,8 +97,8 @@ function HomePage(props: HomePageProps & ContainerState) {
   }, [props.createSlideshow, props.importSlideshow]);
   const onDelete = useCallback(pipe(removeSlideshowAction.request, dispatch), []);
   const [opener, modale] = useVideoModale({
-    title: 'How does it work ?',
-    urls: ['/chargement_zoom_titre_Tesselle.mp4'],
+    title: 'Video overview',
+    vimeoIds: ['372868240'],
   });
   return (
     <>
@@ -117,7 +117,7 @@ function HomePage(props: HomePageProps & ContainerState) {
                 <span>Tesselle</span>
               </Title>
               <p><FormattedMessage {...messages.chapo} /></p>
-              <Button onClick={opener}>How does it work ?</Button>
+              <Button isFullWidth isColor="primary" onClick={opener}>Video overview</Button>
               {modale}
             </Content>
             {slicer.total === 0

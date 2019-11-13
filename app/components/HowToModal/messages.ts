@@ -20,7 +20,7 @@ export default defineMessages({
   },
   loadDescription: {
     id: `${scope}.load.description`,
-    defaultMessage: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Error, laudantium laboriosam enim, deleniti vero quas sit quidem rerum voluptates iure dolorem explicabo eos autem nemo pariatur voluptatem? Adipisci, velit dignissimos.',
+    defaultMessage: 'Learn how to create a new Tesselle project and import a (possibly very big) image to display and annotate.',
   },
   globalComment: {
     id: `${scope}.globalComment`,
@@ -28,7 +28,7 @@ export default defineMessages({
   },
   globalCommentDescription: {
     id: `${scope}.globalComment.description`,
-    defaultMessage: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Error, laudantium laboriosam enim, deleniti vero quas sit quidem rerum voluptates iure dolorem explicabo eos autem nemo pariatur voluptatem? Adipisci, velit dignissimos.',
+    defaultMessage: 'Learn how to attach a comment the globality of the image (examples : an introduction, a conclusion, a transition title between two sets of annotations, ...).',
   },
   annotation: {
     id: `${scope}.annotation`,
@@ -36,7 +36,7 @@ export default defineMessages({
   },
   annotationDescription: {
     id: `${scope}.annotation.description`,
-    defaultMessage: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Error, laudantium laboriosam enim, deleniti vero quas sit quidem rerum voluptates iure dolorem explicabo eos autem nemo pariatur voluptatem? Adipisci, velit dignissimos.',
+    defaultMessage: 'Learn how to attach text to specific parts of the image, wether as rectangles, circles, or free polygon shapes.',
   },
   preview: {
     id: `${scope}.preview`,
@@ -44,7 +44,7 @@ export default defineMessages({
   },
   previewDescription: {
     id: `${scope}.preview.description`,
-    defaultMessage: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Error, laudantium laboriosam enim, deleniti vero quas sit quidem rerum voluptates iure dolorem explicabo eos autem nemo pariatur voluptatem? Adipisci, velit dignissimos.',
+    defaultMessage: 'Learn how to preview the results of your work and scaffold a narrative unfolding your analysis of your image.',
   },
   export: {
     id: `${scope}.export`,
@@ -52,6 +52,6 @@ export default defineMessages({
   },
   exportDescription: {
     id: `${scope}.export.description`,
-    defaultMessage: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Error, laudantium laboriosam enim, deleniti vero quas sit quidem rerum voluptates iure dolorem explicabo eos autem nemo pariatur voluptatem? Adipisci, velit dignissimos.',
+    defaultMessage: 'Learn how to export your work for publication, archiving and reuse.',
   },
 });

@@ -33,6 +33,7 @@ import DownloadModalHelp from '../../components/DownloadModalHelp';
 import { useToggleBoolean } from 'utils/hooks';
 
 import logo from '../../images/logo.svg';
+import { useHowToModal } from 'components/HowToModal';
 
 const Header: React.SFC<{
   onButtonClick: () => void;
@@ -194,6 +195,8 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
   }, [props.leaflet.map]);
   const [isDownloadModalHelp, onCloseDownloadModalHelp, onOpenDownloadModalHelp] = useToggleBoolean(false);
   const isEmpty = !props.slideshow.annotations.size;
+  const [modalButton] = useHowToModal();
+
   return (
     <div className={cx({
       'sidebar': true,
@@ -267,12 +270,29 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                 </StretchedLayoutItem>
                 <StretchedLayoutItem isFlex={1}>
                   <StretchedLayoutContainer isDirection="horizontal">
+                  <StretchedLayoutItem isFlex={1}>
+                      <Download />
+                    </StretchedLayoutItem>
+
                     <StretchedLayoutItem isFlex={1}>
+                      {modalButton}
+                    </StretchedLayoutItem>
+
+                    <StretchedLayoutItem isFlex={1}>
+                      <Button
+                        data-for="tooltip"
+                        data-tip="Learn how to publish your image online"
+                        onClick={onOpenDownloadModalHelp}
+                        isColor="warning"
+                      >Publish</Button>
+                    </StretchedLayoutItem>
+
+                    {/* <StretchedLayoutItem isFlex={1}>
                       <Download />
                     </StretchedLayoutItem>
                     <StretchedLayoutItem>
                       <Button  onClick={onOpenDownloadModalHelp} isColor="info">?</Button>
-                    </StretchedLayoutItem>
+                    </StretchedLayoutItem> */}
                   </StretchedLayoutContainer>
                 </StretchedLayoutItem>
               </StretchedLayoutContainer>

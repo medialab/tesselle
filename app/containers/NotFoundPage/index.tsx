@@ -7,7 +7,7 @@
 import * as React from 'react';
 // import { FormattedMessage } from 'react-intl';
 
-import Viewer404 from '../../components/Viewer404'
+import Viewer404 from '../../components/Viewer404';
 
 // import messages from './messages';
 

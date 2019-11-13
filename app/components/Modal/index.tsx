@@ -49,17 +49,22 @@ const Modale: React.SFC<OwnProps & any> = (props: OwnProps & any) => {
   );
 };
 
-export const useVideoModale = (props: {title: string, urls: string[]}) => {
+export const useVideoModale = (props: {title: string, vimeoIds: string[]}) => {
   const [open, setOpen] = React.useState<boolean>(false);
   const openModal = React.useCallback(() => setOpen(true), []);
   const closeModal = React.useCallback(() => setOpen(false), []);
   const modal = (
     <Modale isOpen={open} title={props.title} onRequestClose={closeModal}>
-      <video controls autoPlay>
-        {props.urls.map(src => (
-          <source key={src} src={src} />
-        ))}
-      </video>
+      {
+        props.vimeoIds.map(vimeoId => (
+          <iframe
+            key={vimeoId}
+            src={`https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0`}
+            allow="autoplay; fullscreen"
+            allowFullScreen
+          />
+        ))
+      }
     </Modale>
   );
 
@@ -68,5 +73,4 @@ export const useVideoModale = (props: {title: string, urls: string[]}) => {
     modal,
   ];
 };
-
 export default Modale;
