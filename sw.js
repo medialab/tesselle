@@ -7,7 +7,7 @@ var __wpo = {
     ],
     "additional": [
       "https://medialab.github.io/tesselle/vendor.738fb51c04446d2bee6e.chunk.js",
-      "https://medialab.github.io/tesselle/main.377b3815ef27af8da22a.chunk.js",
+      "https://medialab.github.io/tesselle/main.3e860b09e5d092b9cb78.chunk.js",
       "https://medialab.github.io/tesselle/3.622000ceebbf99688082.chunk.js",
       "https://medialab.github.io/tesselle/4.5bce229ebef2591782e1.chunk.js"
     ],
@@ -17,15 +17,15 @@ var __wpo = {
   "hashesMap": {
     "30b0fcc2b8e05e59779c194a301a133811a5ad5c": "https://medialab.github.io/tesselle/favicon.ico",
     "d0b8b6763fda684f7c696632bb2681f51afd8dd3": "https://medialab.github.io/tesselle/vendor.738fb51c04446d2bee6e.chunk.js",
-    "2aa52da943158782190e27c70b8d0787d31a8a67": "https://medialab.github.io/tesselle/main.377b3815ef27af8da22a.chunk.js",
+    "00d22a3aca231c4feb9b08a0265199948cb01974": "https://medialab.github.io/tesselle/main.3e860b09e5d092b9cb78.chunk.js",
     "40d36f2f8633111a7d8113b1def56e94dbd83ffc": "https://medialab.github.io/tesselle/runtime~main.5fe36ceb485b9ba7bd6b.js",
     "a4dd3a66222c45f2dcecab3de214363fd896966e": "https://medialab.github.io/tesselle/3.622000ceebbf99688082.chunk.js",
     "d622d1c83cbd1e7cae0493b080994550a622468b": "https://medialab.github.io/tesselle/4.5bce229ebef2591782e1.chunk.js",
-    "a916679d0a823c2ccce64be36fad4e5c620f1b24": "https://medialab.github.io/tesselle/"
+    "cf6d79dbf4b553e57521a297d6ffb973ae42a46c": "https://medialab.github.io/tesselle/"
   },
   "strategy": "changed",
   "responseStrategy": "cache-first",
-  "version": "2019-11-13 14:57:05",
+  "version": "2019-11-13 15:17:00",
   "name": "webpack-offline",
   "pluginVersion": "5.0.6",
   "relativePaths": false
