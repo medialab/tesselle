@@ -1,0 +1,10 @@
+{
+  "name": "Tesselle",
+  "authors": ["Arnaud Pichon", "Robin de Mourat"],
+  "url": "https://github.com/medialab/tesselle/",
+  "source": "https://github.com/medialab/tesselle/",
+  "licence": "MIT",
+  "visual": "https://raw.githubusercontent.com/medialab/tesselle/master/preview.png",
+  "description": "Tesselle - The front-end IIIF",
+  "doc": ""
+}
