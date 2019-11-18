@@ -5,6 +5,6 @@
   "source": "https://github.com/medialab/tesselle/",
   "licence": "MIT",
   "visual": "https://raw.githubusercontent.com/medialab/tesselle/master/preview.png",
-  "description": "Tesselle is an image annotation & publication tool. It allows to comment on specific parts of photographs, maps, or visualizations, in order to perform precise visual analysis and inquiry-driven arguments. Tesselle also embeds a tiling feature which allows to seamlessly display and navigate very large images on the web. Eventually, Tesselle allows to export your work as a simple folder to publish anywhere on the web.",
+  "description": "Tesselle is a web application that allows you to upload high definition images and add text comments to all or part of this image. It allows you to annotate the image and create a dynamic storytelling with it, then to export this story and replay it on your website.",
   "doc": ""
 }
