@@ -4,7 +4,6 @@ import Slideshow from './Slideshow';
 import { typesToExtensions } from 'utils/';
 
 export const generateInfo = (slideshow: Slideshow, scaleFactors) => {
-
   return {
     '@context': 'http://library.stanford.edu/iiif/image-api/1.1/context.json',
     '@id': slideshow.image.id,
@@ -43,7 +42,6 @@ export function* staticPartialTileSizes(width: number, height: number, tilesize:
         }
         const rh = rye - ry;
         const sh = Math.floor(((rh + sf) - 1) / sf);
-        // debugger
         yield [[rx, ry, rw, rh], [sw, sh], sf] as [[number, number, number, number], [number, number], number];
       }
     }

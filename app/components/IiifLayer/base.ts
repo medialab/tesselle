@@ -120,7 +120,7 @@ const IiifBase = L.TileLayer.extend({
     this._imageSizes = imageSizes;
   },
 
-  getTileUrl: function(coords) {
+  getCleanCoords: function(coords) {
     const x = coords.x;
     const y = coords.y;
     const zoom = this._getZoomForUrl();
@@ -135,12 +135,22 @@ const IiifBase = L.TileLayer.extend({
     const yDiff = (maxy - miny);
 
     const size = Math.ceil(xDiff / scale);
-    const options = {
+    return {
       format: this.options.tileFormat,
       quality: this.quality,
-      region: [minx, miny, xDiff, yDiff].join(','),
+      region: [minx, miny, xDiff, yDiff],
       rotation: 0,
-      size: size + ',',
+      size: size,
+    };
+  },
+
+  getTileUrl: function(coords) {
+
+    let options = this.getCleanCoords(coords);
+    options = {
+      ...options,
+      region: options.region.join(','),
+      size: options.size + ',',
     };
 
     const path = L.Util.template(

@@ -6,13 +6,15 @@ import Slideshow, { slideshowCreator } from 'types/Slideshow';
 import ActionTypes from 'containers/HomePage/constants';
 import { List, isImmutable } from 'immutable';
 import makeSelectSlideshows from './selectors';
-import { colisionDetection, slice } from 'containers/App/saga';
+import { colisionDetection } from 'containers/App/saga';
 import { push } from 'connected-react-router';
 import { setProgress } from 'containers/App/actions';
 import makeSelectSlicer from 'containers/App/selectors';
 import { isSvg } from 'utils/';
+
 import SliceState from 'containers/App/SliceArgs';
 import { scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
+import { resizeImage } from 'utils/imageManipulation';
 
 const selectSlideshows = makeSelectSlideshows();
 const selectSlicer = makeSelectSlicer();
@@ -39,7 +41,9 @@ export function* createAndRedirect(action) {
   const sliceState = yield select(selectSlicer);
   const nexd = sliceState.set('total', 500);
   yield put(setProgress(nexd));
-  const [slideshow, img]: [Slideshow, (HTMLImageElement | SVGElement)] = yield slideshowCreator(action.payload, name);
+  const chiant: [Slideshow, (HTMLImageElement | SVGElement)] = yield slideshowCreator(action.payload, name);
+  const slideshow = chiant[0];
+  let img = chiant[1];
   const scaleFactors = scaleFactorsCreator(
     512,
     slideshow.image.width,
@@ -48,7 +52,7 @@ export function* createAndRedirect(action) {
   );
   if (!svg) {
     try {
-      yield* slice(img, slideshow.image.id);
+      // yield* slice(img, slideshow.image.id);
     } catch (error) {
       const allKeys = yield db.keys();
       yield all(allKeys.filter((key: string): boolean =>
@@ -61,6 +65,16 @@ export function* createAndRedirect(action) {
       throw error;
     }
   }
+  img = img as HTMLImageElement;
+  yield call(
+    [db, db.setItem],
+    `/bigpicture/${slideshow.image.id}`,
+    resizeImage(
+      img,
+      [0, 0, img.width, img.height],
+      [img.width, img.height],
+    ),
+  );
   const infos = generateInfo(slideshow, scaleFactors);
   yield call([db, db.setItem], `/info/${slideshow.image.id}.json`, infos);
   const slideshows: List<Slideshow> = yield select(selectSlideshows);

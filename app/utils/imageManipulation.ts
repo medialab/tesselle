@@ -36,7 +36,7 @@ export function resizeImage(img: HTMLImageElement, region, [sizeWidth, sizeHeigh
     canvas.width,
     canvas.height,
   );
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     canvas.toBlob((blob: Blob) => {
       resolve(
         new File(
@@ -64,6 +64,8 @@ function loadImage(file: File, options: Options): Promise<File> {
     img.height = height;
     canvas.width = width;
     canvas.height = height;
+
+    console.log(options, drawingWidth, drawingHeight);
 
     img.onload = () => {
       context.drawImage(

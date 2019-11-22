@@ -3,6 +3,7 @@ import L, { DomEvent, TileLayerOptions } from 'leaflet';
 import db from 'utils/db';
 import Base from 'components/IiifLayer/base';
 import LRUCache from 'mnemonist/lru-cache';
+import { resizeImage } from 'utils/imageManipulation';
 
 // https://github.com/mejackreed/Leaflet-IIIF/blob/master/leaflet-iiif.js
 
@@ -36,7 +37,6 @@ interface Iiif extends L.TileLayer {
 const Iiif = Base.extend({
   _baseUrl: '/{id}/{region}/{size}/{rotation}/{quality}.{format}',
   urls: new LRUCache(72),
-
   createTile: function(coords, done) {
     const tile = document.createElement('img');
     DomEvent.on(tile, 'load', (event) => {
@@ -68,7 +68,16 @@ const Iiif = Base.extend({
           tile.src = url;
         } else {
           console.log('🔥', inMemory, '🔥');
-          done(new Error('not in memory: ' + inMemory));
+          this.bigPicture.then((bigPicture: HTMLImageElement) => {
+            const futurCoords = this.getCleanCoords(coords);
+            resizeImage(bigPicture, futurCoords.region, [futurCoords.size, futurCoords.size])
+            .then((minFile) => {
+              const url = window.URL.createObjectURL(minFile);
+              this.urls.set(inMemory, url);
+              tile.src = url;
+            });
+          });
+          // done(new Error('not in memory: ' + inMemory));
         }
       });
     }
@@ -92,6 +101,18 @@ const Iiif = Base.extend({
       console.error(e);
     }
   },
+
+  callCa: function() {
+    this.bigPicture = db.getItem(`/bigpicture/${this.options.id}`).then(bigPicture => {
+      const image = new Image();
+      image.src = window.URL.createObjectURL(bigPicture);
+      return new Promise((resolve) => {
+        image.onload = () => resolve(image);
+      });
+    });
+  },
 });
+
+Iiif.addInitHook('callCa');
 
 export default Iiif;
