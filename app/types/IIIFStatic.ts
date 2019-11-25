@@ -21,29 +21,44 @@ export const generateInfo = (slideshow: Slideshow, scaleFactors) => {
 
 export function* staticPartialTileSizes(width: number, height: number, tilesize: number, scaleFactors: number[]) {
   for (const sf of scaleFactors) {
-    if (sf * tilesize > width && sf * tilesize >= height) {
+    // Size of the image raster.
+    const rts = tilesize * sf;
+    // If a scale factor returns is to high, skip it.
+    if (rts > width && rts >= height) {
       continue;
     }
-    const rts = tilesize * sf;
+    // Number of tiles on X (cols)
     const xt = Math.floor((width - 1) / rts) + 1;
+    // Number of tiles on Y (rows)
     const yt = Math.floor((height - 1) / rts) + 1;
+    // Start matrice with cols.
     for (let nx = 0; nx <= xt; nx++) {
+      // X Start point.
       const rx = nx * rts;
+      // X End point.
       let rxe = rx + rts;
+      // Image is not a sf multiple, we need to check for the end of the image.
       if (rxe > width) {
         rxe = width;
       }
+      // Raster final width.
       const rw = rxe - rx;
-      const sw = Math.floor (((rw + sf) - 1) / sf);
+      // End file width.
+      const sw = Math.floor(((rw + sf) - 1) / sf);
+      // Matrice rows.
       for (let ny = 0; ny < yt; ny++) {
+        // Y Start point.
         const ry = ny * rts;
+        // End point.
         let rye = ry + rts;
+        // Check image's height
         if (rye > height) {
           rye = height;
         }
+        // Raster height.
         const rh = rye - ry;
+        // End file height.
         const sh = Math.floor(((rh + sf) - 1) / sf);
-        // debugger
         yield [[rx, ry, rw, rh], [sw, sh], sf] as [[number, number, number, number], [number, number], number];
       }
     }
@@ -72,7 +87,7 @@ interface GenerateImageOptions {
   scaleFactors?: number[];
 }
 
-export type FuturImageParsing = () => Promise<File>;
+export type FuturImageParsing = Promise<File>;
 type ScaleFactor = number;
 
 export function* generate(
@@ -90,7 +105,7 @@ export function* generate(
   for (const [region, size, sf] of staticPartialTileSizes(width, height, tileSize, scaleFactors)) {
     yield [
       path(region, size),
-      () => resizeImage(img, region, size),
+      resizeImage(img, region, size),
       sf,
     ];
   }
@@ -101,7 +116,7 @@ export function* generate(
   const lastSize: [number, number] = [ratio.width, ratio.height];
   yield [
     path(lastRegion, lastSize),
-    () => resizeImage(
+    resizeImage(
       img,
       lastRegion,
       lastSize,

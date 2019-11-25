@@ -4,7 +4,7 @@ import { saveAs } from 'file-saver';
 import html from './export-file';
 import uuid from 'uuid';
 
-import { generate, scaleFactorsCreator } from 'types/IIIFStatic';
+import { scaleFactorsCreator, staticPartialTileSizes, path } from 'types/IIIFStatic';
 import db from 'utils/db';
 import { setProgress, exportSlideshowActionCreator, setHelpModalStatus } from './actions';
 import makeSelectSlicer from './selectors';
@@ -16,6 +16,7 @@ import { List, isImmutable } from 'immutable';
 import makeSelectSlideshows from 'containers/HomePage/selectors';
 import { loadSlideshowsAction } from 'containers/HomePage/actions';
 import { typesToExtensions, extentionsToType } from 'utils/';
+import { resizeImage } from 'utils/imageManipulation';
 
 const selectSlicer = makeSelectSlicer();
 const selectSlideshows = makeSelectSlideshows();
@@ -27,15 +28,6 @@ export function* setSlideshows(slideshows: any) {
     yield db.setItem('slideshows', slideshows.toJS());
   }
   yield put(loadSlideshowsAction(slideshows));
-}
-
-function* rawSlice(images, sliceState, slideshowId) {
-  for (const [url, launchFileParsing, sf] of images) {
-    sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
-    yield put(setProgress(sliceState));
-    yield call([db, db.setItem], '/' + slideshowId + url, launchFileParsing());
-  }
-  yield put(setProgress(sliceState));
 }
 
 function* initializeSlicer(nbImages) {
@@ -52,22 +44,35 @@ export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
   img.height,
 )) {
   let toCancel;
+  console.time();
   try {
-    const parsedImage = Array.from(generate(
-      img,
-      {tileSize: 512, scaleFactors: scaleFactors},
-    ));
-    toCancel = yield initializeSlicer(parsedImage.length);
-    // const compareTo = nth(-3, scaleFactors);
-    // const [futurImages, backgroundImages] = pipe(
-    //   sort(matrice => -last(matrice)),
-    //   splitWhen(dup => equals(compareTo, last(dup))),
-    // )(parsedImage);
-    toCancel = yield* rawSlice(parsedImage, yield select(selectSlicer), id);
-    // toCancel = yield spawn(function*(images, sliceState, slideshowId) {
-    //   yield* rawSlice(images, sliceState, slideshowId);
-    //   yield put(setProgress());
-    // }, backgroundImages, yield select(selectSlicer), id);
+    const { width, height } = img;
+    const tileSize = 512;
+    const scaleFactors: number[] = scaleFactorsCreator(
+      tileSize,
+      width,
+      tileSize,
+      height,
+    );
+    const tileSizeMatrice = Array.from(
+      staticPartialTileSizes(
+        width,
+        height,
+        tileSize,
+        scaleFactors,
+      ),
+    );
+    const nbImages = tileSizeMatrice.length;
+    toCancel = yield initializeSlicer(nbImages);
+    let sliceState = yield select(selectSlicer);
+    for (const [region, size, sf] of tileSizeMatrice) {
+      const image = yield resizeImage(img, region, size);
+      toCancel = yield call([db, db.setItem], '/' + id + path(region, size), image);
+      sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
+      toCancel = yield put(setProgress(sliceState));
+    }
+    toCancel = yield put(setProgress(sliceState));
+    console.timeEnd();
   } catch (error) {
     toCancel.cancel();
     throw error;

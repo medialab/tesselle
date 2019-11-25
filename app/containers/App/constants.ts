@@ -15,5 +15,4 @@ enum ActionTypes {
   SET_HELP_MODAL_STATUS = 'app/App/SET_HELP_MODAL_STATUS',
 }
 
-
 export default ActionTypes;
