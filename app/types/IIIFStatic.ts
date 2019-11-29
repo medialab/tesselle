@@ -66,7 +66,7 @@ export function* staticPartialTileSizes(width: number, height: number, tilesize:
 }
 
 export function path(region, size): string {
-  return `/${region.join(',')}/${size[0]},/0/native.jpg`;
+  return `_${region.join(',')}_${size[0]},_0_native.jpg`;
 }
 
 export function scaleFactorsCreator(tileWidth, width, tileHeight, height) {

@@ -28,7 +28,7 @@
     "build:clean": "rimraf ./build",
     "start": "cross-env NODE_ENV=development node server",
     "start:tunnel": "cross-env NODE_ENV=development ENABLE_TUNNEL=true node server",
-    "start:production": "npm run test && npm run build && npm run start:prod",
+    "start:production": "npm run build && npm run start:prod",
     "start:prod": "cross-env NODE_ENV=production node server",
     "presetup": "npm i chalk shelljs",
     "setup": "node ./internals/scripts/setup.js",
@@ -93,7 +93,7 @@
     "compression": "1.7.3",
     "connected-react-router": "6.3.2",
     "cross-env": "^5.2.0",
-    "express": "^4.16.4",
+    "express": "^4.17",
     "file-saver": "^2.0.2",
     "fontfaceobserver": "2.1.0",
     "formik": "^1.5.7",
@@ -141,10 +141,12 @@
     "redux-saga": "1.0.2",
     "reselect": "4.0.0",
     "sanitize.css": "10.0.0",
+    "stacktrace-js": "^2.0.1",
     "typesafe-actions": "^4.2.1",
     "typings-for-css-modules-loader": "^1.7.0",
     "uuid": "^3.3.2",
-    "warning": "4.0.3"
+    "warning": "4.0.3",
+    "wasm-imagemagick": "^1.2.7"
   },
   "devDependencies": {
     "@babel/cli": "7.2.3",

@@ -1,3 +1,5 @@
+// import { execute, buildInputFile, loadImageElement } from 'wasm-imagemagick';
+
 interface Options {
   maxWidth: number;
   maxHeight: number;
@@ -49,7 +51,26 @@ export function resizeImage(img: HTMLImageElement, region, [sizeWidth, sizeHeigh
   });
 }
 
-function loadImage(file: File, options: Options): Promise<File> {
+async function loadImage(file: File, options: Options): Promise<File> {
+  // const drawingWidth = options.right - options.left;
+  // const drawingHeight = options.bottom - options.top;
+  // console.log(file)
+  // const res = await execute({
+  //   inputFiles: [await buildInputFile((file as any).preview, file.name)],
+  //   commands: [
+  //     `convert ${file.name} -resize ${drawingWidth}x${drawingHeight} thumbnail.jpg`
+  //   ],
+  // });
+  // const { outputFiles, exitCode } = res;
+  // console.log(res)
+  // if (exitCode) {
+  //   console.log('exit code !', exitCode);
+  //   debugger;
+  //   throw new Error('exit code: ' + exitCode);
+  // }
+  // console.log('c ici poto', outputFiles);
+  // await loadImageElement(outputFiles[0], document.querySelector('#quoi') as HTMLImageElement)
+  // return outputFiles[0] as any;
   return new Promise((resolve, reject) => {
     const img = new Image();
     const canvas = document.createElement('canvas');

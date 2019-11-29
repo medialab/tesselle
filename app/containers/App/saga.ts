@@ -1,5 +1,6 @@
-import { call, put, select, takeLatest, all } from 'redux-saga/effects';
-// import { last, equals, pipe, nth, sort, splitWhen } from 'ramda';
+import { execute } from 'wasm-imagemagick';
+import { call, put, select, takeLatest, all, fork } from 'redux-saga/effects';
+import { splitEvery } from 'ramda';
 import { saveAs } from 'file-saver';
 import html from './export-file';
 import uuid from 'uuid';
@@ -21,7 +22,7 @@ import { resizeImage } from 'utils/imageManipulation';
 const selectSlicer = makeSelectSlicer();
 const selectSlideshows = makeSelectSlideshows();
 
-const BASE_TILESIZE = 512;
+// const BASE_TILESIZE = 512;
 
 export function* setSlideshows(slideshows: any) {
   if (isImmutable(slideshows)) {
@@ -30,24 +31,38 @@ export function* setSlideshows(slideshows: any) {
   yield put(loadSlideshowsAction(slideshows));
 }
 
-function* initializeSlicer(nbImages) {
+function* initializeSlicer(nbImages: number) {
   let slicer = yield select(selectSlicer);
   slicer = slicer.set('total', nbImages).set('present', 0);
   yield put(setProgress(slicer));
   return slicer;
 }
 
-export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
-  BASE_TILESIZE,
-  img.width,
-  BASE_TILESIZE,
-  img.height,
-)) {
+const delay = ms => new Promise((resolve) => setTimeout(resolve, ms));
+
+function* loaderState(nbImages: number) {
+  const slicer = yield initializeSlicer(nbImages);
+  let task = false;
+  let oldI = 0;
+  return function* koi(index: number, sf: number) {
+    if (task) {
+      oldI = index;
+      return;
+    }
+    task = true;
+    yield delay(1000);
+    task = false;
+    return yield put(setProgress(slicer.set('present', oldI)));
+  };
+}
+
+export function* slice(img, id: string, buffer) {
   let toCancel;
-  console.time();
+  console.log('qu est ce que tu veux ?????');
   try {
     const { width, height } = img;
     const tileSize = 512;
+    const bitArray = new Uint8Array(buffer);
     const scaleFactors: number[] = scaleFactorsCreator(
       tileSize,
       width,
@@ -63,17 +78,53 @@ export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
       ),
     );
     const nbImages = tileSizeMatrice.length;
-    toCancel = yield initializeSlicer(nbImages);
-    let sliceState = yield select(selectSlicer);
+    const loader = yield loaderState(nbImages);
+    console.log(nbImages);
+    console.log(scaleFactors);
+    console.time('all');
+    for (const sizes of splitEvery(300)(tileSizeMatrice)) {
+      console.time('small');
+      const lines = sizes.reduce((accumulator, [region, size]) => {
+        const [rx, ry, rw, rh] = region;
+        const [sw, sh] = size;
+        if (sw > 0) {
+          return `${accumulator} \\
+\\( mpr:XY -crop '${rw}x${rh}+${rx}+${ry}' -resize '${sw}x${sh}!>' +write ${path(region, size)} \\)`;
+        }
+        return accumulator;
+      }, '');
+      const commands = `convert big.jpg -write mpr:XY +delete -respect-parentheses${lines} null:`;
+      const res = yield execute({
+        inputFiles: [{name: 'big.jpg', content: bitArray.slice(0)}],
+        commands: commands,
+      });
+      console.timeEnd('small');
+      console.log(res);
+    }
+    console.timeEnd('all');
+    //   const acc = scaleFactors.reduce((accumulator, scale) => {
+  //     const s = 1 / scale * 100;
+  //     return `${accumulator} \\
+  //   }, '');
+//     const acc = scaleFactors.reduce((acc, n) => {
+//       const s = 1 / scale * 100;
+//       return `${acc}
+// `;
+//     }, ``)
+//     const commands = `convert big.jpg -write mpr:XY +delete -respect-parentheses ${acc} \\
+// null:`;
+    let i = 0;
     for (const [region, size, sf] of tileSizeMatrice) {
+      i = i + 1;
+      yield fork(loader, i, sf);
+
       const image = yield resizeImage(img, region, size);
       toCancel = yield call([db, db.setItem], '/' + id + path(region, size), image);
-      sliceState = sliceState.set('present', sliceState.present + 1).set('level', sf);
-      toCancel = yield put(setProgress(sliceState));
     }
-    toCancel = yield put(setProgress(sliceState));
-    console.timeEnd();
+    toCancel = yield put(setProgress());
   } catch (error) {
+    console.log('ici');
+    console.error(error);
     toCancel.cancel();
     throw error;
   }

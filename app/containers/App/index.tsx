@@ -21,6 +21,7 @@ import Player from 'containers/Player';
 import Viewer from 'containers/Viewer';
 
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
+import './styles.css';
 import 'react-redux-toastr/lib/css/react-redux-toastr.min.css';
 
 import reducer from './reducer';

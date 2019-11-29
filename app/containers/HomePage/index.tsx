@@ -81,6 +81,7 @@ function HomePage(props: HomePageProps & ContainerState) {
   const dispatch = useDispatch();
   const slicer = useSlicerState();
   const onDrop = useCallback((files: File[]) => {
+    console.log('????????');
     const file = head(files);
     if (!file) {
       toastr.error(`Invalid file extension`, 'You tried to import a file which are not handled by Tesselle.');

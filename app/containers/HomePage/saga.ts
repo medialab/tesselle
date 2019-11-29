@@ -47,8 +47,9 @@ export function* createAndRedirect(action) {
     slideshow.image.height,
   );
   if (!svg) {
+    console.log('ici', action.payload);
     try {
-      yield* slice(img, slideshow.image.id);
+      yield* slice(img, slideshow.image.id, yield action.payload.arrayBuffer());
     } catch (error) {
       const allKeys = yield db.keys();
       yield all(allKeys.filter((key: string): boolean =>
