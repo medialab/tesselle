@@ -16,7 +16,7 @@ export default defineMessages({
   },
   load: {
     id: `${scope}.load`,
-    defaultMessage: 'How to create a Tessel project ?',
+    defaultMessage: 'How to create a Tesselle project ?',
   },
   loadDescription: {
     id: `${scope}.load.description`,
@@ -28,7 +28,7 @@ export default defineMessages({
   },
   globalCommentDescription: {
     id: `${scope}.globalComment.description`,
-    defaultMessage: 'Learn how to attach a comment the globality of the image (examples : an introduction, a conclusion, a transition title between two sets of annotations, ...).',
+    defaultMessage: 'Learn how to attach a comment to the whole image (examples : an introduction, a conclusion, a transition title between two sets of annotations, ...).',
   },
   annotation: {
     id: `${scope}.annotation`,
@@ -36,7 +36,7 @@ export default defineMessages({
   },
   annotationDescription: {
     id: `${scope}.annotation.description`,
-    defaultMessage: 'Learn how to attach text to specific parts of the image, wether as rectangles, circles, or free polygon shapes.',
+    defaultMessage: 'Learn how to attach text to specific parts of the image, whether as rectangles, circles, or free polygon shapes.',
   },
   preview: {
     id: `${scope}.preview`,
