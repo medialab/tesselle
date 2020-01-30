@@ -30,11 +30,11 @@ interface IiifBase extends L.TileLayer {
 function ceilLog2(x: number) {
   return Math.ceil(Math.log(x) / Math.LN2);
 }
-
+const BASE_TILESIZE = 512;
 const IiifBase = L.TileLayer.extend({
   options: {
     continuousWorld: true,
-    tileSize: 512,
+    tileSize: BASE_TILESIZE,
     updateWhenIdle: true,
     tileFormat: 'jpg',
     fitBounds: true,
@@ -86,7 +86,7 @@ const IiifBase = L.TileLayer.extend({
     // Unless an explicit tileSize is set, use a preferred tileSize
     if (!this._explicitTileSize) {
       // Set the default first
-      this.options.tileSize = 512;
+      this.options.tileSize = BASE_TILESIZE;
       if (data.tiles) {
         // Image API 2.0 Case
         this.options.tileSize = data.tiles[0].width;
@@ -198,7 +198,7 @@ const IiifBase = L.TileLayer.extend({
         const width = tile.tile.naturalWidth;
 
         // No need to resize if tile is 256 x 256
-        if (height === 512 && width === 512) {
+        if (height === BASE_TILESIZE && width === BASE_TILESIZE) {
           return;
         }
         tile.tile.style.width = width + 'px';

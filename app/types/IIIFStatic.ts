@@ -2,6 +2,7 @@ import { resizeImage, calculateAspectRatioFit } from 'utils/imageManipulation';
 import { last } from 'ramda';
 import Slideshow from './Slideshow';
 import { typesToExtensions } from 'utils/';
+const BASE_TILESIZE = 512;
 
 export const generateInfo = (slideshow: Slideshow, scaleFactors) => {
 
@@ -13,8 +14,8 @@ export const generateInfo = (slideshow: Slideshow, scaleFactors) => {
     'profile': 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0',
     'qualities': ['default'],
     'scale_factors': scaleFactors,
-    'tile_height': 512,
-    'tile_width': 512,
+    'tile_height': BASE_TILESIZE,
+    'tile_width': BASE_TILESIZE,
     'width': slideshow.image.width,
   };
 };
@@ -95,7 +96,7 @@ export function* generate(
     ];
   }
   const ratio = calculateAspectRatioFit(
-    width, height, 480, 512,
+    width, height, 480, BASE_TILESIZE,
   );
   const lastRegion = [0, 0, width, height];
   const lastSize: [number, number] = [ratio.width, ratio.height];

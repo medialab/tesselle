@@ -55,7 +55,7 @@ export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
   try {
     const parsedImage = Array.from(generate(
       img,
-      {tileSize: 512, scaleFactors: scaleFactors},
+      {tileSize: BASE_TILESIZE, scaleFactors: scaleFactors},
     ));
     toCancel = yield initializeSlicer(parsedImage.length);
     // const compareTo = nth(-3, scaleFactors);
@@ -69,7 +69,10 @@ export function* slice(img, id: string, scaleFactors = scaleFactorsCreator(
     //   yield put(setProgress());
     // }, backgroundImages, yield select(selectSlicer), id);
   } catch (error) {
-    toCancel.cancel();
+    // debugger
+    // toCancel.cancel();
+    console.log(toCancel);
+    console.error(error);
     throw error;
   }
 }

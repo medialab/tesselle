@@ -34,6 +34,7 @@ import { isSvg } from 'utils/index';
 
 const minZoom = 1;
 const maxZoom = 20;
+const BASE_TILESIZE = 512;
 
 Modal.setAppElement('#app');
 
@@ -72,12 +73,13 @@ const PlayerMap = withLeaflet<SureContextProps & PlayerProps>((props) => {
       />
     );
   } else {
-    child = <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} />;
+    child = <LocalIiifLayer tileSize={BASE_TILESIZE} id={props.slideshow.image.id} />;
   }
+  console.log(props.playing);
   return (
     <React.Fragment>
       <AnnotationLayer
-        onLayerClick={props.playing ? undefined : props.changeSelection}
+        onLayerClick={props.changeSelection}
         data={props.slideshow.annotations}
         selectedAnnotations={props.selectedAnnotations} />
       {child}

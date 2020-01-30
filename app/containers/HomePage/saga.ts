@@ -16,7 +16,7 @@ import { scaleFactorsCreator, generateInfo } from 'types/IIIFStatic';
 
 const selectSlideshows = makeSelectSlideshows();
 const selectSlicer = makeSelectSlicer();
-
+const BASE_TILESIZE = 512;
 export function* setSlideshows(slideshows: any) {
   if (isImmutable(slideshows)) {
     yield db.setItem('slideshows', slideshows.toJS());
@@ -41,9 +41,9 @@ export function* createAndRedirect(action) {
   yield put(setProgress(nexd));
   const [slideshow, img]: [Slideshow, (HTMLImageElement | SVGElement)] = yield slideshowCreator(action.payload, name);
   const scaleFactors = scaleFactorsCreator(
-    512,
+    BASE_TILESIZE,
     slideshow.image.width,
-    512,
+    BASE_TILESIZE,
     slideshow.image.height,
   );
   if (!svg) {

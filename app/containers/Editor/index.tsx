@@ -26,6 +26,8 @@ import AnnotationLayer from 'components/AnnotationLayer';
 
 import './style.css';
 
+const BASE_TILESIZE = 512;
+
 import {
   addAnnotationAction,
   changeSelectionAction,
@@ -144,7 +146,6 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
     },
     [props.changeSelection, tool],
   );
-
   return (
     <React.Fragment>
       <AnnotationLayer
@@ -158,7 +159,7 @@ const EditorMap = withLeaflet<EditorProps & SetToolsProps & SureContextProps>(pr
         url={useUrl(slideshow.image.file)}
         bounds={useMemo(() => coverToBounds(slideshow.image), [slideshow.image])}
       />
-      : <LocalIiifLayer tileSize={512} id={props.slideshow.image.id} /> }
+      : <LocalIiifLayer tileSize={BASE_TILESIZE} id={props.slideshow.image.id} /> }
       <FloatinBar
         onSelectClick={onSelectClick}
         activeButton={tool}

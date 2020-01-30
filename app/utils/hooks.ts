@@ -76,12 +76,12 @@ export const useTools = (defaultTool): [
 };
 
 export const useUrl = (file: File): string => {
+  const url = useMemo(() => window.URL.createObjectURL(file), [file]);
+  useEffect(() => () => window.URL.revokeObjectURL(url), [url]);
   if (!file || !file.name) {
     // throw new Error('File is empty');
     return 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Mire_RTL.jpg';
   }
-  const url = useMemo(() => window.URL.createObjectURL(file), [file]);
-  useEffect(() => () => window.URL.revokeObjectURL(url), [url]);
   return url;
 };
 
@@ -107,8 +107,10 @@ export function useMapLock(map?: L.Map, image?: Cover): LatLngBounds {
   return maxBounds;
 }
 
+const BASE_TILESIZE = 512;
+
 export const coverToBounds = (image: Cover) => {
-  const denominator = last(scaleFactorsCreator(512, image.width, 512, image.height)) * 2;
+  const denominator = last(scaleFactorsCreator(BASE_TILESIZE, image.width, BASE_TILESIZE, image.height)) * 2;
   return new LatLngBounds(
     new LatLng(0, 0),
     new LatLng(-image.height / denominator, image.width / denominator),
@@ -121,10 +123,9 @@ export const useLockEffect = (map: L.Map, image: any, ignore: boolean = false) =
       return;
     }
     if (image.height) {
-      const bonbounds = coverToBounds(image);
       // debugger
       map.fitBounds(
-        bonbounds,
+        coverToBounds(image),
         {animate: true},
       );
     } else {
