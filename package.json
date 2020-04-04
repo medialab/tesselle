@@ -113,7 +113,7 @@
     "loadable-components": "2.2.3",
     "localforage": "^1.7.3",
     "lodash": "^4.17.15",
-    "minimist": "1.2.0",
+    "minimist": "1.2.3",
     "mnemonist": "^0.30.0",
     "normalize-url": "^4.3.0",
     "quinoa-design-library": "^0.1.9",
