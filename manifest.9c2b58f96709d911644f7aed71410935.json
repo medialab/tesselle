@@ -56,12 +56,12 @@
       "type": "image/png"
     }
   ],
-  "name": "React Boilerplate",
-  "short_name": "React BP",
+  "name": "Tesselle",
+  "short_name": "TSL",
   "orientation": "portrait",
   "display": "standalone",
   "start_url": ".",
-  "description": "My React Boilerplate-based project!",
+  "description": "Open big images",
   "background_color": "#fafafa",
   "theme_color": "#b1624d"
 }
