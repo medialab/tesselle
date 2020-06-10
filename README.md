@@ -22,6 +22,9 @@ Requirements : node >= 8
 git clone
 npm i
 npm start
+
+# To publish updates on gh-pages
+npm run publish
 ```
 
 http://localhost:3000
