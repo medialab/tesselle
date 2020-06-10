@@ -227,7 +227,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                       No annotations yet.
                       <br/>
                       {`You can download this image as a simple viewer or add annotations in `}
-                      <Link to={`/editor/${props.slideshow.id}`}>edition mode</Link>.
+                      <Link to={`/editor/${props.slideshow.id}`}>editor mode</Link>.
                     </Notification>
                     :
                     props.slideshow.annotations.map((annotation: Annotation) =>
@@ -265,7 +265,7 @@ const Sidebar = withLeaflet<SidebarProps & SureContextProps>((props) => {
                     to={`/editor/${props.slideshow.id}`}
                     className="button is-fullwidth is-primary"
                   >
-                      Back to edition
+                      Back to editor
                   </Link>
                 </StretchedLayoutItem>
                 <StretchedLayoutItem isFlex={1}>
