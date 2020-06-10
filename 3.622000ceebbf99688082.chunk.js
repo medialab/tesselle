@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[3],{df852b79991469f7a807:function(e,n,t){"use strict";t.r(n),t.d(n,"default",function(){return l});var a=t("8af190b70a6bc55c6f1b"),c=t("d919039d7265280b3f13");function l(){return a.createElement("article",null,a.createElement("h1",null,a.createElement(c.a,null)))}}}]);
